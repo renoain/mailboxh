@@ -1,4 +1,4 @@
-# PROTOCOL.md - Mailboxh
+﻿# PROTOCOL.md - Mailboxh
 
 Protokol kerja project. Wajib dibaca sebelum bekerja di project ini.
 
@@ -94,13 +94,13 @@ Entri baru di paling atas. Dilarang mengubah entri lama.
 - Ikon custom dalam SVG.
 - Nama file snake_case.
 - Path aset lewat AppAssets, dilarang hardcode di widget.
-- Poster film diambil dari URL TMDB, tidak disimpan lokal sebagai file.
+- Poster dan backdrop diupload admin ke backend, lalu dimuat lewat URL dari APP_URL.
 
 ## Bagian H: Security dan Validasi
 
 - Auth pakai Laravel Sanctum.
 - Token sesi di secure storage.
-- API key TMDB hanya di backend.
+- APP_KEY dan password database hanya di backend.
 - Validasi input di backend (FormRequest).
 - Rate limit endpoint sensitif.
 - Tidak log data sensitif.
@@ -127,12 +127,14 @@ Subject maks 72 karakter, imperatif, Bahasa Inggris, tanpa emoji.
 - Semver: MAJOR.MINOR.PATCH.
 - Rilis MVP: v0.1.0.
 - Setiap rilis lolos flutter analyze, flutter test, php artisan test.
+  Perintah Flutter dijalankan dari `frontend/`, perintah Artisan dari
+  `backend/`.
 
 ## Bagian L: Checklist Verifikasi
 
-- flutter analyze: 0 error.
-- flutter test: semua pass.
-- php artisan test: semua pass.
+- `cd frontend && flutter analyze`: 0 error.
+- `cd frontend && flutter test`: semua pass.
+- `cd backend && php artisan test`: semua pass.
 - CHANGELOG.md updated.
 - Docs terkait diperbarui.
 - String UI dwibahasa.

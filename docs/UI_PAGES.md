@@ -1,4 +1,4 @@
-# UI PAGES - Mailboxh
+﻿# UI PAGES - Mailboxh
 
 Daftar halaman aplikasi. Detail visual ada di Stitch. Dokumen ini hanya
 struktur, alur, dan komponen.
@@ -37,17 +37,32 @@ struktur, alur, dan komponen.
 
 ## 5. Home
 
-- Tujuan: beranda katalog dan cuplikan activity feed.
-- Elemen:
-  - Search bar di atas.
+- Tujuan: beranda dengan enam section katalog dan cuplikan activity
+  feed.
+- Elemen, dari atas ke bawah:
+  - Search bar.
+  - Section Featured, banner besar dengan maksimal lima film yang
+    ditandai admin. Section ini boleh kosong dan menampilkan ajakan ke
+    admin lewat empty state.
+  - Section Latest, horizontal list poster.
+  - Section Top Rated, horizontal list poster.
+  - Section Most Watched, horizontal list poster.
+  - Section Most Watchlisted, horizontal list poster.
+  - Section Explore, grid film pilihan acak.
   - Section Feed, maksimal lima aktivitas terbaru dengan tombol Lihat
-    Semua yang menuju halaman Feed.
-  - Section Trending, horizontal list poster.
-  - Section Populer, horizontal list poster.
-- State: loading, data, kosong, error.
-  - Feed kosong punya tombol Jelajahi Member agar section tidak kosong.
+    Semua menuju halaman Feed.
+- State: loading, data, kosong, katalog kosong, error.
+  - Katalog kosong punya tombol Jelajahi Member agar halaman tidak
+    kosong.
+  - Section Featured yang kosong tidak menampilkan judul section. Section
+    lain yang kosong menampilkan judul dengan pesan singkat.
 - Aksi: tap film ke Detail, tap search bar ke Search, tap aktivitas ke
-  film atau Public Profile, tap Lihat Semua ke Feed.
+  film atau Public Profile, tap Lihat Semua ke Feed, tap Lihat Semua
+  section ke Search dengan sort yang sesuai.
+- Sumber data: satu endpoint `GET /api/home` untuk enam section katalog,
+  dan `GET /api/feed` dengan batas lima item untuk bagian feed.
+- Catatan: keenam section katalog diambil dalam satu permintaan. Halaman
+  tidak melakukan enam request terpisah.
 
 ## 6. Feed
 
@@ -64,28 +79,50 @@ struktur, alur, dan komponen.
 
 ## 7. Search
 
-- Tujuan: cari film.
-- Elemen: search bar, daftar hasil pencarian.
-- State: belum ada query, searching, hasil, tidak ditemukan, error.
-- Aksi: tap film ke Detail.
+- Tujuan: cari dan saring katalog film.
+- Elemen:
+  - Search bar untuk judul film.
+  - Chip genre yang bisa multi-pilih.
+  - Chip pengurutan: Terbaru, Judul, Tanggal rilis, Rating.
+  - Daftar hasil.
+- State: belum ada query, searching, hasil, tidak ditemukan, katalog
+  kosong, filter tidak menghasilkan hasil, error.
+- Aksi: tap film ke Detail, ubah genre, ubah pengurutan, tarik ke bawah
+  untuk halaman berikutnya.
+- Sumber data: endpoint `GET /api/movies`.
+- Catatan: katalog hanya berisi film yang sudah diinput admin. State
+  katalog kosong perlu copy yang berbeda dari state tidak ditemukan,
+  karena yang satu berarti fitur jalan dan yang lain berarti admin belum
+  mengisi data.
 
 ## 8. Detail Film
 
 - Tujuan: lihat detail film dan aksi.
-- Elemen:
-  - Backdrop dan poster.
-  - Judul, tahun, durasi, rating TMDB.
+- Elemen, dari atas ke bawah:
+  - Backdrop dengan judul, tahun, dan durasi di atasnya. Poster berada
+    di sisi kiri menindih sebagian backdrop.
+  - Badge genre yang bisa diketuk ke Search dengan filter genre itu.
+  - Baris aksi: Tambah ke Watchlist, Tandai Sudah Ditonton, dan tombol
+    hati Like dengan jumlah like.
   - Sinopsis.
-  - Tombol Tambah ke Watchlist.
-  - Tombol Tandai Sudah Ditonton.
-  - Tombol hati Like dengan jumlah like. Letak di bawah judul, terpisah
-    dari blok rating bintang.
-  - Section review user bila ada.
-  - Tombol Tulis Review.
-- State: loading, data, error, film tidak ditemukan, sudah di watchlist,
-  sudah ditonton, sudah di-like.
+  - Panel informasi: bahasa, negara, rating rata-rata, jumlah review,
+    jumlah watched, dan jumlah watchlist.
+  - Section Cast berupa daftar nama pemeran.
+  - Section Crew berupa daftar nama crew.
+  - Section review user bila ada, dengan tombol Tulis Review.
+- State: loading, data, error, film tidak ditemukan, poster kosong,
+  backdrop kosong, sinopsis kosong, sudah di watchlist, sudah ditonton,
+  sudah di-like, film sudah dinonaktifkan admin.
 - Aksi: tambah watchlist, tandai watched, like atau batalkan like,
-  tulis review, ubah review, buka Form Log.
+  tulis review, ubah review, buka Form Log, ketuk genre ke Search.
+- Catatan:
+  - Poster dan backdrop kosong menampilkan placeholder dari token, bukan
+    gambar rusak.
+  - Cast dan crew adalah teks dipisah koma. Tampil sebagai chip yang
+    bisa dibungkus ke beberapa baris, bukan tabel.
+  - Film yang dinonaktifkan admin menampilkan empty state Film tidak
+    tersedia, bukan halaman error.
+  - Rating rata-rata berasal dari data review user di aplikasi ini.
 
 ## 9. Form Review
 
@@ -282,11 +319,162 @@ struktur, alur, dan komponen.
 ## 24. Settings
 
 - Tujuan: pengaturan aplikasi.
-- Elemen: pilih bahasa ID atau EN, tentang aplikasi, blok atribusi
-  TMDB, logout.
+- Elemen: pilih bahasa ID atau EN, tentang aplikasi, blok kredit
+  pengelola katalog, versi aplikasi, logout.
 - State: tersimpan.
+- Catatan: user dengan role `admin` melihat tambahan menu `Masuk ke
+  Admin` di halaman ini.
 
-## 25. Komponen Reusable
+## 25. Admin Dashboard
+
+- Tujuan: ringkasan kondisi aplikasi bagi admin.
+- Elemen:
+  - Kartu statistik: film aktif, film nonaktif, genre, user, admin,
+    review, list, tag.
+  - Daftar film yang baru diinput.
+  - Daftar aktivitas admin terbaru.
+  - Daftar film paling banyak ditonton.
+- State: loading, data, kosong, error.
+- Sumber data: endpoint `GET /api/admin/dashboard`.
+- Aksi: tap kartu ke halaman terkait, tap film ke Admin Movie Form, tap
+  aktivitas ke entitas yang diubah.
+
+## 26. Admin Movies
+
+- Tujuan: daftar film untuk dikelola admin.
+- Elemen:
+  - Search bar judul film.
+  - Chip status: Semua, Aktif, Dinonaktifkan.
+  - Baris film: poster, judul, tahun, jumlah genre, penanda featured,
+    waktu input.
+  - Tombol Tambah Film.
+- State: loading, data, kosong, katalog kosong, error, filter kosong.
+- Aksi: tap film ke Admin Movie Form, tandai featured, nonaktifkan,
+  pulihkan, hapus permanen dengan konfirmasi ganda.
+- Catatan: film yang dinonaktifkan masih tampil dengan badge, supaya
+  admin bisa memulihkannya.
+
+## 27. Admin Movie Form
+
+- Tujuan: menambah atau mengubah data film.
+- Elemen:
+  - Field judul, judul asli, sinopsis, tanggal rilis, durasi.
+  - Field bahasa dan negara.
+  - Field cast dan crew berupa teks dipisah koma.
+  - `ImageUploadField` untuk poster dan backdrop, dengan pratinjau,
+    tombol pilih, tombol ganti, dan tombol hapus gambar.
+  - Chip genre multi-pilih.
+  - Switch featured.
+  - Tombol Simpan dan tombol Hapus Film.
+- State: kosong, validasi, memilih gambar, mengunggah, loading, error,
+  sukses, gagal simpan.
+- Aksi: pilih gambar dari galeri atau kamera, hapus gambar, pilih genre,
+  simpan, hapus dengan konfirmasi.
+- Catatan:
+  - Maksimal lima film featured. Switch featured menolak permintaan kelima dan
+    menampilkan pesan dari server.
+  - Field gambar bersifat opsional. Film tanpa poster tetap bisa
+    disimpan.
+  - Gagal mengunggah gambar tidak membuang data teks yang sudah diisi.
+
+## 28. Admin Genres
+
+- Tujuan: daftar genre.
+- Elemen:
+  - Baris genre: nama, slug, jumlah film.
+  - Tombol Tambah Genre.
+- State: loading, data, kosong, error.
+- Aksi: tap genre ke Admin Genre Form, hapus genre dengan konfirmasi.
+
+## 29. Admin Genre Form
+
+- Tujuan: menambah atau mengubah genre.
+- Elemen: field nama, field slug dengan pratinjau slug otomatis, tombol
+  Simpan.
+- State: kosong, validasi, slug bentrok, loading, error, sukses.
+- Catatan: slug bisa dikosongkan dan dibangkitkan backend dari nama.
+
+## 30. Admin Users
+
+- Tujuan: daftar user.
+- Elemen:
+  - Search bar nama atau email.
+  - Chip filter role.
+  - Baris user: avatar inisial, nama, email, role, jumlah film di
+    watchlist dan watched.
+- State: loading, data, kosong, error, filter kosong.
+- Aksi: tap user ke Admin User Detail.
+
+## 31. Admin User Detail
+
+- Tujuan: melihat dan mengubah satu user.
+- Elemen: nama, email, tanggal bergabung, statistik, aktivitas terbaru,
+  selector role.
+- State: loading, data, error, user tidak ditemukan, role sendiri.
+- Catatan: selector role untuk admin sendiri dinonaktifkan dengan pesan
+  alasan. Admin tidak dapat menurunkan role dirinya sendiri.
+
+## 32. Admin Reviews
+
+- Tujuan: moderasi review.
+- Elemen:
+  - Search bar.
+  - Chip filter rating dan film.
+  - Baris review: nama user, judul film, rating, cuplikan isi, waktu.
+- State: loading, data, kosong, error, filter kosong.
+- Aksi: hapus review dengan konfirmasi.
+- Catatan: menghapus review langsung mengubah nilai Top Rated.
+
+## 33. Admin Lists
+
+- Tujuan: moderasi list.
+- Elemen:
+  - Search bar.
+  - Chip filter publik dan privat.
+  - Baris list: judul, pemilik, jumlah film, publik atau privat, waktu.
+- State: loading, data, kosong, error, filter kosong.
+- Aksi: hapus list dengan konfirmasi.
+- Catatan: menghapus list tidak menghapus film, review, atau like.
+
+## 34. Admin Tags
+
+- Tujuan: moderasi tag.
+- Elemen:
+  - Search bar nama tag.
+  - Baris tag: nama, pemilik, jumlah entri diary yang memakainya.
+- State: loading, data, kosong, error, filter kosong.
+- Aksi: hapus tag dengan konfirmasi.
+- Catatan: menghapus tag melepasnya dari seluruh entri diary.
+
+## 35. Admin Audit Logs
+
+- Tujuan: melihat riwayat tindakan admin.
+- Elemen:
+  - Chip filter jenis entitas.
+  - Chip filter admin.
+  - Baris log: waktu, nama admin, tindakan, jenis entitas, keterangan
+    ringkas.
+- State: loading, data, kosong, error, filter kosong.
+- Catatan: tidak ada aksi hapus atau ubah. Halaman ini hanya baca.
+
+## 36. Aturan Area Admin
+
+- Area admin memakai `AdminShell`, satu kerangka dengan `AdminDrawer` di
+  sisi kiri.
+- `AdminDrawer` berisi delapan tautan sesuai delapan fitur admin, plus
+  tombol Kembali ke Beranda.
+- Rute admin diawali `/admin/` dan dijaga route guard yang memeriksa
+  role. Guard mengembalikan user ke `/home` beserta pesan, tidak pernah
+  ke halaman error.
+- Halaman admin tidak pernah dibuka lewat push notification atau deep
+  link dari luar. Satu-satunya cara masuk adalah navigasi `go` dari
+  Settings atau dari `AdminShell`.
+- Login sebagai admin tetap lewat halaman Login yang sama. Tidak ada
+  form login terpisah.
+- Maksimal tiga warna dominan per halaman admin, sama seperti halaman
+  user. Tidak ada gaya khusus yang membedakan area admin secara warna.
+
+## 37. Komponen Reusable
 
 | Komponen | Peran |
 |---|---|
@@ -301,8 +489,13 @@ struktur, alur, dan komponen.
 | UserCard | Avatar inisial, nama, jumlah follower, tombol follow |
 | FavouriteSlot | Satu slot favourites, terisi atau kosong |
 | SectionHeader | Judul section dengan aksi opsional |
-| ChipFilterRow | Deretan chip filter untuk feed, incoming, dan tag |
+| ChipFilterRow | Deretan chip filter untuk feed, incoming, tag, dan genre |
 | MoviePickerSheet | Picker film dengan search, dipakai bersama |
+| GenreChip | Nama genre, bisa dipilih |
+| StatCard | Angka besar dengan label dan ikon |
+| ImageUploadField | Pilih, pratinjau, ganti, dan hapus gambar |
+| ConfirmDialog | Dialog konfirmasi dengan judul, pesan, dan dua aksi |
+| DataTableRow | Baris data admin dengan aksi di kanan |
 | EmptyState | Ikon, judul, pesan, aksi |
 | LoadingIndicator | Indikator dengan pesan opsional |
 | ErrorState | Pesan dan tombol coba lagi |
@@ -310,33 +503,69 @@ struktur, alur, dan komponen.
 | SecondaryButton | Aksi sekunder |
 | CustomTextField | Input dengan label dan error |
 | CustomAppBar | App bar dengan aksi |
+| AdminShell | Kerangka area admin dengan drawer dan app bar |
+| AdminDrawer | Menu delapan fitur admin |
 
 `ActivityTile` sebelumnya ditulis, sekarang bernama `ActivityItem`.
+`PrimaryButton` dan `SecondaryButton` diimplementasikan sebagai satu
+komponen `AppButton` dengan enum varian.
 
-## 26. Alur Navigasi Utama
+## 38. Alur Navigasi Utama
 
 ```
-Splash -> Onboarding -> Login -> Home
-Home -> Search -> Detail
-Home -> Feed -> Detail
-Home -> Feed -> Public Profile
-Home -> Detail -> Form Review
-Home -> Detail -> Form Log
-Home -> Form Log
-Home -> Watchlist -> Detail
-Home -> Profile -> Tags -> Diary
-Home -> Profile -> Four Favourites
-Home -> Profile -> Followers -> Public Profile
-Home -> Profile -> Following -> Public Profile
-Home -> Profile -> Members -> Public Profile
-Home -> Profile -> Incoming Activity -> Public Profile
-Home -> Profile -> Lists -> List Detail -> Detail
-Home -> Profile -> Diary -> Detail
-Home -> Profile -> Settings
-Public Profile -> Followers -> Public Profile
+/ -> /onboarding -> /login -> /home
+/home -> /search -> /movie/:movieId
+/home -> /home -> /movie/:movieId
+/home -> /feed -> /movie/:movieId
+/home -> /feed -> /user/:userId
+/home -> /movie/:movieId -> /review/:movieId
+/home -> /movie/:movieId -> /log?movieId
+/home -> /log
+/home -> /watchlist -> /movie/:movieId
+/home -> /profile -> /diary -> /movie/:movieId
+/home -> /profile -> /tags -> /diary
+/home -> /profile -> /favorites/edit
+/home -> /profile -> /followers -> /user/:userId
+/home -> /profile -> /following -> /user/:userId
+/home -> /profile -> /members -> /user/:userId
+/home -> /profile -> /activity/incoming -> /user/:userId
+/home -> /profile -> /lists -> /lists/:listId -> /movie/:movieId
+/home -> /profile -> /lists -> /lists/new
+/home -> /profile -> /lists -> /lists/:listId/edit
+/home -> /profile -> /settings
+/home -> /settings -> /admin/dashboard
+/user/:userId -> /followers -> /user/:userId
 ```
 
-## 27. Aturan Layar
+## 39. Alur Navigasi Admin
+
+```
+/admin/dashboard
+/admin/dashboard -> /admin/movies
+/admin/movies -> /admin/movies/new
+/admin/movies -> /admin/movies/:movieId
+/admin/movies -> /admin/genres
+/admin/genres -> /admin/genres/new
+/admin/genres -> /admin/genres/:genreId
+/admin/movies -> /admin/users
+/admin/users -> /admin/users/:userId
+/admin/movies -> /admin/reviews
+/admin/movies -> /admin/lists
+/admin/movies -> /admin/tags
+/admin/movies -> /admin/audit-logs
+/admin/* -> /home
+```
+
+Seluruh perpindahan di dalam area admin memakai `context.go`, bukan
+`context.push`, supaya tombol kembali sistem tidak menumpuk halaman
+admin di atas satu sama lain.
+
+Sub-tab profil memakai query string `?tab=`, bukan path terpisah, supaya
+halaman yang sama dipakai ulang untuk profil sendiri dan profil user
+lain. Nilai yang dipakai: `films`, `diary`, `reviews`, `lists`, `tags`,
+`stats`.
+
+## 40. Aturan Layar
 
 - Semua string dari AppStrings. Widget tidak boleh punya string const
   berisi teks yang tampil ke user.
@@ -358,17 +587,20 @@ Public Profile -> Followers -> Public Profile
   perpindahan tab.
 - ActivityItem dipakai bersama oleh Feed, Incoming Activity, dan Home.
 
-## 28. Atribusi TMDB
+## 41. Atribusi
 
-Blok atribusi wajib tampil di aplikasi, minimal di halaman Settings.
-Teks mengikuti bahasa yang sedang dipakai.
+Tidak ada lagi atribusi TMDB. Data film sepenuhnya milik aplikasi dan
+diinput admin.
+
+Blok kredit wajib tampil di halaman Settings:
+
+> Katalog film dikelola oleh admin Mailboxh. Data film diinput manual
+> dan bukan berasal dari layanan film pihak ketiga.
 
 Bahasa Inggris:
 
-> This product uses the TMDB API but is not endorsed or certified by
-> TMDB.
+> Movie catalogue is maintained by the Mailboxh admin. Film data is
+> entered manually and does not come from any third-party film service.
 
-Bahasa Spanjol:
-
-> Este producto utiliza la API de TMDB pero no está avalado ni
-> certificado por TMDB.
+Halaman Settings juga menampilkan versi aplikasi. Tidak ada logo atau
+nama layanan film pihak ketiga di mana pun dalam aplikasi.

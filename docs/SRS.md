@@ -14,13 +14,16 @@ dengan backend REST API Laravel dan database MySQL.
 
 Aplikasi mencakup katalog film, pencatatan tontonan, watchlist, rating,
 review, diary, lists, tags, four favourites, like, follow members, dan
-activity feed. Data film diambil dari TMDB API.
+activity feed, ditambah area admin untuk mengelola katalog dan
+moderasi konten. Data film diinput manual oleh admin.
 
 ### 1.3 Definisi
 
 - REST API: arsitektur API berbasis HTTP.
-- TMDB: The Movie Database.
 - MVP: Minimum Viable Product.
+- Role: nilai `user` atau `admin` pada kolom `users.role`.
+- Soft delete: menandai baris tidak aktif lewat `deleted_at` tanpa
+  menghapusnya.
 - Otorisasi: dijaga di level aplikasi, bukan di level database.
 
 ### 1.4 Referensi
@@ -43,10 +46,9 @@ melihat riwayat tontonan.
 ### 2.2 Fungsi Utama
 
 - Autentikasi user.
-- Pencarian dan penjelajahan film.
-- Pencatatan watched dan watchlist.
+- Penjelajahan katalog film yang dikelola admin.
+- Pencatatan watched, diary, dan watchlist.
 - Rating dan review.
-- Diary tontonan.
 - Lists kurasi movie.
 - Tag pada entri diary.
 - Four favourites di profil.
@@ -54,35 +56,46 @@ melihat riwayat tontonan.
 - Follow antar member.
 - Activity feed di beranda.
 - Profil dan statistik user.
+- Pengelolaan katalog, genre, dan user oleh admin.
+- Moderasi review, list, dan tag oleh admin.
+- Log aktivitas admin.
 
 ### 2.3 Karakteristik User
 
 - User umum: penikmat film, tidak butuh keahlian teknis.
-- Admin: tidak ada di MVP. Konten film berasal dari TMDB, bukan input
-  manual.
+- Admin: pengelola katalog film. Satu orang untuk requirements tugas,
+  sudah dibuat lewat seeder dan tidak dapat mendaftar lewat aplikasi.
 
 ### 2.4 Batasan
 
-- Data film bergantung pada ketersediaan TMDB.
+- Katalog film hanya berisi film yang sudah diinput admin. Tidak ada
+  akses ke katalog film eksternal.
 - Fitur sosial yang tersedia hanya follow dan activity feed. Komentar,
   direct message, dan mention tidak ada di MVP.
-- List kurasi sistem bersifat statis dan tidak dikelola lewat aplikasi.
-  Tidak ada admin panel.
-- Tanpa upload gambar.
+- Endpoint katalog film dapat dipanggil tanpa login. Halaman yang
+  memakai katalog tetap butuh login karena memerlukan state user.
+- Admin hanya dapat mengubah role user lain. Tidak dapat menghapus akun
+  dan tidak dapat mengubah password user lain.
+- Moderasi dibatasi pada penghapusan review, list, dan tag. Film tidak
+  pernah dihapus fisik.
 - Tanpa push notification. Activity feed hanya dimuat saat aplikasi
   dibuka atau saat user menarik untuk refresh.
+- Tanpa trailer dan tanpa streaming video.
 
 ### 2.5 Asumsi
 
-- TMDB API tersedia dan stabil.
+- Admin menjaga kelengkapan katalog film.
 - User memiliki koneksi internet.
 - Backend dan database berjalan lokal melalui Laragon saat demo.
 
 ## 3. Aktor
 
-- Guest: belum login. Tidak dapat mengakses data user.
-- User: sudah login. Dapat mengakses seluruh fitur.
-- Sistem: backend Laravel dan TMDB API.
+- Guest: belum login. Dapat melihat katalog film dan genre saja.
+- User: sudah login dengan role `user`. Dapat mengakses seluruh fitur
+  user dan tidak dapat membuka endpoint admin.
+- Admin: sudah login dengan role `admin`. Dapat mengakses seluruh fitur
+  user ditambah area admin.
+- Sistem: backend Laravel, database MySQL, dan penyimpanan file lokal.
 
 ## 4. Kebutuhan Fungsional
 
@@ -98,16 +111,30 @@ melihat riwayat tontonan.
 
 ### 4.2 Katalog Film
 
-- FR-CAT-01: User dapat melihat daftar film trending.
-- FR-CAT-02: User dapat melihat daftar film populer.
-- FR-CAT-03: User dapat mencari film berdasarkan judul.
-- FR-CAT-04: Sistem menampilkan poster, judul, dan tahun rilis.
+- FR-CAT-01: User dapat melihat daftar film dengan urutan pilihan admin,
+  yaitu terbaru, rating tertinggi, paling banyak ditonton, dan paling
+  banyak masuk watchlist.
+- FR-CAT-02: User dapat mencari film berdasarkan judul, minimal dua
+  karakter.
+- FR-CAT-03: User dapat menyaring daftar film berdasarkan satu atau
+  beberapa genre.
+- FR-CAT-04: Sistem menampilkan poster, judul, tahun rilis, dan rating
+  rata-rata pada setiap kartu film.
+- FR-CAT-05: Film yang sudah dinonaktifkan admin tidak muncul di katalog
+  maupun di hasil pencarian.
+- FR-CAT-06: Daftar film memakai pagination, bukan memuat seluruh
+  katalog sekaligus.
 
 ### 4.3 Detail Film
 
 - FR-DET-01: User dapat melihat detail film.
-- FR-DET-02: Detail mencakup judul, sinopsis, poster, tanggal rilis,
-  rating TMDB, genre, dan durasi.
+- FR-DET-02: Detail mencakup judul, judul asli, sinopsis, poster,
+  backdrop, tanggal rilis, durasi, bahasa, negara, genre, cast, crew,
+  rating rata-rata, dan jumlah review.
+- FR-DET-03: Rating rata-rata dan jumlah review dihitung dari data user
+  di aplikasi ini.
+- FR-DET-04: Film yang sudah dinonaktifkan admin menampilkan halaman
+  tidak tersedia bagi user, bukan crash.
 
 ### 4.4 Watchlist
 
@@ -152,9 +179,14 @@ melihat riwayat tontonan.
 - FR-DIA-01: Diary menampilkan riwayat tontonan beserta tanggal, diurutkan
   dari yang terbaru.
 - FR-DIA-02: Diary dapat difilter berdasarkan rentang tanggal.
-- FR-DIA-03: Diary diturunkan dari data watched, bukan tabel terpisah.
-  Mengubah atau menghapus entri watched otomatis mengubah isi diary.
-- FR-DIA-04: Diary dapat menampilkan catatan opsional per entri tontonan.
+- FR-DIA-03: Diary adalah tabel tersendiri. Entri diary menyimpan film,
+  tanggal tonton, dan catatan. Entri ini tidak sama dengan tabel
+  watched, yang hanya menandai status sudah ditonton.
+- FR-DIA-04: Diary dapat menampilkan catatan opsional per entri
+  tontonan.
+- FR-DIA-05: User dapat menambah, mengubah, dan menghapus entri diary.
+  Entri diary harus berpasangan dengan status watched untuk film yang
+  sama.
 
 ### 4.9 Onboarding dan Pengaturan
 
@@ -163,7 +195,8 @@ melihat riwayat tontonan.
 - FR-APP-02: User dapat melewati onboarding.
 - FR-APP-03: User dapat mengganti bahasa aplikasi antara Indonesia dan
   Inggris.
-- FR-APP-04: Halaman pengaturan menampilkan atribusi TMDB.
+- FR-APP-04: Halaman pengaturan menampilkan versi aplikasi dan credit
+  kepada pengelola katalog film.
 
 ### 4.10 Lists
 
@@ -259,12 +292,114 @@ melihat riwayat tontonan.
   gagal, tidak ada bagian yang tersimpan.
 - FR-LOG-04: Tanggal tontonan dapat diisi manual pada form log.
 
+### 4.19 Beranda
+
+Beranda mengambil keenam section dalam satu permintaan.
+
+- FR-HOME-01: Section Featured menampilkan film yang ditandai admin,
+  maksimal lima film, dalam bentuk banner besar. Section ini boleh
+  kosong.
+- FR-HOME-02: Section Latest menampilkan sepuluh film yang paling baru
+  diinput admin.
+- FR-HOME-03: Section Top Rated menampilkan sepuluh film dengan rating
+  rata-rata tertinggi dari film yang punya minimal satu review.
+- FR-HOME-04: Section Most Watched menampilkan sepuluh film dengan jumlah
+  entri watched terbanyak.
+- FR-HOME-05: Section Most Watchlisted menampilkan sepuluh film dengan
+  jumlah entri watchlist terbanyak.
+- FR-HOME-06: Section Explore menampilkan sepuluh film pilihan acak dari
+  katalog aktif.
+
+### 4.20 Admin Dashboard
+
+- FR-ADM-DASH-01: Admin dapat melihat ringkasan jumlah film aktif, jumlah
+  film nonaktif, jumlah genre, jumlah user, jumlah review, jumlah list,
+  dan jumlah tag.
+- FR-ADM-DASH-02: Dashboard menampilkan film yang baru diinput dan
+  aktivitas admin terbaru.
+- FR-ADM-DASH-03: Semua angka dashboard dihitung ulang saat halaman
+  dibuka dan tidak disimpan sebagai cache.
+
+### 4.21 Admin Kelola Film
+
+- FR-ADM-FILM-01: Admin dapat membuat film dengan judul, judul asli,
+  sinopsis, tanggal rilis, durasi, bahasa, negara, cast, crew, genre, dan
+  penanda featured.
+- FR-ADM-FILM-02: Admin dapat mengupload poster dan backdrop sebagai
+  file gambar. Poster maksimal 2 MB dan backdrop maksimal 4 MB dengan
+  format jpg, jpeg, png, atau webp.
+- FR-ADM-FILM-03: Admin dapat mengubah data film yang sudah ada.
+- FR-ADM-FILM-04: Admin dapat menonaktifkan film. Film yang dinonaktifkan
+  hilang dari katalog, pencarian, dan section beranda tanpa menghapus
+  data watchlist, watched, diary, review, like, dan favourite milik user.
+- FR-ADM-FILM-05: Admin dapat mengaktifkan kembali film yang
+  dinonaktifkan.
+- FR-ADM-FILM-06: Admin dapat menandai atau menghapus penanda featured.
+  Maksimal lima film dapat featured agar section beranda tidak penuh.
+
+### 4.22 Admin Kelola Genre
+
+- FR-ADM-GENRE-01: Admin dapat membuat genre dengan nama dan slug yang
+  unik.
+- FR-ADM-GENRE-02: Admin dapat mengubah nama dan slug genre.
+- FR-ADM-GENRE-03: Admin dapat menghapus genre. Film yang memakai genre
+  tersebut kehilangan genre itu tanpa kehilangan filmnya.
+- FR-ADM-GENRE-04: Slug yang sudah dipakai genre lain ditolak. Nama genre
+  dibandingkan mengabaikan huruf besar dan kecil.
+
+### 4.23 Admin Kelola User
+
+- FR-ADM-USER-01: Admin dapat melihat daftar seluruh user beserta jumlah
+  film yang they've masukkan.
+- FR-ADM-USER-02: Admin dapat melihat detail satu user berupa profil,
+  statistik, dan aktivitas terbaru.
+- FR-ADM-USER-03: Admin dapat mengubah role user antara `user` dan
+  `admin`.
+- FR-ADM-USER-04: Admin tidak dapat menghapus akun dan tidak dapat
+  mengubah password user lain. Admin juga tidak dapat menurunkan role
+  dirinya sendiri agar tidak ada admin tersisa.
+
+### 4.24 Admin Moderasi Review
+
+- FR-ADM-REV-01: Admin dapat melihat seluruh review dengan filter film
+  dan kata kunci.
+- FR-ADM-REV-02: Admin dapat menghapus review yang melanggar.
+- FR-ADM-REV-03: Film yang kehilangan seluruh review tidak lagi masuk
+  section Top Rated.
+
+### 4.25 Admin Moderasi List
+
+- FR-ADM-LIST-01: Admin dapat melihat seluruh list dengan filter
+  publik, privat, dan kata kunci.
+- FR-ADM-LIST-02: Admin dapat menghapus list milik user.
+- FR-ADM-LIST-03: Menghapus list tidak menghapus film di dalamnya dan
+  tidak menyentuh like atau review pada film tersebut.
+
+### 4.26 Admin Moderasi Tag
+
+- FR-ADM-TAG-01: Admin dapat melihat seluruh tag beserta jumlah entri
+  diary yang memakainya.
+- FR-ADM-TAG-02: Admin dapat menghapus tag. Tag yang dihapus dilepas dari
+  seluruh entri diary secara otomatis.
+- FR-ADM-TAG-03: Admin dapat memfilter tag berdasarkan kata kunci.
+
+### 4.27 Admin Log Aktivitas
+
+- FR-ADM-LOG-01: Setiap tindakan admin yang mengubah data tercatat
+  lengkap dengan pelaku, tindakan, jenis entitas, id entitas, dan
+  keterangan.
+- FR-ADM-LOG-02: Admin dapat melihat log aktivitas dengan filter admin
+  dan jenis entitas, serta pagination. Admin tidak dapat menghapus log.
+
 ## 5. Kebutuhan Non-Fungsional
 
 ### 5.1 Performa
 
 - Waktu muat katalog maksimal 3 detik pada koneksi normal.
-- Cache data film dari TMDB untuk mengurangi request.
+- Enam section beranda diambil dalam satu permintaan agar tidak ada enam
+  round trip.
+- Query agregat untuk Top Rated, Most Watched, dan Most Watchlisted
+  memakai indeks yang sesuai dan tidak memuat seluruh tabel ke memori.
 - Scroll daftar tetap mulus pada 200 item.
 
 ### 5.2 Keamanan
@@ -273,9 +408,13 @@ melihat riwayat tontonan.
 - Token sesi memakai Laravel Sanctum.
 - Token disimpan di secure storage perangkat, bukan SharedPreferences
   polos.
-- API key TMDB hanya ada di backend, tidak pernah di Flutter.
+- Endpoint admin dilindungi dua lapis: `auth:sanctum` dan
+  `EnsureUserIsAdmin`.
+- Role hanya bisa diubah lewat endpoint admin. Tidak ada parameter role
+  pada form register.
 - Validasi input di backend melalui FormRequest.
-- Rate limit pada endpoint auth dan endpoint tulis.
+- Rate limit pada endpoint auth, endpoint tulis, dan endpoint admin.
+- Upload gambar divalidasi tipe MIME dan ukuran, bukan hanya ekstensi.
 - Tidak ada log data sensitif.
 
 ### 5.3 Usability
@@ -318,7 +457,7 @@ melihat riwayat tontonan.
 
 1. User buka halaman katalog.
 2. User ketik judul film.
-3. Sistem tampilkan hasil dari TMDB.
+3. Sistem menampilkan hasil dari katalog yang dikelola admin.
 4. User tap film.
 5. Sistem tampilkan detail.
 6. User tap tombol Tambah ke Watchlist.
@@ -412,17 +551,23 @@ melihat riwayat tontonan.
 | FR-AUTH-02 | Login | POST /api/login |
 | FR-AUTH-03 | Profile | POST /api/logout |
 | FR-AUTH-04 | Login | POST /api/login |
-| FR-CAT-01 | Home | GET /api/movies/trending |
-| FR-CAT-02 | Home | GET /api/movies/popular |
-| FR-CAT-03 | Search | GET /api/movies/search |
-| FR-DET-01 | Detail | GET /api/movies/{tmdbId} |
+| FR-CAT-01 | Home | GET /api/home |
+| FR-CAT-02 | Search | GET /api/movies dengan parameter q |
+| FR-CAT-03 | Search | GET /api/movies dengan parameter genre_id |
+| FR-CAT-04 | Search, Home | GET /api/movies, GET /api/home |
+| FR-CAT-05 | Search, Detail | GET /api/movies |
+| FR-CAT-06 | Search | GET /api/movies dengan parameter page |
+| FR-DET-01 | Detail | GET /api/movies/{id} |
+| FR-DET-02 | Detail | GET /api/movies/{id} |
+| FR-DET-03 | Detail | GET /api/movies/{id} |
+| FR-DET-04 | Detail | GET /api/movies/{id} |
 | FR-WL-01 | Detail | POST /api/watchlist |
-| FR-WL-02 | Watchlist | DELETE /api/watchlist/{tmdbId} |
+| FR-WL-02 | Watchlist | DELETE /api/watchlist/{movieId} |
 | FR-WL-03 | Watchlist | GET /api/watchlist |
 | FR-WT-01 | Detail | POST /api/watched |
-| FR-WT-02 | Watched | DELETE /api/watched/{tmdbId} |
+| FR-WT-02 | Watched | DELETE /api/watched/{movieId} |
 | FR-WT-03 | Watched | GET /api/watched |
-| FR-WT-04 | Diary | PATCH /api/watched/{tmdbId} |
+| FR-WT-04 | Watched | PATCH /api/watched/{movieId} |
 | FR-REV-01 | Form Review | POST /api/reviews |
 | FR-REV-03 | Form Review | PUT /api/reviews/{id} |
 | FR-REV-04 | Detail | DELETE /api/reviews/{id} |
@@ -433,10 +578,13 @@ melihat riwayat tontonan.
 | FR-PROF-05 | Profile | GET /api/tags |
 | FR-PROF-06 | Public Profile | GET /api/users/{userId}, GET /api/lists dengan user_id |
 | FR-DIA-01 | Diary | GET /api/diary |
-| FR-DIA-02 | Diary | GET /api/diary |
+| FR-DIA-02 | Diary | GET /api/diary dengan parameter from dan to |
+| FR-DIA-03 | Diary | GET /api/diary |
+| FR-DIA-04 | Diary | POST /api/diary dengan field note |
+| FR-DIA-05 | Diary | POST /api/diary, PUT /api/diary/{id}, DELETE /api/diary/{id} |
 | FR-LIST-01 | Form List | POST /api/lists |
 | FR-LIST-02 | Form List | PUT /api/lists/{id}, DELETE /api/lists/{id} |
-| FR-LIST-03 | List Detail | POST /api/lists/{id}/items, DELETE /api/lists/{id}/items/{tmdbId} |
+| FR-LIST-03 | List Detail | POST /api/lists/{id}/items, DELETE /api/lists/{id}/items/{movieId} |
 | FR-LIST-04 | Lists | GET /api/lists |
 | FR-LIST-05 | List Detail | GET /api/lists/{id} |
 | FR-LIST-06 | List Detail | POST /api/lists/{id}/items, PATCH /api/lists/{id}/items |
@@ -449,8 +597,8 @@ melihat riwayat tontonan.
 | FR-FAV-02 | Four Favourites | PUT /api/favorites |
 | FR-FAV-03 | Profile, Public Profile | GET /api/favorites, GET /api/users/{userId} |
 | FR-LIKE-01 | Detail Film | POST /api/likes |
-| FR-LIKE-02 | Detail Film | DELETE /api/likes/{tmdbId} |
-| FR-LIKE-03 | Detail Film | GET /api/likes/{tmdbId} |
+| FR-LIKE-02 | Detail Film | DELETE /api/likes/{movieId} |
+| FR-LIKE-03 | Detail Film | GET /api/likes/{movieId} |
 | FR-FOLLOW-01 | Public Profile | POST /api/follow/{userId} |
 | FR-FOLLOW-02 | Public Profile | DELETE /api/follow/{userId} |
 | FR-FOLLOW-03 | Followers, Following | GET /api/followers, GET /api/following |
@@ -469,13 +617,53 @@ melihat riwayat tontonan.
 | FR-LOG-02 | Form Log | POST /api/log |
 | FR-LOG-03 | Form Log | POST /api/log |
 | FR-LOG-04 | Form Log | POST /api/log |
+| FR-HOME-01 | Home | GET /api/home |
+| FR-HOME-02 | Home | GET /api/home |
+| FR-HOME-03 | Home | GET /api/home |
+| FR-HOME-04 | Home | GET /api/home |
+| FR-HOME-05 | Home | GET /api/home |
+| FR-HOME-06 | Home | GET /api/home |
+| FR-ADM-DASH-01 | Admin Dashboard | GET /api/admin/dashboard |
+| FR-ADM-DASH-02 | Admin Dashboard | GET /api/admin/dashboard |
+| FR-ADM-DASH-03 | Admin Dashboard | GET /api/admin/dashboard |
+| FR-ADM-FILM-01 | Admin Movie Form | POST /api/admin/movies |
+| FR-ADM-FILM-02 | Admin Movie Form | POST /api/admin/movies multipart |
+| FR-ADM-FILM-03 | Admin Movie Form | PUT /api/admin/movies/{id} |
+| FR-ADM-FILM-04 | Admin Movies | DELETE /api/admin/movies/{id} |
+| FR-ADM-FILM-05 | Admin Movies | DELETE /api/admin/movies/{id} |
+| FR-ADM-FILM-06 | Admin Movies | POST /api/admin/movies/{id}/feature |
+| FR-ADM-GENRE-01 | Admin Genre Form | POST /api/admin/genres |
+| FR-ADM-GENRE-02 | Admin Genre Form | PUT /api/admin/genres/{id} |
+| FR-ADM-GENRE-03 | Admin Genres | DELETE /api/admin/genres/{id} |
+| FR-ADM-GENRE-04 | Admin Genre Form | POST /api/admin/genres, PUT /api/admin/genres/{id} |
+| FR-ADM-USER-01 | Admin Users | GET /api/admin/users |
+| FR-ADM-USER-02 | Admin User Detail | GET /api/admin/users/{id} |
+| FR-ADM-USER-03 | Admin User Detail | PUT /api/admin/users/{id}/role |
+| FR-ADM-USER-04 | Admin Users | tanpa endpoint, batasan di middleware dan service |
+| FR-ADM-REV-01 | Admin Reviews | GET /api/admin/reviews |
+| FR-ADM-REV-02 | Admin Reviews | DELETE /api/admin/reviews/{id} |
+| FR-ADM-REV-03 | Home | GET /api/home |
+| FR-ADM-LIST-01 | Admin Lists | GET /api/admin/lists |
+| FR-ADM-LIST-02 | Admin Lists | DELETE /api/admin/lists/{id} |
+| FR-ADM-LIST-03 | Admin Lists | tanpa endpoint, batasan di service |
+| FR-ADM-TAG-01 | Admin Tags | GET /api/admin/tags |
+| FR-ADM-TAG-02 | Admin Tags | DELETE /api/admin/tags/{id} |
+| FR-ADM-TAG-03 | Admin Tags | GET /api/admin/tags dengan parameter q |
+| FR-ADM-LOG-01 | Admin Audit Logs | tanpa endpoint, penulisan di AdminAuditService |
+| FR-ADM-LOG-02 | Admin Audit Logs | GET /api/admin/audit-logs |
 | FR-APP-01 | Onboarding | tanpa endpoint, flag lokal |
+| FR-APP-04 | Settings | tanpa endpoint, teks dari AppStrings |
 
-Catatan: `GET /api/diary` adalah endpoint baca yang diturunkan dari tabel
-`watched` di backend. Tidak ada endpoint tulis untuk diary. Entri diary
-diidentifikasi oleh id baris `watched`, dipakai pada endpoint tag.
+Catatan: entri diary adalah tabel `diary_entries` tersendiri. Endpoint
+tulis diary adalah `POST /api/diary`, `PUT /api/diary/{id}`, dan
+`DELETE /api/diary/{id}`. Entri diary diidentifikasi oleh id baris
+`diary_entries`, dipakai pada endpoint tag.
 
 Catatan: `GET /api/activity/incoming` tidak memakai tabel terpisah.
 Backend menggabungkan aktivitas `followed` yang menunjuk user yang
 sedang login dengan aktivitas `liked` pada film yang ada di list publik
 user tersebut. Komentar tidak termasuk karena fitur komentar ditunda.
+
+Catatan: seluruh endpoint `/api/admin/*` memakai dua middleware,
+`auth:sanctum` dan `EnsureUserIsAdmin`. Request tanpa token menjawab
+401 dan token valid dengan role `user` menjawab 403.

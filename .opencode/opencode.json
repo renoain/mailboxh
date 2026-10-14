@@ -1,0 +1,31 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "instructions": [
+    "AGENTS.md",
+    "PROTOCOL.md",
+    ".opencode/rules/01-core.md",
+    ".opencode/rules/02-coding.md",
+    ".opencode/rules/03-design.md",
+    ".opencode/rules/04-docs.md",
+    ".opencode/rules/05-security.md",
+    ".opencode/rules/06-testing.md"
+  ],
+  "permission": {
+    "bash": {
+      "*": "ask",
+      "git status": "allow",
+      "git diff*": "allow",
+      "git log*": "allow",
+      "flutter analyze": "allow",
+      "flutter test*": "allow",
+      "flutter pub get": "allow",
+      "cd frontend && flutter analyze": "allow",
+      "cd frontend && flutter test*": "allow",
+      "cd frontend && flutter pub get": "allow"
+    },
+    "external_directory": {
+      "*": "allow",
+      "~/.config/opencode/**": "deny"
+    }
+  }
+}

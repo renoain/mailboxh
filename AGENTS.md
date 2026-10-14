@@ -1,4 +1,4 @@
-# AGENTS.md - Mailboxh
+﻿# AGENTS.md - Mailboxh
 
 File instruksi utama untuk AI/agent. Wajib dibaca sebelum menulis kode
 atau membuat file.
@@ -7,7 +7,7 @@ atau membuat file.
 
 Mailboxh adalah aplikasi mobile katalog film sosial. User dapat mencatat
 film yang sudah ditonton, membuat watchlist, diberi rating dan review,
-serta melihat riwayat tontonan. Data film diambil dari TMDB API.
+serta melihat riwayat tontonan. Data film diinput manual oleh admin.
 
 Fitur MVP:
 
@@ -55,7 +55,7 @@ Aturan detail ada di folder .opencode/rules/. Wajib dibaca sesuai konteks:
 - Dilarang pemisah dekoratif di komentar kode.
 - Komentar hanya yang penting saja. Jangan mengulang kode. Jangan
   menjelaskan hal yang sudah jelas dari nama variabel atau fungsi.
-- Dilarang hardcode warna/spacing/radius, wajib token di lib/core/theme/.
+- Dilarang hardcode warna/spacing/radius, wajib token di frontend/lib/core/theme/.
 - Dilarang menulis secret, wajib lewat .env.
 - Setiap task selesai wajib update CHANGELOG.md di paling atas.
 - Task yang mengubah struktur/token/arsitektur wajib update docs terkait
@@ -72,7 +72,7 @@ Aturan detail ada di folder .opencode/rules/. Wajib dibaca sesuai konteks:
 - HTTP: dio
 - Backend: Laravel (REST API)
 - Database: MySQL
-- Sumber data film: TMDB API
+- Sumber data film: input manual oleh admin
 - Icon: flutter_lucide
 - Font: Manrope + Geist
 - Local storage: shared_preferences
@@ -85,14 +85,17 @@ Aturan detail ada di folder .opencode/rules/. Wajib dibaca sesuai konteks:
 - Logic bisnis di domain (usecase), bukan di widget.
 - Akses data di data (repository/datasource).
 - Widget hanya memanggil provider/notifier.
-- Provider per fitur di lib/features/<fitur>/presentation/providers/.
-- Route di lib/core/router/app_router.dart.
-- Token di lib/core/theme/.
-- Konstanta di lib/core/constants/.
-- Service di lib/core/services/.
-- Utility di lib/core/utils/.
-- Widget global di lib/core/widgets/.
-- Frontend di root repo, backend Laravel di backend/.
+- Provider per fitur di frontend/lib/features/<fitur>/presentation/providers/.
+- Route di frontend/lib/core/router/app_router.dart.
+- Token di frontend/lib/core/theme/.
+- Konstanta di frontend/lib/core/constants/.
+- Service di frontend/lib/core/services/.
+- Utility di frontend/lib/core/utils/.
+- Widget global di frontend/lib/core/widgets/.
+- Flutter di frontend/, backend Laravel di backend/.
+- Root hanya dokumentasi dan aturan. Tidak ada kode di root.
+- Perintah Flutter dijalankan dari frontend/, perintah Artisan dari
+  backend/.
 
 ## 7. Alur Kerja
 
@@ -109,9 +112,9 @@ Aturan detail ada di folder .opencode/rules/. Wajib dibaca sesuai konteks:
 
 Sebelum task dianggap selesai:
 
-1. flutter analyze - OK / warning / error.
-2. flutter test - OK / gagal / belum ditest.
-3. php artisan test - OK / gagal / belum ditest.
+1. `cd frontend && flutter analyze` - OK / warning / error.
+2. `cd frontend && flutter test` - OK / gagal / belum ditest.
+3. `cd backend && php artisan test` - OK / gagal / belum ditest.
 4. Task UI: screenshot terlampir.
 5. CHANGELOG.md terupdate di paling atas.
 6. Docs terkait terupdate jika ada perubahan struktur/token/arsitektur.
@@ -124,8 +127,8 @@ Sebelum task dianggap selesai:
 ## 9. Aturan Security
 
 - Token sesi disimpan di secure storage, bukan SharedPreferences polos.
-- API key TMDB disimpan di .env backend, tidak pernah di kode Flutter.
-- Flutter hanya bicara ke backend Laravel, bukan langsung ke TMDB.
+- APP_KEY dan password database disimpan di .env backend, tidak pernah di kode Flutter.
+- Flutter hanya bicara ke backend Laravel, tidak pernah memanggil layanan film pihak ketiga.
 - Rate limit endpoint auth dan endpoint tulis.
 - Validasi input di backend (FormRequest).
 - Dilarang log data sensitif (token, password).

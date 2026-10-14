@@ -1,4 +1,4 @@
-# API - Mailboxh
+﻿# API - Mailboxh
 
 Dokumentasi REST API Laravel untuk aplikasi Mailboxh.
 
@@ -144,11 +144,30 @@ Kemungkinan gagal: 401.
 
 ### 3.2 Katalog Film
 
-#### GET /api/movies/trending
+Seluruh endpoint pada bagian ini tidak butuh autentikasi. Endpoint ini
+boleh dipanggil tamu.
 
-Butuh autentikasi.
+Konsekuensi untuk respons:
 
-Parameter query: `page`, `language`.
+- Field `liked`, `in_watchlist`, dan `diary_entry_id` hanya diisi bila
+  request membawa token yang valid. Tanpa token, field tersebut bernilai
+  netral.
+- Film yang dinonaktifkan admin tidak pernah dikembalikan.
+- Halaman detail film tetap berada di route privat karena memerlukan
+  state user. Endpoint film's tetap publik.
+
+#### GET /api/movies
+
+Daftar film dengan pencarian, filter genre, dan pengurutan.
+
+Parameter query:
+
+| Nama | Tipe | Keterangan |
+|---|---|---|
+| q | string | Pencarian judul, minimal 2 karakter, opsional |
+| genre_id | integer | Filter satu genre, opsional |
+| sort | string | `title`, `release_date`, `latest`, `rating`, opsional |
+| page | integer | Opsional, 20 item per halaman |
 
 Response 200:
 
@@ -157,38 +176,42 @@ Response 200:
   "success": true,
   "data": [
     {
-      "tmdb_id": 123,
+      "id": 12,
       "title": "Judul Film",
-      "poster_path": "/abc.jpg",
-      "release_date": "2024-01-01",
-      "vote_average": 7.5
+      "original_title": "Original Title",
+      "overview": "Sinopsis film.",
+      "release_date": "1994-01-01",
+      "poster_url": "http://127.0.0.1:8000/storage/posters/8f3a1c.jpg",
+      "backdrop_url": null,
+      "runtime": 120,
+      "language": "en",
+      "country": "United States",
+      "cast": "Nama Satu, Nama Dua",
+      "crew": "Nama Sutradara",
+      "genres": [
+        { "id": 1, "name": "Drama", "slug": "drama" }
+      ],
+      "average_rating": 4.3,
+      "review_count": 17,
+      "liked": false,
+      "in_watchlist": false,
+      "diary_entry_id": null
     }
-  ]
+  ],
+  "meta": {
+    "page": 1,
+    "per_page": 20,
+    "total": 12
+  }
 }
 ```
 
-#### GET /api/movies/popular
+`poster_url` dan `backdrop_url` sudah berupa URL penuh yang dibentuk
+backend dari `APP_URL`. Klien tidak menyusun URL sendiri.
 
-Butuh autentikasi. Bentuk respons sama seperti trending.
+Kemungkinan gagal: 422, 429.
 
-#### GET /api/movies/search
-
-Butuh autentikasi.
-
-Parameter query:
-
-| Nama | Tipe | Keterangan |
-|---|---|---|
-| q | string | Wajib, minimal 2 karakter |
-| page | integer | Opsional |
-
-Response 200 sama seperti trending.
-
-Kemungkinan gagal: 401, 422, 429.
-
-#### GET /api/movies/{tmdbId}
-
-Butuh autentikasi.
+#### GET /api/movies/{id}
 
 Response 200:
 
@@ -196,24 +219,111 @@ Response 200:
 {
   "success": true,
   "data": {
-    "tmdb_id": 123,
+    "id": 12,
     "title": "Judul Film",
     "original_title": "Original Title",
     "overview": "Sinopsis film.",
-    "release_date": "2024-01-01",
-    "poster_path": "/abc.jpg",
-    "backdrop_path": "/def.jpg",
-    "vote_average": 7.5,
-    "genre_ids": [18, 28],
+    "release_date": "1994-01-01",
+    "poster_url": "http://127.0.0.1:8000/storage/posters/8f3a1c.jpg",
+    "backdrop_url": null,
     "runtime": 120,
-    "liked": true,
-    "like_count": 42
+    "language": "en",
+    "country": "United States",
+    "cast": "Nama Satu, Nama Dua",
+    "crew": "Nama Sutradara",
+    "genres": [
+      { "id": 1, "name": "Drama", "slug": "drama" }
+    ],
+    "average_rating": 4.3,
+    "review_count": 17,
+    "watched_count": 48,
+    "watchlist_count": 12,
+    "like_count": 93,
+    "liked": false,
+    "in_watchlist": false,
+    "watched_at": null,
+    "diary_entry_id": null
   }
 }
 ```
 
-Kemungkinan gagal: 401, 404.
+Kemungkinan gagal: 404, 429.
 
+Catatan:
+
+- Film yang dinonaktifkan admin menjawab 404, bukan 403. User tidak
+  perlu tahu bahwa film itu pernah ada.
+- `average_rating` bernilai null bila film belum punya review.
+
+#### GET /api/genres
+
+Daftar genre beserta jumlah film aktif per genre.
+
+Tidak butuh autentikasi.
+
+Response 200:
+
+```json
+{
+  "success": true,
+  "data": [
+    { "id": 1, "name": "Drama", "slug": "drama", "movie_count": 4 }
+  ]
+}
+```
+
+Kemungkinan gagal: 429.
+
+#### GET /api/home
+
+Butuh autentikasi. Satu permintaan untuk enam section beranda.
+
+Response 200:
+
+```json
+{
+  "success": true,
+  "data": {
+    "featured": [
+      { "id": 12, "title": "Judul Film", "poster_url": "http://...", "overview": "...", "average_rating": 4.3 }
+    ],
+    "latest": [
+      { "id": 12, "title": "Judul Film", "poster_url": "http://...", "release_date": "1994-01-01", "average_rating": 4.3 }
+    ],
+    "top_rated": [
+      { "id": 12, "title": "Judul Film", "poster_url": "http://...", "average_rating": 4.6, "review_count": 25 }
+    ],
+    "most_watched": [
+      { "id": 12, "title": "Judul Film", "poster_url": "http://...", "watched_count": 48 }
+    ],
+    "most_watchlisted": [
+      { "id": 12, "title": "Judul Film", "poster_url": "http://...", "watchlist_count": 12 }
+    ],
+    "explore": [
+      { "id": 12, "title": "Judul Film", "poster_url": "http://...", "release_date": "1994-01-01" }
+    ]
+  }
+}
+```
+
+Kemungkinan gagal: 401, 429.
+
+Batas jumlah item:
+
+| Section | Jumlah |
+|---|---|
+| featured | 5 |
+| latest | 10 |
+| top_rated | 10 |
+| most_watched | 10 |
+| most_watchlisted | 10 |
+| explore | 10 |
+
+Catatan:
+
+- `featured` boleh berisi array kosong bila admin belum menandai film.
+- `top_rated` hanya berisi film dengan minimal satu review.
+- Keenam query dijalankan di dalam satu transaksi baca.
 ### 3.3 Watchlist
 
 Seluruh endpoint butuh autentikasi.
@@ -227,7 +337,7 @@ Response 200: daftar film di watchlist user.
   "success": true,
   "data": [
     {
-      "tmdb_id": 123,
+      "movie_id": 123,
       "title": "Judul Film",
       "poster_path": "/abc.jpg",
       "release_date": "2024-01-01",
@@ -243,15 +353,15 @@ Request:
 
 ```json
 {
-  "tmdb_id": 123
+  "movie_id": 123
 }
 ```
 
 Response 201. Gagal dengan 409 bila film sudah ada di watchlist.
 
-#### DELETE /api/watchlist/{tmdbId}
+#### DELETE /api/watchlist/{movieId}
 
-Response 200. Path memakai `tmdb_id`, bukan id baris lokal.
+Response 200. Path memakai `movie_id`, bukan id baris lokal.
 
 Kemungkinan gagal: 401, 404.
 
@@ -268,7 +378,7 @@ Response 200: daftar film yang sudah ditonton.
   "success": true,
   "data": [
     {
-      "tmdb_id": 123,
+      "movie_id": 123,
       "title": "Judul Film",
       "poster_path": "/abc.jpg",
       "release_date": "2024-01-01",
@@ -285,7 +395,7 @@ Request:
 
 ```json
 {
-  "tmdb_id": 123,
+  "movie_id": 123,
   "watched_at": "2026-10-14",
   "note": "Nonton bareng teman"
 }
@@ -297,7 +407,7 @@ ini. `note` opsional.
 Response 201. Gagal dengan 409 bila film sudah tercatat sebagai watched.
 Lihat FR-WT-05.
 
-#### PATCH /api/watched/{tmdbId}
+#### PATCH /api/watched/{movieId}
 
 Request:
 
@@ -313,7 +423,7 @@ diubah lewat endpoint reviews.
 
 Response 200.
 
-#### DELETE /api/watched/{tmdbId}
+#### DELETE /api/watched/{movieId}
 
 Response 200. Menghapus entri ini juga menghapus tampilannya dari diary.
 
@@ -333,7 +443,7 @@ Response 200: daftar review milik user.
   "data": [
     {
       "id": 7,
-      "tmdb_id": 123,
+      "movie_id": 123,
       "title": "Judul Film",
       "poster_path": "/abc.jpg",
       "rating": 4,
@@ -350,7 +460,7 @@ Request:
 
 ```json
 {
-  "tmdb_id": 123,
+  "movie_id": 123,
   "rating": 4,
   "content": "Bagus"
 }
@@ -360,7 +470,7 @@ Validasi:
 
 | Field | Aturan |
 |---|---|
-| tmdb_id | Wajib, integer |
+| movie_id | Wajib, integer |
 | rating | Wajib, integer 1 sampai 5 |
 | content | Opsional, teks |
 
@@ -448,10 +558,12 @@ Catatan:
 
 ### 3.7 Diary
 
+Seluruh endpoint butuh autentikasi. Diary adalah tabel `diary_entries`
+yang tersendiri, bukan turunan dari `watched`.
+
 #### GET /api/diary
 
-Butuh autentikasi. Endpoint baca saja. Isinya diturunkan dari tabel
-`watched`.
+Endpoint baca dengan pengelompokan per tanggal.
 
 Parameter query:
 
@@ -460,6 +572,7 @@ Parameter query:
 | from | date | Awal rentang tanggal, opsional |
 | to | date | Akhir rentang tanggal, opsional |
 | tag_id | integer | Filter satu tag milik user, opsional |
+| page | integer | Opsional |
 
 Response 200:
 
@@ -468,13 +581,20 @@ Response 200:
   "success": true,
   "data": [
     {
-      "watched_at": "2026-10-14",
+      "watched_date": "2026-10-14",
       "items": [
         {
-          "tmdb_id": 123,
-          "title": "Judul Film",
-          "poster_path": "/abc.jpg",
+          "id": 31,
+          "movie": {
+            "id": 12,
+            "title": "Judul Film",
+            "poster_url": "http://127.0.0.1:8000/storage/posters/8f3a1c.jpg",
+            "release_date": "1994-01-01"
+          },
           "note": "Nonton bareng teman",
+          "tags": [
+            { "id": 3, "name": "rewatch" }
+          ],
           "rating": 4,
           "content": "Bagus."
         }
@@ -486,8 +606,61 @@ Response 200:
 
 Kemungkinan gagal: 401, 422.
 
-Tidak ada endpoint tulis diary. Menambah, mengubah, dan menghapus
-entri diary dilakukan lewat endpoint watched.
+#### POST /api/diary
+
+Request:
+
+```json
+{
+  "movie_id": 12,
+  "watched_date": "2026-10-14",
+  "note": "Nonton bareng teman"
+}
+```
+
+Validasi:
+
+| Field | Aturan |
+|---|---|
+| movie_id | Wajib, integer, exists di movies yang tidak dihapus |
+| watched_date | Opsional, tanggal, default hari ini |
+| note | Opsional, teks maksimal 1000 karakter |
+
+Response 201 dengan entri yang tersimpan.
+
+Kemungkinan gagal: 401, 409, 422.
+
+Catatan:
+
+- Film yang sudah punya entri diary menghasilkan 409.
+- Endpoint ini tidak membuat baris `watched`. Endpoint `POST /api/log`
+  membuat keduanya sekaligus.
+- Tag dilepas lewat `POST /api/diary/{id}/tags`.
+
+#### PUT /api/diary/{id}
+
+Request:
+
+```json
+{
+  "watched_date": "2026-10-15",
+  "note": "Revisi catatan"
+}
+```
+
+Field `movie_id` tidak dapat diubah. Pindahkan entri dengan menghapus
+dan membuat ulang bila film perlu diganti.
+
+Response 200.
+
+Kemungkinan gagal: 401, 403, 404, 422.
+
+#### DELETE /api/diary/{id}
+
+Response 200. Menghapus entri ini juga melepas seluruh tag yang menempel
+padanya.
+
+Kemungkinan gagal: 401, 403, 404.
 
 ### 3.8 Lists
 
@@ -574,7 +747,7 @@ Response 200 berisi detail list beserta isinya.
     "items": [
       {
         "id": 21,
-        "tmdb_id": 123,
+        "movie_id": 123,
         "title": "Judul Film",
         "poster_path": "/abc.jpg",
         "release_date": "1994-01-01",
@@ -624,7 +797,7 @@ Request:
 
 ```json
 {
-  "tmdb_id": 123,
+  "movie_id": 123,
   "note": "Nonton ulang tiap tahun."
 }
 ```
@@ -633,7 +806,7 @@ Validasi:
 
 | Field | Aturan |
 |---|---|
-| tmdb_id | Wajib, integer |
+| movie_id | Wajib, integer |
 | note | Opsional, teks maksimal 500 karakter |
 
 `order_index` diisi otomatis oleh backend dari nilai terbesar yang ada.
@@ -642,9 +815,9 @@ Response 201. Film yang sudah ada di list tersebut menghasilkan 409.
 
 Kemungkinan gagal: 401, 403, 404, 409, 422.
 
-#### DELETE /api/lists/{id}/items/{tmdbId}
+#### DELETE /api/lists/{id}/items/{movieId}
 
-Response 200. Path memakai `tmdb_id`, bukan id baris `list_items`.
+Response 200. Path memakai `movie_id`, bukan id baris `list_items`.
 
 Kemungkinan gagal: 401, 403, 404.
 
@@ -664,7 +837,7 @@ Validasi:
 
 | Field | Aturan |
 |---|---|
-| order | Wajib, array id film TMDB yang sudah ada di list |
+| order | Wajib, array id film yang sudah ada di list |
 
 Backend menulis ulang `order_index` sesuai urutan yang dikirim, dimulai
 dari 0.
@@ -728,8 +901,8 @@ Kemungkinan gagal: 401, 404.
 
 #### POST /api/diary/{id}/tags
 
-Menempelkan tag ke satu entri diary. `id` adalah id baris `watched`,
-bukan tanggal tonton.
+Menempelkan tag ke satu entri diary. `id` adalah id baris
+`diary_entries`, bukan tanggal tonton.
 
 Request:
 
@@ -766,7 +939,7 @@ Response 200: Empat film favorit user sendiri, sudah terisi posisi.
   "data": [
     {
       "position": 1,
-      "tmdb_id": 123,
+      "movie_id": 123,
       "title": "Judul Film",
       "poster_path": "/abc.jpg",
       "release_date": "1994-01-01"
@@ -786,11 +959,11 @@ Request mengirim seluruh isi favourites dalam satu operasi.
   "items": [
     {
       "position": 1,
-      "tmdb_id": 123
+      "movie_id": 123
     },
     {
       "position": 2,
-      "tmdb_id": 456
+      "movie_id": 456
     }
   ]
 }
@@ -802,7 +975,7 @@ Validasi:
 |---|---|
 | items | Wajib, array maksimal 4 |
 | items.position | Wajib, integer 1 sampai 4, unik dalam satu request |
-| items.tmdb_id | Wajib, integer, unik dalam satu request |
+| items.movie_id | Wajib, integer, unik dalam satu request |
 
 Response 200 dengan isi favourites terbaru. Endpoint ini menggantikan
 isi lama, jadi user dapat mengurangi jumlah favourites dari empat menjadi
@@ -829,7 +1002,7 @@ Request:
 
 ```json
 {
-  "tmdb_id": 123
+  "movie_id": 123
 }
 ```
 
@@ -839,7 +1012,7 @@ Response 201:
 {
   "success": true,
   "data": {
-    "tmdb_id": 123,
+    "movie_id": 123,
     "liked": true,
     "like_count": 42
   }
@@ -854,14 +1027,14 @@ Catatan:
 - Like tidak membuat rating, tidak membuat review, dan tidak mengubah
   status watched.
 
-#### DELETE /api/likes/{tmdbId}
+#### DELETE /api/likes/{movieId}
 
 Response 200 dengan bentuk data yang sama seperti `POST /api/likes`,
 dengan `liked` bernilai false dan `like_count` terbaru.
 
 Kemungkinan gagal: 401, 404.
 
-#### GET /api/likes/{tmdbId}
+#### GET /api/likes/{movieId}
 
 State tombol hati untuk satu film.
 
@@ -871,7 +1044,7 @@ Response 200:
 {
   "success": true,
   "data": {
-    "tmdb_id": 123,
+    "movie_id": 123,
     "liked": true,
     "like_count": 42
   }
@@ -889,7 +1062,7 @@ Response 200: film yang di-like user, untuk state tombol hati di katalog.
   "success": true,
   "data": [
     {
-      "tmdb_id": 123,
+      "movie_id": 123,
       "title": "Judul Film",
       "poster_path": "/abc.jpg",
       "liked_at": "2026-10-14T08:00:00Z"
@@ -999,7 +1172,7 @@ Response 200:
       },
       "reference_id": 31,
       "metadata": {
-        "tmdb_id": 123,
+        "movie_id": 123,
         "watched_at": "2026-10-14"
       },
       "created_at": "2026-10-14T08:00:00Z"
@@ -1046,7 +1219,7 @@ user yang sedang login.
     "favorites": [
       {
         "position": 1,
-        "tmdb_id": 123,
+        "movie_id": 123,
         "title": "Judul Film",
         "poster_path": "/abc.jpg"
       }
@@ -1108,7 +1281,7 @@ Response 200:
         "name": "Budi"
       },
       "target": {
-        "tmdb_id": null,
+        "movie_id": null,
         "title": null,
         "poster_path": null
       },
@@ -1178,7 +1351,7 @@ Request:
 
 ```json
 {
-  "tmdb_id": 123,
+  "movie_id": 123,
   "watched_at": "2026-10-14",
   "note": "Nonton bareng teman",
   "rating": 4,
@@ -1191,7 +1364,7 @@ Validasi:
 
 | Field | Aturan |
 |---|---|
-| tmdb_id | Wajib, integer |
+| movie_id | Wajib, integer |
 | watched_at | Opsional, tanggal, default hari ini |
 | note | Opsional, teks maksimal 1000 karakter |
 | rating | Opsional, integer 1 sampai 5 |
@@ -1206,7 +1379,7 @@ Response 201:
   "data": {
     "watched": {
       "id": 31,
-      "tmdb_id": 123,
+      "movie_id": 123,
       "watched_at": "2026-10-14",
       "note": "Nonton bareng teman"
     },
@@ -1234,10 +1407,402 @@ Catatan:
 - `tags` berisi nama tag, bukan id. Tag yang belum ada dibuat otomatis.
   Tag dengan nama yang sudah ada dipakai kembali.
 - Film yang sudah tercatat sebagai watched menghasilkan 409. Edit
-  entri yang sudah ada memakai `PATCH /api/watched/{tmdbId}`,
+  entri yang sudah ada memakai `PATCH /api/watched/{movieId}`,
   `PUT /api/reviews/{id}`, dan endpoint tag.
 - Endpoint ini menulis aktivitas `watched`, `rated`, dan `reviewed`
   sekaligus.
+
+### 3.18 Admin
+
+Seluruh endpoint pada bagian ini memakai dua middleware, yaitu
+`auth:sanctum` lalu `EnsureUserIsAdmin`. Request tanpa token menjawab
+401. Token valid dengan role `user` menjawab 403.
+
+Bentuk respons identik dengan endpoint user. Tindakan yang mengubah data
+selalu menulis satu baris ke `admin_audit_logs`.
+
+Batas umum:
+
+| Aturan | Nilai |
+|---|---|
+| Rate limit | 60 request per menit per admin |
+| Batas featured | 5 film |
+| Batas upload poster | 2 MB |
+| Batas upload backdrop | 4 MB |
+| Format gambar | jpg, jpeg, png, webp |
+
+#### GET /api/admin/dashboard
+
+Response 200:
+
+```json
+{
+  "success": true,
+  "data": {
+    "stats": {
+      "active_movies": 10,
+      "deleted_movies": 1,
+      "total_genres": 5,
+      "total_users": 2,
+      "total_admins": 1,
+      "total_reviews": 8,
+      "total_lists": 3,
+      "total_tags": 4
+    },
+    "latest_movies": [
+      {
+        "id": 12,
+        "title": "Judul Film",
+        "is_featured": true,
+        "created_at": "2026-10-14T08:00:00Z"
+      }
+    ],
+    "recent_admin_activity": [
+      {
+        "id": 5,
+        "admin_name": "Admin",
+        "action": "create",
+        "entity": "movie",
+        "entity_id": 12,
+        "detail": "{\"title\":\"Judul Film\"}",
+        "created_at": "2026-10-14T08:00:00Z"
+      }
+    ],
+    "top_watched": [
+      { "id": 12, "title": "Judul Film", "watched_count": 48 }
+    ]
+  }
+}
+```
+
+Kemungkinan gagal: 401, 403.
+
+#### GET /api/admin/movies
+
+Daftar film termasuk yang sudah dinonaktifkan.
+
+Parameter query:
+
+| Nama | Tipe | Keterangan |
+|---|---|---|
+| q | string | Pencarian judul, opsional |
+| status | string | `active` atau `deleted`, opsional |
+| page | integer | Opsional |
+
+Response 200 memakai `MovieResource` dengan tambahan `is_featured` dan
+`deleted_at`.
+
+#### POST /api/admin/movies
+
+Content type `multipart/form-data`.
+
+Request:
+
+| Field | Tipe | Aturan |
+|---|---|---|
+| title | string | Wajib, maksimal 255 |
+| original_title | string | Opsional, maksimal 255 |
+| overview | text | Opsional |
+| release_date | date | Opsional |
+| poster | file | Opsional, image, mimes jpg jpeg png webp, maksimal 2048 KB |
+| backdrop | file | Opsional, image, mimes jpg jpeg png webp, maksimal 4096 KB |
+| runtime | integer | Opsional, minimal 1 |
+| language | string | Opsional, maksimal 10 |
+| country | string | Opsional, maksimal 100 |
+| cast | string | Opsional, nama dipisah koma |
+| crew | string | Opsional, nama dipisah koma |
+| is_featured | boolean | Opsional, default false |
+| genres | array | Opsional, id genre yang sudah ada |
+| genres.* | integer | Harus exists di tabel genres |
+
+Contoh payload curl:
+
+```
+curl -X POST http://127.0.0.1:8000/api/admin/movies \
+  -H "Authorization: Bearer TOKEN" \
+  -F "title=Judul Film" \
+  -F "release_date=1994-01-01" \
+  -F "runtime=120" \
+  -F "cast=Nama Satu, Nama Dua" \
+  -F "genres[]=1" \
+  -F "genres[]=2" \
+  -F "poster=@poster.jpg"
+```
+
+Response 201 dengan film yang tersimpan. `poster_url` dan
+`backdrop_url` sudah berupa URL penuh.
+
+Kemungkinan gagal: 401, 403, 422, 429.
+
+Catatan:
+
+- Field gambar yang tidak dikirim tidak mengubah gambar yang sudah ada.
+- Untuk menghapus gambar, kirim `poster_clear` atau `backdrop_clear`
+  bernilai boolean `true`.
+- Berkas gambar disimpan di `storage/app/public/posters/` dan
+  `storage/app/public/backdrops/`. `php artisan storage:link` wajib
+  dijalankan lebih dulu.
+
+#### PUT /api/admin/movies/{id}
+
+Sama seperti `POST /api/admin/movies`, dengan Content type
+`multipart/form-data`. Field yang tidak dikirim tidak berubah.
+
+Response 200.
+
+Kemungkinan gagal: 401, 403, 404, 422.
+
+#### DELETE /api/admin/movies/{id}
+
+Menonaktifkan film dengan mengisi kolom `deleted_at`. Baris tidak
+dihapus dan data user tetap utuh.
+
+Response 200:
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": 12,
+    "deleted_at": "2026-10-14T09:00:00Z"
+  }
+}
+```
+
+Kemungkinan gagal: 401, 403, 404.
+
+Catatan:
+
+- Film yang sudah dinonaktifkan bisa dipulihkan dengan
+  `POST /api/admin/movies/{id}/restore`.
+- Endpoint ini tidak menghapus file gambar.
+
+#### POST /api/admin/movies/{id}/feature
+
+Menyalakan atau mematikan penanda featured.
+
+Request:
+
+```json
+{
+  "is_featured": true
+}
+```
+
+Response 200 dengan film terbaru.
+
+Kemungkinan gagal: 401, 403, 404, 409.
+
+Catatan:
+
+- Menyalakan featured ketika sudah ada lima film featured menghasilkan
+  409. Admin harus mematikan salah satu lebih dulu.
+- Film yang dinonaktifkan tidak bisa ditandai featured.
+
+#### POST /api/admin/movies/{id}/restore
+
+Mengembalikan film yang dinonaktifkan ke katalog.
+
+Response 200.
+
+Kemungkinan gagal: 401, 403, 404.
+
+#### GET /api/admin/genres
+
+Response 200 memakai `GenreResource` dengan tambahan `movie_count`.
+
+#### POST /api/admin/genres
+
+Request:
+
+```json
+{
+  "name": "Action",
+  "slug": "action"
+}
+```
+
+Response 201.
+
+Kemungkinan gagal: 401, 403, 409, 422.
+
+Catatan:
+
+- `slug` boleh dikosongkan. Backend membutakannya dari `name` bila
+  tidak dikirim.
+- `name` dibandingkan case-insensitive. `action` dan `Action`
+  menghasilkan 409.
+
+#### PUT /api/admin/genres/{id}
+
+Sama seperti `POST /api/admin/genres`. Response 200.
+
+Kemungkinan gagal: 401, 403, 404, 409, 422.
+
+#### DELETE /api/admin/genres/{id}
+
+Melepas genre dari seluruh film tanpa menghapus filmnya.
+
+Response 200.
+
+Kemungkinan gagal: 401, 403, 404.
+
+Catatan:
+
+- Genre yang masih dipakai film tidak dihapus dari tabel `genres`.
+  Endpoint ini hanya menghapus baris `movie_genres`.
+- Untuk benar-benar menghapus genre, hapus film-filmnya lebih dulu.
+  Endpoint ini sengaja tidak menyediakan penghapusan keras.
+
+#### GET /api/admin/users
+
+Daftar seluruh user.
+
+Parameter query: `q`, `role`, `page`.
+
+Response 200:
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "name": "Admin",
+      "email": "admin@mailboxh.test",
+      "role": "admin",
+      "movie_count": 10,
+      "joined_at": "2026-10-01T08:00:00Z"
+    }
+  ]
+}
+```
+
+Kemungkinan gagal: 401, 403.
+
+#### GET /api/admin/users/{id}
+
+Response 200 memakai `UserResource` dengan tambahan `stats`, `recent_activity`,
+dan `is_self`.
+
+Kemungkinan gagal: 401, 403, 404.
+
+#### PUT /api/admin/users/{id}/role
+
+Request:
+
+```json
+{
+  "role": "admin"
+}
+```
+
+Validasi: `role` wajib, harus bernilai `user` atau `admin`.
+
+Response 200.
+
+Kemungkinan gagal: 401, 403, 404, 422.
+
+Catatan:
+
+- Admin tidak dapat menurunkan role dirinya sendiri dari `admin`.
+  Percobaan itu menghasilkan 422 supaya tidak ada admin tersisa tanpa
+  sengaja.
+- Endpoint ini satu-satunya yang boleh mengubah `users.role`.
+- Password user tidak dapat diubah lewat endpoint ini.
+
+#### GET /api/admin/reviews
+
+Daftar seluruh review.
+
+Parameter query: `q`, `movie_id`, `rating`, `page`.
+
+Response 200 memakai `ReviewResource` dengan tambahan `movie` dan
+`user_name`.
+
+Kemungkinan gagal: 401, 403.
+
+#### DELETE /api/admin/reviews/{id}
+
+Menghapus review. Baris `reviews` terhapus dan aktivitas `rated` atau
+`reviewed` yang menunjuknya disembunyikan dari feed.
+
+Response 200.
+
+Kemungkinan gagal: 401, 403, 404.
+
+#### GET /api/admin/lists
+
+Daftar seluruh list.
+
+Parameter query: `q`, `scope` dengan nilai `public` atau `private`, `page`.
+
+Response 200 memakai `ListResource` dengan tambahan `owner_name`.
+
+#### DELETE /api/admin/lists/{id}
+
+Menghapus list milik user beserta seluruh `list_items`. Film di
+dalamnya, review, dan like tidak tersentuh.
+
+Response 200.
+
+Kemungkinan gagal: 401, 403, 404.
+
+#### GET /api/admin/tags
+
+Daftar seluruh tag milik seluruh user.
+
+Parameter query: `q`, `user_id`, `page`.
+
+Response 200 memakai `TagResource` dengan tambahan `user_name` dan
+`usage_count`.
+
+#### DELETE /api/admin/tags/{id}
+
+Menghapus tag. Tag dilepas dari seluruh entri diary secara otomatis
+lewat cascade.
+
+Response 200.
+
+Kemungkinan gagal: 401, 403, 404.
+
+#### GET /api/admin/audit-logs
+
+Parameter query:
+
+| Nama | Tipe | Keterangan |
+|---|---|---|
+| admin_id | integer | Filter admin, opsional |
+| entity | string | Filter jenis entitas, opsional |
+| page | integer | Opsional |
+
+Response 200 memakai `AdminAuditLogResource`.
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 5,
+      "admin": { "id": 1, "name": "Admin" },
+      "action": "update",
+      "entity": "movie",
+      "entity_id": 12,
+      "detail": "{\"title\":\"Judul Lama\"}",
+      "created_at": "2026-10-14T09:00:00Z"
+    }
+  ]
+}
+```
+
+Kemungkinan gagal: 401, 403.
+
+Catatan:
+
+- Log tidak punya endpoint hapus. Riwayat audit tidak boleh dihapus dari
+  aplikasi.
+- `detail` berisi JSON ringkasan perubahan, bukan dump baris utuh.
+  Password dan token tidak pernah masuk ke sini.
 
 ## 4. Kode Error
 
@@ -1267,25 +1832,37 @@ Aturan:
 | Endpoint auth | 5 request per menit per IP |
 | Endpoint tulis | 60 request per menit per user |
 | Endpoint baca | 120 request per menit per user |
+| Endpoint movies tanpa login | 60 request per menit per IP |
+| Endpoint admin | 60 request per menit per admin |
 | `GET /api/feed` | 30 request per menit per user |
 | `GET /api/activity/incoming` | 30 request per menit per user |
 | `GET /api/members` | 30 request per menit per user |
+
+Endpoint movies memakai batas per IP bila request tidak membawa token,
+dan batas per user bila token valid. Guest tidak boleh menghabiskan kuota
+pengguna lain.
 
 Saat terlampaui, backend menjawab 429 dengan header `Retry-After`.
 
 ## 6. Aturan Implementasi
 
 - Semua endpoint ditulis di `backend/routes/api.php`.
+- Route publik memakai middleware `guest` untuk yang berbasis IP, dan
+  `throttle:movies` untuk endpoint movies tanpa login.
 - Validasi input memakai FormRequest, bukan pengecekan manual di
   controller.
 - Output memakai Resource agar bentuk JSON konsisten.
-- Controller tidak memanggil TMDB secara langsung. Semua lewat
-  `TmdbService`.
+- Controller tidak memanggil layanan film eksternal. Semua lewat
+  repository dan service di dalam aplikasi.
 - Controller tidak memuat queryfilm milik user secara langsung. Semua
   lewat repository.
 - Pesan error dalam Bahasa Indonesia dan tidak mengandung stack trace.
 - Penulisan ke tabel `activities` dilakukan lewat satu service, bukan
   langsung di controller. Endpoint yang memicu aktivitas: watched,
   reviews, likes, lists, follow.
-- Endpoint `PUT /api/favorites` memvalidasi jumlah item maksimal 4 dan
-  memprosesnya dalam satu transaksi database.
+- Penulisan ke tabel `admin_audit_logs` dilakukan lewat
+  `AdminAuditService`. Setiap controller admin yang mengubah data wajib
+  memanggilnya.
+- Penulisan yang harus atomik memakai satu database transaction.
+  `POST /api/log`, `PUT /api/favorites`, dan `PUT /api/admin/movies/{id}`
+  termasuk yang wajib.

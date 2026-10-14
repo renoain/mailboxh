@@ -1,4 +1,4 @@
-# DESIGN SYSTEM - Mailboxh
+﻿# DESIGN SYSTEM - Mailboxh
 
 Design token untuk aplikasi Mailboxh. Semua widget wajib merujuk ke
 token di dokumen ini.
@@ -247,7 +247,7 @@ Shadow di mode dark memakai warna netral, bukan warna primary.
 - Ikon custom berbentuk SVG.
 - Nama file snake_case.
 - Path aset lewat AppAssets, dilarang hardcode di widget.
-- Poster film dari TMDB, tidak disimpan sebagai file lokal.
+- Poster dan backdrop diupload admin ke backend, lalu dimuat lewat URL dari APP_URL.
 - Font Manrope dan Geist berada di assets/fonts/.
 
 ## 10. Aturan Pemakaian Token

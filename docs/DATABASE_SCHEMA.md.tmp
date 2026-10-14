@@ -1,0 +1,537 @@
+﻿# DATABASE SCHEMA - Mailboxh
+
+Skema database MySQL untuk aplikasi Mailboxh.
+
+## 1. Prinsip
+
+- Semua tabel berada di database `mailboxh`.
+- Primary key `bigint` auto increment untuk seluruh tabel. Tidak ada lagi
+  primary key dari sumber luar.
+- Timestamp `created_at` dan `updated_at` mengikuti bawaan Laravel.
+- Naming snake_case, tabel berbentuk plural.
+- Foreign key ke `users` memakai on delete cascade.
+- Film berada di tabel `movies` dan dimiliki aplikasi sendiri. Semua
+  tabel yang menunjuk film memakai `movie_id` foreign key ke
+  `movies.id`.
+- Film memakai soft delete lewat kolom `deleted_at`. Film yang dinonaktifkan
+  hilang dari katalog tanpa menghapus baris dan tanpa merusak data user.
+- `diary_entries` adalah tabel tersendiri. Entri diary bukan baris
+  `watched`, melainkan catatan tontonan milik user.
+- Cast dan crew disimpan sebagai teks dipisah koma pada kolom `movies.cast`
+  dan `movies.crew`. Tidak ada tabel cast atau crew.
+- Admin adalah user dengan nilai `role` bernilai `admin` pada tabel
+  `users`. Tidak ada tabel admin terpisah.
+
+## 2. Entity Relationship
+
+```
+users
+  |
+  +--> watchlist --------+
+  +--> watched ----------+--> movies (soft delete)
+  +--> diary_entries ----+      |
+  +--> reviews ----------+      +--> movie_genres <-- genres
+  +--> lists --> list_items -----+
+  +--> favorites --------+
+  +--> likes ------------+
+  +--> activities
+  +--> follows (follower_id, following_id)
+  +--> admin_audit_logs (admin_id)
+
+diary_entries --> diary_tags <-- tags
+```
+
+Kolom `reference_id` pada tabel `activities` tidak memakai foreign key
+karena nilainya bisa menunjuk ke beberapa tabel berbeda.
+
+## 3. Tabel
+
+### 3.1 users
+
+Bawaan Laravel dengan kolom tambahan.
+
+Migration: `0001_01_01_000000_create_users_table.php`, sudah ada dari
+`composer create-project`.
+
+| Kolom | Tipe | Constraint | Keterangan |
+|---|---|---|---|
+| id | bigint | PK, auto increment | |
+| name | varchar(255) | not null | Nama user |
+| email | varchar(255) | unique, not null | Email |
+| password | varchar(255) | not null | Hash bcrypt |
+| role | enum('user', 'admin') | not null, default 'user' | Role user |
+| remember_token | varchar(100) | nullable | Bawaan Laravel |
+| created_at | timestamp | nullable | |
+| updated_at | timestamp | nullable | |
+
+Kolom `role` ditambahkan lewat migration terpisah setelah tabel
+pertama kali dibuat. Kolom ini tidak boleh diisi lewat form register.
+Endpoint yang boleh mengubahnya hanya `PUT /api/admin/users/{id}/role`.
+
+### 3.2 movies
+
+Katalog film. Semua data diinput manual oleh admin.
+
+Migration: `2026_10_14_000001_create_movies_table.php`.
+
+| Kolom | Tipe | Constraint | Keterangan |
+|---|---|---|---|
+| id | bigint | PK, auto increment | |
+| title | varchar(255) | not null | Judul |
+| original_title | varchar(255) | nullable | Judul asli |
+| overview | text | nullable | Sinopsis |
+| release_date | date | nullable | Tanggal rilis |
+| poster_path | varchar(255) | nullable | Path file poster relatif |
+| backdrop_path | varchar(255) | nullable | Path file backdrop relatif |
+| runtime | integer | nullable | Durasi menit |
+| language | varchar(10) | nullable | Kode bahasa, contoh en |
+| country | varchar(100) | nullable | Negara produksi |
+| cast | text | nullable | Nama pemeran, dipisah koma |
+| crew | text | nullable | Nama crew, dipisah koma |
+| is_featured | boolean | not null, default false | Tampil di section Featured |
+| deleted_at | timestamp | nullable | Soft delete |
+| created_at | timestamp | nullable | |
+| updated_at | timestamp | nullable | |
+
+Index:
+
+- `(is_featured, deleted_at)` untuk query Featured.
+- `(deleted_at, created_at)` untuk Latest.
+- `title` untuk pencarian judul.
+- `release_date` untuk pengurutan.
+
+Catatan:
+
+- Soft delete memakai trait `SoftDeletes` di model `Movie`. Semua query
+  katalog otomatis menambahkan `where deleted_at is null`.
+- File poster disimpan di `storage/app/public/posters/` dan backdrop di
+  `storage/app/public/backdrops/`. Kolom path menyimpan nilai relatif
+  seperti `posters/abc.jpg`.
+- URL penuh dibentuk di backend dari `APP_URL`, lalu dikirim ke klien.
+  Backend mengembalikan `poster_url` dan `backdrop_url` yang sudah jadi.
+- `vote_average` tidak ada di tabel ini. Rating rata-rata dihitung dari
+  tabel `reviews` saat query, bukan disimpan.
+- CHECK constraint pada `runtime` membatasi nilai minimal 1.
+- Maksimal lima film featured. Aturan ini ditegakkan di service, bukan
+  di database.
+
+### 3.3 genres
+
+Kategori film yang dikelola admin.
+
+Migration: `2026_10_14_000002_create_genres_table.php`.
+
+| Kolom | Tipe | Constraint | Keterangan |
+|---|---|---|---|
+| id | bigint | PK, auto increment | |
+| name | varchar(50) | unique, not null | Nama genre |
+| slug | varchar(50) | unique, not null | Slug untuk URL dan filter |
+| created_at | timestamp | nullable | |
+| updated_at | timestamp | nullable | |
+
+Catatan:
+
+- Nama dibandingkan case-insensitive lewat collation `utf8mb4_unicode_ci`,
+  sehingga `Action` dan `action` dianggap sama.
+- Slug wajib lowercase dan hanya berisi huruf, angka, dan tanda hubung.
+- Genre awal dari seeder: Action, Drama, Comedy, Horror, Romance.
+
+### 3.4 movie_genres
+
+Pivot antara film dan genre.
+
+Migration: `2026_10_14_000003_create_movie_genres_table.php`.
+
+| Kolom | Tipe | Constraint | Keterangan |
+|---|---|---|---|
+| movie_id | bigint | FK movies, cascade, not null | |
+| genre_id | bigint | FK genres, cascade, not null | |
+
+Primary key: `(movie_id, genre_id)`.
+
+Kolom `id` tidak ada. Tabel pivot memakai komposit primary key.
+
+Catatan:
+
+- Menghapus film atau genre melepas seluruh baris pivot secara otomatis.
+- Satu film boleh punya beberapa genre. Satu genre boleh dipakai banyak
+  film.
+
+### 3.5 watchlist
+
+Film yang ingin ditonton user.
+
+Migration: `2026_10_14_000004_create_watchlist_table.php`.
+
+| Kolom | Tipe | Constraint | Keterangan |
+|---|---|---|---|
+| id | bigint | PK, auto increment | |
+| user_id | bigint | FK users, cascade, not null | |
+| movie_id | bigint | FK movies, cascade, not null | |
+| created_at | timestamp | nullable | |
+| updated_at | timestamp | nullable | |
+
+Unique: `(user_id, movie_id)`.
+
+Index: `(movie_id)` untuk query Most Watchlisted.
+
+### 3.6 watched
+
+Film yang sudah ditonton user.
+
+Migration: `2026_10_14_000005_create_watched_table.php`.
+
+| Kolom | Tipe | Constraint | Keterangan |
+|---|---|---|---|
+| id | bigint | PK, auto increment | |
+| user_id | bigint | FK users, cascade, not null | |
+| movie_id | bigint | FK movies, cascade, not null | |
+| watched_at | date | not null | Tanggal tonton |
+| created_at | timestamp | nullable | |
+| updated_at | timestamp | nullable | |
+
+Unique: `(user_id, movie_id)`.
+
+Index: `(user_id, watched_at)` untuk urutan riwayat tontonan.
+Index: `(movie_id)` untuk query Most Watched.
+
+Catatan:
+
+- Kolom `note` tidak ada di tabel ini. Catatan tontonan berada di
+  `diary_entries.note`.
+- Menghapus film tidak menghapus baris di tabel ini karena `movies`
+  memakai soft delete.
+
+### 3.7 diary_entries
+
+Catatan tontonan milik user beserta tanggal dan catatan.
+
+Migration: `2026_10_14_000006_create_diary_entries_table.php`.
+
+| Kolom | Tipe | Constraint | Keterangan |
+|---|---|---|---|
+| id | bigint | PK, auto increment | |
+| user_id | bigint | FK users, cascade, not null | |
+| movie_id | bigint | FK movies, cascade, not null | |
+| watched_date | date | not null | Tanggal tonton |
+| note | text | nullable | Catatan opsional |
+| created_at | timestamp | nullable | |
+| updated_at | timestamp | nullable | |
+
+Unique: `(user_id, movie_id)`.
+
+Index: `(user_id, watched_date)` untuk urutan diary.
+Index: `movie_id` untuk menagih film yang tidak ada di watchlist.
+
+Catatan:
+
+- Tabel ini terpisah dari `watched`. `watched` menandai status sudah
+  ditonton, `diary_entries` menyimpan catatan tontonannya.
+- Entri diary boleh dibuat tanpa baris `watched` yang sesuai. Endpoint
+  `POST /api/log` membuat keduanya sekaligus.
+- `watched_id` tidak ada di tabel ini. Relasi ke `watched` dijaga di
+  application layer, bukan dengan foreign key.
+
+### 3.8 reviews
+
+Rating dan review user untuk film.
+
+Migration: `2026_10_14_000007_create_reviews_table.php`.
+
+| Kolom | Tipe | Constraint | Keterangan |
+|---|---|---|---|
+| id | bigint | PK, auto increment | |
+| user_id | bigint | FK users, cascade, not null | |
+| movie_id | bigint | FK movies, cascade, not null | |
+| rating | tinyint | not null | Nilai 1 sampai 5 |
+| content | text | nullable | Isi review teks |
+| created_at | timestamp | nullable | |
+| updated_at | timestamp | nullable | |
+
+Unique: `(user_id, movie_id)`.
+
+Index: `(movie_id)` untuk query Top Rated.
+
+Catatan:
+
+- Rating wajib diisi karena review tanpa rating tidak disimpan pada MVP.
+- Gunakan CHECK constraint agar rating selalu di rentang 1 sampai 5.
+- Film yang kehilangan seluruh review tidak lagi masuk Top Rated.
+
+### 3.9 lists
+
+Daftar film kurasi milik user.
+
+Migration: `2026_10_14_000008_create_lists_table.php`.
+
+| Kolom | Tipe | Constraint | Keterangan |
+|---|---|---|---|
+| id | bigint | PK, auto increment | |
+| user_id | bigint | FK users, cascade, not null | Pemilik list |
+| title | varchar(120) | not null | Judul list |
+| description | text | nullable | Deskripsi list |
+| is_public | boolean | not null, default false | true bila dapat dilihat user lain |
+| created_at | timestamp | nullable | |
+| updated_at | timestamp | nullable | |
+
+Index: `(user_id, is_public)` untuk daftar list publik dan list pribadi.
+
+Catatan:
+
+- `title` dibatasi 120 karakter agar konsisten di tampilan.
+- List kurasi sistem tidak disimpan di tabel ini. Tidak ada lagi list
+  kurasi sistem setelah TMDB dihapus.
+- Hapus list berarti semua `list_items` ikut terhapus lewat cascade.
+
+### 3.10 list_items
+
+Film yang menjadi anggota sebuah list.
+
+Migration: `2026_10_14_000009_create_list_items_table.php`.
+
+| Kolom | Tipe | Constraint | Keterangan |
+|---|---|---|---|
+| id | bigint | PK, auto increment | |
+| list_id | bigint | FK lists, cascade, not null | List induk |
+| movie_id | bigint | FK movies, cascade, not null | |
+| note | text | nullable | Catatan singkat di dalam list |
+| order_index | integer | not null, default 0 | Urutan manual |
+| created_at | timestamp | nullable | |
+| updated_at | timestamp | nullable | |
+
+Unique: `(list_id, movie_id)`.
+
+Index: `(list_id, order_index)` untuk urutan isi list.
+
+Catatan:
+
+- `order_index` diisi otomatis dari nilai terbesar saat film ditambahkan,
+  lalu dapat diubah lewat halaman detail list.
+- Tabel ini tidak memakai `updated_at` pada MVP karena isi list tidak
+  pernah diedit. Kolom tetap disediakan oleh migration Laravel.
+
+### 3.11 tags
+
+Label pribadi milik user untuk entri watched pada diary.
+
+Migration: `2026_10_14_000007_create_tags_table.php`.
+
+| Kolom | Tipe | Constraint | Keterangan |
+|---|---|---|---|
+| id | bigint | PK, auto increment | |
+| user_id | bigint | FK users, cascade, not null | Pemilik tag |
+| name | varchar(40) | not null | Nama tag |
+| created_at | timestamp | nullable | |
+| updated_at | timestamp | nullable | |
+
+Unique: `(user_id, name)`.
+
+Catatan:
+
+- Bandingkan nama tag secara case-insensitive dengan collation
+  `utf8mb4_unicode_ci`, sehingga `Sci-Fi` dan `sci-fi` dianggap sama.
+- Tag tidak dipakai ulang antar user. Tiap user punya tag sendiri.
+
+### 3.12 diary_tags
+
+Penghubung tag ke entri diary.
+
+Migration: `2026_10_14_000011_create_diary_tags_table.php`.
+
+| Kolom | Tipe | Constraint | Keterangan |
+|---|---|---|---|
+| id | bigint | PK, auto increment | |
+| diary_entry_id | bigint | FK diary_entries, cascade, not null | Entri diary |
+| tag_id | bigint | FK tags, cascade, not null | Tag yang ditempel |
+| created_at | timestamp | nullable | |
+
+Unique: `(diary_entry_id, tag_id)`.
+
+Index: `(tag_id)` untuk filter diary berdasarkan tag.
+
+Catatan:
+
+- Menghapus entri diary otomatis melepas tag pada entri itu.
+- Menghapus tag melepas tag dari seluruh entri diary.
+
+### 3.13 favorites
+
+Empat film favorit yang dipajang di profil user.
+
+Migration: `2026_10_14_000012_create_favorites_table.php`.
+
+| Kolom | Tipe | Constraint | Keterangan |
+|---|---|---|---|
+| id | bigint | PK, auto increment | |
+| user_id | bigint | FK users, cascade, not null | Pemilik |
+| movie_id | bigint | FK movies, cascade, not null | |
+| position | tinyint | not null | Posisi 1 sampai 4 |
+| created_at | timestamp | nullable | |
+| updated_at | timestamp | nullable | |
+
+Unique: `(user_id, position)` dan `(user_id, movie_id)`.
+
+Catatan:
+
+- CHECK constraint pada `position` membatasi nilai 1 sampai 4.
+- Menyimpan film di posisi yang sudah terpakai memindahkan film lama di
+  posisi tersebut ke posisi paling akhir yang kosong.
+- Film boleh berada di watchlist, watched, diary, like, dan favourites
+  sekaligus. Tabel-tabel ini berdiri sendiri.
+
+### 3.14 likes
+
+Tanda suka pada film, terpisah dari rating bintang.
+
+Migration: `2026_10_14_000013_create_likes_table.php`.
+
+| Kolom | Tipe | Constraint | Keterangan |
+|---|---|---|---|
+| id | bigint | PK, auto increment | |
+| user_id | bigint | FK users, cascade, not null | Pemberi like |
+| movie_id | bigint | FK movies, cascade, not null | |
+| created_at | timestamp | nullable | |
+| updated_at | timestamp | nullable | |
+
+Unique: `(user_id, movie_id)`.
+
+Index: `(movie_id)` untuk menghitung jumlah like per film.
+
+Catatan:
+
+- Like tidak memengaruhi rating dan tidak membuat review.
+- User dapat like film yang belum pernah ia tonton atau beri rating.
+
+### 3.15 follows
+
+Relasi mengikuti antar user.
+
+Migration: `2026_10_14_000014_create_follows_table.php`.
+
+| Kolom | Tipe | Constraint | Keterangan |
+|---|---|---|---|
+| id | bigint | PK, auto increment | |
+| follower_id | bigint | FK users, cascade, not null | User yang mengikuti |
+| following_id | bigint | FK users, cascade, not null | User yang diikuti |
+| created_at | timestamp | nullable | |
+| updated_at | timestamp | nullable | |
+
+Unique: `(follower_id, following_id)`.
+
+Index: `(following_id)` untuk daftar follower.
+
+Catatan:
+
+- CHECK constraint melarang `follower_id` sama dengan `following_id`.
+- User tidak dapat mengikuti dirinya sendiri.
+- Dua user dapat saling mengikuti.
+
+### 3.16 activities
+
+Catatan aktivitas user untuk activity feed.
+
+Migration: `2026_10_14_000015_create_activities_table.php`.
+
+| Kolom | Tipe | Constraint | Keterangan |
+|---|---|---|---|
+| id | bigint | PK, auto increment | |
+| user_id | bigint | FK users, cascade, not null | Pemilik aktivitas |
+| type | varchar(20) | not null | watched, rated, reviewed, liked, list_created, followed |
+| reference_id | bigint | nullable | Id baris pada tabel asal |
+| metadata | json | nullable | Konteks tambahan, lihat tabel di bawah |
+| created_at | timestamp | nullable | |
+| updated_at | timestamp | nullable | |
+
+Index: `(user_id, created_at)` untuk feed satu user dan untuk purge.
+
+Nilai kolom `type`:
+
+| Type | Kapan ditulis | reference_id | metadata |
+|---|---|---|---|
+| watched | User menandai film ditonton | `watched.id` | movie_id, watched_at |
+| rated | User menyimpan rating | `reviews.id` | movie_id, rating |
+| reviewed | User menulis review | `reviews.id` | movie_id, excerpt |
+| liked | User like film | `likes.id` | movie_id |
+| list_created | User membuat list | `lists.id` | title, is_public |
+| followed | User mengikuti user lain | `follows.id` | following_name |
+
+Catatan:
+
+- Tabel ini hanya ditulis oleh backend. Aplikasi tidak pernah insert
+  langsung ke tabel ini.
+- Tidak ada foreign key pada `reference_id` karena nilainya polymorphic
+  dan baris asal boleh terhapus. Aktivitas yang menunjuk baris terhapus
+  disembunyikan saat feed dibangun.
+- `metadata` tidak pernah berisi data sensitif.
+- Aktivitas admin tidak ditulis ke tabel ini. Tindakan admin dicatat di
+  `admin_audit_logs` supaya tidak bocor ke feed user.
+
+### 3.17 admin_audit_logs
+
+Riwayat setiap tindakan admin yang mengubah data.
+
+Migration: `2026_10_14_000016_create_admin_audit_logs_table.php`.
+
+| Kolom | Tipe | Constraint | Keterangan |
+|---|---|---|---|
+| id | bigint | PK, auto increment | |
+| admin_id | bigint | FK users, cascade, not null | Admin pelaku |
+| action | varchar(50) | not null | Lihat tabel nilai di bawah |
+| entity | varchar(50) | not null | Lihat tabel nilai di bawah |
+| entity_id | bigint | nullable | Id baris yang diubah |
+| detail | text | nullable | Keterangan singkat |
+| created_at | timestamp | nullable | |
+| updated_at | timestamp | nullable | |
+
+Index: `(admin_id, created_at)` untuk daftar log per admin.
+Index: `(entity, created_at)` untuk filter per jenis entitas.
+
+Nilai kolom `entity`:
+
+| Entity | Dipakai saat |
+|---|---|
+| movie | Tambah, ubah, hapus, atau tandai featured film |
+| genre | Tambah, ubah, atau hapus genre |
+| user | Ubah role user |
+| review | Hapus review |
+| list | Hapus list |
+| tag | Hapus tag |
+
+Catatan:
+
+- Tabel ini hanya ditulis oleh `AdminAuditService`. Controller admin
+  tidak boleh insert langsung.
+- Admin tidak dapat menghapus baris di tabel ini. Tidak ada endpoint
+  hapus dan tidak ada soft delete.
+- `detail` menyimpan JSON dengan ringkasan perubahan, bukan dump seluruh
+  baris. Jangan pernah menaruh password atau token di sini.
+- `created_at` tidak memakai `updated_at` karena log tidak pernah diubah.
+  Kolom `updated_at` tetap ada karena bawaan Laravel memakai
+  `timestamps()`.
+
+## 4. Relasi
+
+- users satu ke banyak watchlist.
+- users satu ke banyak watched.
+- users satu ke banyak reviews.
+- users satu ke banyak lists.
+- users satu ke banyak tags.
+- users satu ke banyak favorites.
+- users satu ke banyak likes.
+- users satu ke banyak activities.
+- users banyak ke banyak users lewat follows.
+- lists satu ke banyak list_items.
+- watched banyak ke banyak tags lewat diary_tags.
+- movies_cache direferensikan oleh nilai `tmdb_id` pada watchlist,
+  watched, reviews, list_items, favorites, dan likes, tanpa foreign key
+  constraint.
+
+Perubahan tabel lama:
+
+- `users` tidak berubah.
+- `watchlist` tidak berubah.
+- `watched` tidak berubah. Kolom `note` tetap dipakai sebagai catatan
+  diary.
+- `reviews` tidak berubah. Rating dan review tetap terpisah dari like.
+- `movies_cache` tidak berubah.
+
