@@ -62,6 +62,10 @@ class AppText {
   final String logout;
   final String noAccount;
   final String haveAccount;
+  final String fieldRequired;
+  final String invalidEmail;
+  final String passwordTooShort;
+  final String passwordConfirmation;
 
   // Detail film
   final String addToWatchlist;
@@ -257,6 +261,10 @@ class AppText {
     logout: 'Keluar',
     noAccount: 'Belum punya akun',
     haveAccount: 'Sudah punya akun',
+    fieldRequired: 'Bagian ini wajib diisi',
+    invalidEmail: 'Email tidak valid',
+    passwordTooShort: 'Kata sandi minimal 8 karakter',
+    passwordConfirmation: 'Konfirmasi kata sandi',
     addToWatchlist: 'Tambah ke watchlist',
     markWatched: 'Tandai sudah ditonton',
     writeReview: 'Tulis review',
@@ -425,6 +433,10 @@ class AppText {
     logout: 'Log out',
     noAccount: 'No account yet',
     haveAccount: 'Already have an account',
+    fieldRequired: 'This field is required',
+    invalidEmail: 'Invalid email',
+    passwordTooShort: 'Password must be at least 8 characters',
+    passwordConfirmation: 'Confirm password',
     addToWatchlist: 'Add to watchlist',
     markWatched: 'Mark as watched',
     writeReview: 'Write review',
@@ -594,6 +606,10 @@ class AppText {
     required this.logout,
     required this.noAccount,
     required this.haveAccount,
+    required this.fieldRequired,
+    required this.invalidEmail,
+    required this.passwordTooShort,
+    required this.passwordConfirmation,
     required this.addToWatchlist,
     required this.markWatched,
     required this.writeReview,

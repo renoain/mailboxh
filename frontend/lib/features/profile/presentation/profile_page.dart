@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart' as riverpod;
 import 'package:provider/provider.dart';
 
 import '../../../core/constants/app_strings.dart';
 import '../../../core/providers/app_state.dart';
+import '../../auth/presentation/auth_provider.dart';
 import '../../auth/presentation/login_page.dart';
 import '../../detail/presentation/movie_detail_page.dart';
 import '../../feed/presentation/feed_page.dart'; 
@@ -268,17 +270,21 @@ class ProfilePage extends StatelessWidget {
                     const SizedBox(height: 16),
                     
                     // TOMBOL LOGOUT
-                    OutlinedButton.icon(
-                      onPressed: () {
-                        Provider.of<AppState>(context, listen: false).logout();
-                        Navigator.popUntil(context, (route) => route.isFirst);
-                      },
-                      icon: const Icon(Icons.logout, color: Colors.redAccent, size: 18),
-                      label: Text(text.logout, style: const TextStyle(color: Colors.redAccent)),
-                      style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: Color(0xFF2C3440)),
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                    riverpod.Consumer(
+                      builder: (context, ref, _) => OutlinedButton.icon(
+                        onPressed: () async {
+                          await ref.read(authProvider.notifier).signOut();
+                          if (!context.mounted) return;
+                          Provider.of<AppState>(context, listen: false).logout();
+                          Navigator.popUntil(context, (route) => route.isFirst);
+                        },
+                        icon: const Icon(Icons.logout, color: Colors.redAccent, size: 18),
+                        label: Text(text.logout, style: const TextStyle(color: Colors.redAccent)),
+                        style: OutlinedButton.styleFrom(
+                          side: const BorderSide(color: Color(0xFF2C3440)),
+                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                        ),
                       ),
                     ),
                     const SizedBox(height: 20),
