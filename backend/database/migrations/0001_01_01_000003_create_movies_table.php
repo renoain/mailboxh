@@ -34,7 +34,10 @@ return new class extends Migration
             $table->index('release_date');
         });
 
-        DB::statement("alter table `movies` add constraint `movies_runtime_check` check (`runtime` is null or `runtime` >= 1)");
+        // SQLite tidak mendukung ALTER TABLE ADD CONSTRAINT; validasi utama ada di FormRequest.
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement("alter table `movies` add constraint `movies_runtime_check` check (`runtime` is null or `runtime` >= 1)");
+        }
     }
 
     public function down(): void

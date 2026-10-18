@@ -7,17 +7,24 @@ namespace App\Http\Controllers\Api;
 use App\Http\Resources\UserResource;
 use App\Http\Traits\ApiResponse;
 use App\Models\Follow;
+use App\Models\Notification;
 use App\Models\User;
 use App\Services\ActivityLogger;
+use App\Services\NotificationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
+// Endpoint follow dan unfollow antar user.
 class FollowController extends Controller
 {
     use ApiResponse;
 
-    public function store(Request $request, int $userId, ActivityLogger $logger): JsonResponse
-    {
+    public function store(
+        Request $request,
+        int $userId,
+        ActivityLogger $logger,
+        NotificationService $notifications,
+    ): JsonResponse {
         $me = $request->user();
 
         if ($userId === $me->id) {
@@ -39,6 +46,8 @@ class FollowController extends Controller
         $logger->log($me->id, ActivityLogger::TYPE_FOLLOWED, $follow->id, [
             'following_name' => $target->name,
         ]);
+
+        $notifications->notify($userId, $me->id, Notification::TYPE_FOLLOW, $follow->id);
 
         return $this->success([
             'user_id' => $userId,

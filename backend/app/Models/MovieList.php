@@ -29,4 +29,9 @@ class MovieList extends Model
     {
         return $this->hasMany(ListItem::class, 'list_id');
     }
+
+    public function likes()
+    {
+        return $this->morphMany(Like::class, 'likeable');
+    }
 }

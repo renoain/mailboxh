@@ -7,6 +7,7 @@ namespace Tests\Feature;
 use App\Models\Movie;
 use App\Models\User;
 use App\Models\Watched;
+use App\Models\Watchlist;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
@@ -58,5 +59,36 @@ class WatchedTest extends TestCase
         $response = $this->getJson('/api/watched');
 
         $response->assertStatus(401);
+    }
+
+    public function test_watched_tidak_membuat_entri_diary(): void
+    {
+        Sanctum::actingAs(User::factory()->create());
+        $movie = Movie::factory()->create();
+
+        $this->postJson('/api/watched', [
+            'movie_id' => $movie->id,
+            'watched_at' => now()->toDateString(),
+        ])->assertStatus(201);
+
+        $this->assertDatabaseCount('diary_entries', 0);
+    }
+
+    public function test_watched_menghapus_film_dari_watchlist(): void
+    {
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+        $movie = Movie::factory()->create();
+        Watchlist::factory()->create(['user_id' => $user->id, 'movie_id' => $movie->id]);
+
+        $this->postJson('/api/watched', [
+            'movie_id' => $movie->id,
+            'watched_at' => now()->toDateString(),
+        ])->assertStatus(201);
+
+        $this->assertDatabaseMissing('watchlist', [
+            'user_id' => $user->id,
+            'movie_id' => $movie->id,
+        ]);
     }
 }

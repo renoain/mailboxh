@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Requests\RateMovieRequest;
 use App\Http\Resources\MovieResource;
 use App\Http\Traits\ApiResponse;
 use App\Models\Genre;
 use App\Models\Movie;
+use App\Models\Review;
+use App\Services\ActivityLogger;
 use App\Services\MovieStatsService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -78,5 +81,65 @@ class MovieController extends Controller
         ])->resolve($request);
 
         return $this->success($payload);
+    }
+
+    /**
+     * Simpan rating bintang saja, tanpa entri diary.
+     */
+    public function rate(RateMovieRequest $request, int $id, ActivityLogger $logger): JsonResponse
+    {
+        $movie = Movie::find($id);
+
+        if ($movie === null) {
+            return $this->failure('Film tidak ditemukan.', 404);
+        }
+
+        $rating = $request->integer('rating');
+
+        $review = Review::firstOrNew([
+            'user_id' => $request->user()->id,
+            'movie_id' => $id,
+        ]);
+        $review->rating = $rating;
+        $review->save();
+
+        $logger->log($request->user()->id, ActivityLogger::TYPE_RATED, $review->id, [
+            'movie_id' => $id,
+            'rating' => $rating,
+        ]);
+
+        // 201 untuk rating pertama, 200 saat nilai diperbarui.
+        $status = $review->wasRecentlyCreated ? 201 : 200;
+
+        return $this->success([
+            'movie_id' => $id,
+            'review_id' => $review->id,
+            'rating' => $review->rating,
+        ], null, $status);
+    }
+
+    /**
+     * Hapus rating bintang; teks review tetap tersimpan jika ada.
+     */
+    public function unrate(Request $request, int $id): JsonResponse
+    {
+        $review = Review::where('user_id', $request->user()->id)
+            ->where('movie_id', $id)
+            ->first();
+
+        if ($review === null || $review->rating === null) {
+            return $this->failure('Film ini belum diberi rating.', 404);
+        }
+
+        if ($review->content === null) {
+            $review->delete();
+        } else {
+            $review->update(['rating' => null]);
+        }
+
+        return $this->success([
+            'movie_id' => $id,
+            'rating' => null,
+        ]);
     }
 }

@@ -10,6 +10,7 @@ use App\Http\Resources\DiaryResource;
 use App\Http\Resources\ReviewResource;
 use App\Http\Traits\ApiResponse;
 use App\Models\DiaryEntry;
+use App\Services\WatchlistService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -58,20 +59,31 @@ class DiaryController extends Controller
         return $this->success($grouped->values()->all());
     }
 
-    public function store(StoreDiaryRequest $request): JsonResponse
+    public function store(StoreDiaryRequest $request, WatchlistService $watchlists): JsonResponse
     {
+        $userId = $request->user()->id;
         $movieId = $request->integer('movie_id');
+        $watchedDate = ($request->date('watched_date') ?? now())->toDateString();
 
-        if (DiaryEntry::where('user_id', $request->user()->id)->where('movie_id', $movieId)->exists()) {
-            return $this->failure('Entri diary untuk film ini sudah ada.', 409);
+        // Satu film boleh punya banyak entri selama tanggalnya berbeda.
+        $exists = DiaryEntry::where('user_id', $userId)
+            ->where('movie_id', $movieId)
+            ->whereDate('watched_date', $watchedDate)
+            ->exists();
+
+        if ($exists) {
+            return $this->failure('Entri diary untuk tanggal ini sudah ada.', 409);
         }
 
         $entry = DiaryEntry::create([
-            'user_id' => $request->user()->id,
+            'user_id' => $userId,
             'movie_id' => $movieId,
-            'watched_date' => $request->date('watched_date') ?? now()->toDateString(),
+            'watched_date' => $watchedDate,
             'note' => $request->input('note'),
         ]);
+
+        // Film yang sudah di-log keluar dari watchlist.
+        $watchlists->remove($userId, $movieId);
 
         return $this->success(new DiaryResource($entry->load(['movie.genres', 'tags'])), null, 201);
     }

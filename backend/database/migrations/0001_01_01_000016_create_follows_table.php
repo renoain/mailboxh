@@ -21,7 +21,10 @@ return new class extends Migration
             $table->index('following_id');
         });
 
-        DB::statement("alter table `follows` add constraint `follows_self_check` check (`follower_id` <> `following_id`)");
+        // SQLite tidak mendukung ALTER TABLE ADD CONSTRAINT; validasi utama ada di controller.
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement("alter table `follows` add constraint `follows_self_check` check (`follower_id` <> `following_id`)");
+        }
     }
 
     public function down(): void

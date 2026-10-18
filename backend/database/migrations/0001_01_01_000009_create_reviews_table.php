@@ -23,7 +23,10 @@ return new class extends Migration
             $table->index('movie_id');
         });
 
-        DB::statement("alter table `reviews` add constraint `reviews_rating_check` check (`rating` between 1 and 5)");
+        // SQLite tidak mendukung ALTER TABLE ADD CONSTRAINT; validasi utama ada di FormRequest.
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement("alter table `reviews` add constraint `reviews_rating_check` check (`rating` between 1 and 5)");
+        }
     }
 
     public function down(): void

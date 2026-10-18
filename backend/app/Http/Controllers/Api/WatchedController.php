@@ -9,6 +9,7 @@ use App\Http\Resources\WatchedResource;
 use App\Http\Traits\ApiResponse;
 use App\Models\Watched;
 use App\Services\ActivityLogger;
+use App\Services\WatchlistService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -23,8 +24,11 @@ class WatchedController extends Controller
         return $this->success(WatchedResource::collection($items)->resolve($request));
     }
 
-    public function store(StoreWatchedRequest $request, ActivityLogger $logger): JsonResponse
-    {
+    public function store(
+        StoreWatchedRequest $request,
+        ActivityLogger $logger,
+        WatchlistService $watchlists,
+    ): JsonResponse {
         $movieId = $request->integer('movie_id');
 
         if (Watched::where('user_id', $request->user()->id)->where('movie_id', $movieId)->exists()) {
@@ -41,6 +45,9 @@ class WatchedController extends Controller
             'movie_id' => $movieId,
             'watched_at' => $watched->watched_at->toDateString(),
         ]);
+
+        // Film yang sudah ditonton keluar dari watchlist.
+        $watchlists->remove($request->user()->id, $movieId);
 
         return $this->success(new WatchedResource($watched->load('movie.genres')), null, 201);
     }

@@ -11,6 +11,7 @@ use App\Models\Review;
 use App\Models\Tag;
 use App\Models\Watched;
 use App\Services\ActivityLogger;
+use App\Services\WatchlistService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 
@@ -18,8 +19,11 @@ class LogController extends Controller
 {
     use ApiResponse;
 
-    public function store(StoreLogRequest $request, ActivityLogger $logger): JsonResponse
-    {
+    public function store(
+        StoreLogRequest $request,
+        ActivityLogger $logger,
+        WatchlistService $watchlists,
+    ): JsonResponse {
         $userId = $request->user()->id;
         $movieId = $request->integer('movie_id');
 
@@ -27,9 +31,19 @@ class LogController extends Controller
             return $this->failure('Film ini sudah tercatat sebagai watched.', 409);
         }
 
-        $result = DB::transaction(function () use ($request, $userId, $movieId, $logger): array {
-            $watchedAt = $request->date('watched_at') ?? now()->toDateString();
+        $watchedAt = ($request->date('watched_at') ?? now())->toDateString();
 
+        // Unique constraint mengizinkan log berulang hanya pada tanggal berbeda.
+        $diaryExists = DiaryEntry::where('user_id', $userId)
+            ->where('movie_id', $movieId)
+            ->whereDate('watched_date', $watchedAt)
+            ->exists();
+
+        if ($diaryExists) {
+            return $this->failure('Entri diary untuk tanggal ini sudah ada.', 409);
+        }
+
+        $result = DB::transaction(function () use ($request, $userId, $movieId, $watchedAt, $logger, $watchlists): array {
             $watched = Watched::create([
                 'user_id' => $userId,
                 'movie_id' => $movieId,
@@ -47,6 +61,9 @@ class LogController extends Controller
                 'watched_date' => $watchedAt,
                 'note' => $request->input('note'),
             ]);
+
+            // Film yang sudah di-log keluar dari watchlist.
+            $watchlists->remove($userId, $movieId);
 
             $tags = collect();
 

@@ -7,6 +7,7 @@ namespace Tests\Feature;
 use App\Models\DiaryEntry;
 use App\Models\Movie;
 use App\Models\User;
+use App\Models\Watchlist;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
@@ -75,5 +76,63 @@ class DiaryTest extends TestCase
         ]);
 
         $response->assertStatus(422);
+    }
+
+    public function test_entri_kedua_tanggal_berbeda_diizinkan(): void
+    {
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+        $movie = Movie::factory()->create();
+        DiaryEntry::factory()->create([
+            'user_id' => $user->id,
+            'movie_id' => $movie->id,
+            'watched_date' => '2026-01-01',
+        ]);
+
+        $response = $this->postJson('/api/diary', [
+            'movie_id' => $movie->id,
+            'watched_date' => '2026-01-02',
+        ]);
+
+        $response->assertStatus(201);
+        $this->assertDatabaseCount('diary_entries', 2);
+    }
+
+    public function test_entri_tanggal_sama_ditolak(): void
+    {
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+        $movie = Movie::factory()->create();
+        DiaryEntry::factory()->create([
+            'user_id' => $user->id,
+            'movie_id' => $movie->id,
+            'watched_date' => '2026-01-01',
+        ]);
+
+        $response = $this->postJson('/api/diary', [
+            'movie_id' => $movie->id,
+            'watched_date' => '2026-01-01',
+        ]);
+
+        $response->assertStatus(409);
+        $this->assertDatabaseCount('diary_entries', 1);
+    }
+
+    public function test_log_menghapus_film_dari_watchlist(): void
+    {
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+        $movie = Movie::factory()->create();
+        Watchlist::factory()->create(['user_id' => $user->id, 'movie_id' => $movie->id]);
+
+        $this->postJson('/api/diary', [
+            'movie_id' => $movie->id,
+            'watched_date' => now()->toDateString(),
+        ])->assertStatus(201);
+
+        $this->assertDatabaseMissing('watchlist', [
+            'user_id' => $user->id,
+            'movie_id' => $movie->id,
+        ]);
     }
 }

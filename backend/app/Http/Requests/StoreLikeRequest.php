@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Http\Requests;
 
+use App\Models\Like;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
-// Validasi tanda suka pada film.
+// Validasi tanda suka polymorphic pada film, review, atau list.
 class StoreLikeRequest extends FormRequest
 {
     public function authorize(): bool
@@ -17,7 +19,8 @@ class StoreLikeRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'movie_id' => ['required', 'integer', 'exists:movies,id'],
+            'likeable_id' => ['required', 'integer', 'min:1'],
+            'likeable_type' => ['required', 'string', Rule::in(Like::TYPES)],
         ];
     }
 }

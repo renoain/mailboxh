@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api;
 
 use App\Http\Traits\ApiResponse;
+use App\Models\Movie;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -41,9 +42,10 @@ class IncomingActivityController extends Controller
         if ($type === '' || $type === 'liked') {
             $likes = DB::table('likes')
                 ->join('users', 'users.id', '=', 'likes.user_id')
-                ->join('list_items', 'list_items.movie_id', '=', 'likes.movie_id')
+                ->join('list_items', 'list_items.movie_id', '=', 'likes.likeable_id')
                 ->join('lists', 'lists.id', '=', 'list_items.list_id')
-                ->join('movies', 'movies.id', '=', 'likes.movie_id')
+                ->join('movies', 'movies.id', '=', 'likes.likeable_id')
+                ->where('likes.likeable_type', Movie::class)
                 ->where('lists.is_public', true)
                 ->where('lists.user_id', $userId)
                 ->where('likes.user_id', '!=', $userId)
@@ -53,7 +55,7 @@ class IncomingActivityController extends Controller
                 ->get([
                     'users.id as actor_id',
                     'users.name as actor_name',
-                    'likes.movie_id',
+                    'likes.likeable_id as movie_id',
                     'likes.created_at',
                     'movies.title',
                     'movies.poster_path',

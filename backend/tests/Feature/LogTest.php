@@ -6,6 +6,7 @@ namespace Tests\Feature;
 
 use App\Models\Movie;
 use App\Models\User;
+use App\Models\Watchlist;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
@@ -63,5 +64,39 @@ class LogTest extends TestCase
         $response = $this->postJson('/api/log', ['movie_id' => 9999]);
 
         $response->assertStatus(422);
+    }
+
+    public function test_log_menghapus_film_dari_watchlist(): void
+    {
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+        $movie = Movie::factory()->create();
+        Watchlist::factory()->create(['user_id' => $user->id, 'movie_id' => $movie->id]);
+
+        $this->postJson('/api/log', ['movie_id' => $movie->id])->assertStatus(201);
+
+        $this->assertDatabaseMissing('watchlist', [
+            'user_id' => $user->id,
+            'movie_id' => $movie->id,
+        ]);
+    }
+
+    public function test_log_dua_kali_tanggal_sama_ditolak(): void
+    {
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+        $movie = Movie::factory()->create();
+
+        $this->postJson('/api/log', [
+            'movie_id' => $movie->id,
+            'watched_at' => '2026-01-01',
+        ])->assertStatus(201);
+
+        $this->postJson('/api/log', [
+            'movie_id' => $movie->id,
+            'watched_at' => '2026-01-01',
+        ])->assertStatus(409);
+
+        $this->assertDatabaseCount('diary_entries', 1);
     }
 }

@@ -22,7 +22,10 @@ return new class extends Migration
             $table->unique(['user_id', 'movie_id']);
         });
 
-        DB::statement("alter table `favorites` add constraint `favorites_position_check` check (`position` between 1 and 4)");
+        // SQLite tidak mendukung ALTER TABLE ADD CONSTRAINT; validasi utama ada di FormRequest.
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement("alter table `favorites` add constraint `favorites_position_check` check (`position` between 1 and 4)");
+        }
     }
 
     public function down(): void

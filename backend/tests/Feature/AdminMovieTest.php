@@ -94,7 +94,7 @@ class AdminMovieTest extends TestCase
 
         $response = $this->post('/api/admin/movies', [
             'title' => 'Film Berposter',
-            'poster' => UploadedFile::fake()->image('poster.jpg', 600, 800)->size(500),
+            'poster' => UploadedFile::fake()->create('poster.jpg', 500, 'image/jpeg'),
         ]);
 
         $response->assertStatus(201);
@@ -118,7 +118,7 @@ class AdminMovieTest extends TestCase
 
         $response = $this->post('/api/admin/movies', [
             'title' => 'Film Besar',
-            'poster' => UploadedFile::fake()->image('besar.jpg')->size(3000),
+            'poster' => UploadedFile::fake()->create('besar.jpg', 3000, 'image/jpeg'),
         ]);
 
         $response->assertStatus(422);
