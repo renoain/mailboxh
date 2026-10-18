@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../../core/constants/app_strings.dart';
 import '../../../core/providers/app_state.dart';
 import '../../auth/presentation/login_page.dart'; 
 
@@ -13,6 +14,8 @@ class MovieDetailPage extends StatefulWidget {
 }
 
 class _MovieDetailPageState extends State<MovieDetailPage> {
+  static const AppText text = AppStrings.id;
+
   double _userRating = 0;
   final TextEditingController _reviewController = TextEditingController();
 
@@ -38,7 +41,7 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
 
   void _showLogReviewModal(BuildContext context, AppState appState) {
     if (!appState.isLoggedIn) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Kamu harus Sign In untuk memberi review!'), backgroundColor: Colors.redAccent));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text.signInToReview), backgroundColor: Colors.redAccent));
       Navigator.push(context, MaterialPageRoute(builder: (context) => const LoginPage()));
       return; 
     }
@@ -57,7 +60,7 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Write a review...', style: TextStyle(color: Colors.white, fontSize: 18)),
+                  Text(text.writeReview, style: const TextStyle(color: Colors.white, fontSize: 18)),
                   const SizedBox(height: 4),
                   Text(widget.movieData['title'], style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 16),
@@ -77,7 +80,7 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
                     maxLines: 4,
                     style: const TextStyle(color: Colors.white),
                     decoration: InputDecoration(
-                      hintText: 'Add a review...',
+                      hintText: text.reviewModalHint,
                       hintStyle: const TextStyle(color: Colors.grey),
                       filled: true,
                       fillColor: const Color(0xFF14181C),
@@ -87,17 +90,17 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
                   const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: () {
-                      appState.addToDiary(widget.movieData, _userRating, _reviewController.text.isEmpty ? 'Tidak ada ulasan.' : _reviewController.text);
+                      appState.addToDiary(widget.movieData, _userRating, _reviewController.text.isEmpty ? text.noReview : _reviewController.text);
                       setState(() {
                         _reviews.insert(0, {
-                          'user': appState.userName, 'rating': _userRating, 'text': _reviewController.text.isEmpty ? 'Tidak ada ulasan.' : _reviewController.text, 'likes': 0, 'isLiked': false,
+                          'user': appState.userName, 'rating': _userRating, 'text': _reviewController.text.isEmpty ? text.noReview : _reviewController.text, 'likes': 0, 'isLiked': false,
                         });
                       });
                       Navigator.pop(context);
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Review berhasil ditambahkan!'), backgroundColor: Color(0xFF00E054)));
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text.reviewAdded), backgroundColor: const Color(0xFF00E054)));
                     },
                     style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF00E054), foregroundColor: Colors.black, minimumSize: const Size(double.infinity, 50), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4))),
-                    child: const Text('SAVE REVIEW', style: TextStyle(fontWeight: FontWeight.bold)),
+                    child: Text(text.saveReview, style: const TextStyle(fontWeight: FontWeight.bold)),
                   ),
                   const SizedBox(height: 16),
                 ],
@@ -155,19 +158,19 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
                             children: [
                               Text(widget.movieData['title'], style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold)),
                               const SizedBox(height: 8),
-                              Text('${widget.movieData['year']} • DIRECTED BY', style: const TextStyle(color: Colors.grey, fontSize: 12, letterSpacing: 1)),
+                              Text('${widget.movieData['year']} • ${text.directedBy}', style: const TextStyle(color: Colors.grey, fontSize: 12, letterSpacing: 1)),
                               const SizedBox(height: 4),
                               Text(widget.movieData['director'], style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
                               const SizedBox(height: 16),
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                                 decoration: BoxDecoration(color: const Color(0xFF445566), borderRadius: BorderRadius.circular(20)),
-                                child: const Row(
+                                child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Icon(Icons.play_arrow, color: Colors.white, size: 18),
-                                    SizedBox(width: 4),
-                                    Text('TRAILER', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+                                    const Icon(Icons.play_arrow, color: Colors.white, size: 18),
+                                    const SizedBox(width: 4),
+                                    Text(text.trailer, style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
                                   ],
                                 ),
                               ),
@@ -197,52 +200,52 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         _buildActionButton(
-                          icon: Icons.visibility, label: 'Watch', color: const Color(0xFF00E054),
+                          icon: Icons.visibility, label: text.watchAction, color: const Color(0xFF00E054),
                           onTap: () {
                             if (!appState.isLoggedIn) {
-                              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Silakan Sign In dulu!'), backgroundColor: Colors.redAccent));
+                              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text.signInFirst), backgroundColor: Colors.redAccent));
                               Navigator.push(context, MaterialPageRoute(builder: (context) => const LoginPage()));
                               return;
                             }
-                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('${widget.movieData['title']} ditandai sudah ditonton!'), backgroundColor: const Color(0xFF00E054)));
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text.markedWatched(widget.movieData['title'])), backgroundColor: const Color(0xFF00E054)));
                           },
                         ),
                         _buildActionButton(
-                          icon: Icons.article, label: 'Review', color: const Color(0xFF8A9BAE),
+                          icon: Icons.article, label: text.reviewAction, color: const Color(0xFF8A9BAE),
                           onTap: () => _showLogReviewModal(context, appState),
                         ),
-                        
+                         
                         // TOMBOL WATCHLIST DINAMIS (Bisa jadi Unwatchlist)
                         _buildActionButton(
                           icon: isWatchlisted ? Icons.remove_circle : Icons.add_circle, // Ikon berubah
-                          label: isWatchlisted ? 'Unwatchlist' : 'Watchlist', // Teks berubah
+                          label: isWatchlisted ? text.watchlistRemove : text.watchlistAdd, // Teks berubah
                           color: isWatchlisted ? Colors.redAccent : const Color(0xFF40BCF4), // Warna berubah jadi merah jika sudah ada
                           onTap: () {
                             if (!appState.isLoggedIn) {
-                              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Silakan Sign In dulu!'), backgroundColor: Colors.redAccent));
+                              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text.signInFirst), backgroundColor: Colors.redAccent));
                               Navigator.push(context, MaterialPageRoute(builder: (context) => const LoginPage()));
                               return;
                             }
-                            
+                             
                             // Logika Add / Remove
                             if (isWatchlisted) {
                               appState.removeFromWatchlist(widget.movieData);
-                              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Dihapus dari Watchlist'), backgroundColor: Colors.redAccent));
+                              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text.removedFromWatchlist), backgroundColor: Colors.redAccent));
                             } else {
                               appState.addToWatchlist(widget.movieData);
-                              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Ditambahkan ke Watchlist!'), backgroundColor: const Color(0xFF00E054)));
+                              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text.addedToWatchlist), backgroundColor: const Color(0xFF00E054)));
                             }
                           },
                         ),
                       ],
                     ),
-                    
+                     
                     const SizedBox(height: 24),
                     const Divider(color: Color(0xFF2C3440)),
                     const SizedBox(height: 16),
-                    
+                     
                     // --- BAGIAN ULASAN ---
-                    const Text('POPULAR REVIEWS', style: TextStyle(color: Colors.grey, fontSize: 12, letterSpacing: 1.5, fontWeight: FontWeight.bold)),
+                    Text(text.popularReviews, style: const TextStyle(color: Colors.grey, fontSize: 12, letterSpacing: 1.5, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 16),
                     ..._reviews.asMap().entries.map((entry) {
                       int idx = entry.key;
@@ -277,7 +280,7 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
                           ],
                         ),
                       );
-                    }).toList(),
+                    }),
                   ],
                 ),
               ),
@@ -285,9 +288,15 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
             SliverPersistentHeader(
               pinned: true,
               delegate: _SliverAppBarDelegate(
-                const TabBar(
-                  isScrollable: true, indicatorColor: Color(0xFF00E054), indicatorWeight: 3, labelColor: Colors.white, unselectedLabelColor: Colors.grey,
-                  tabs: [Tab(text: 'Cast'), Tab(text: 'Crew'), Tab(text: 'Details'), Tab(text: 'Genre'), Tab(text: 'Releases')],
+                TabBar(
+                  isScrollable: true, indicatorColor: const Color(0xFF00E054), indicatorWeight: 3, labelColor: Colors.white, unselectedLabelColor: Colors.grey,
+                  tabs: [
+                    Tab(text: text.tabCast),
+                    Tab(text: text.tabCrew),
+                    Tab(text: text.tabDetails),
+                    Tab(text: text.tabGenre),
+                    Tab(text: text.tabReleases),
+                  ],
                 ),
               ),
             ),
@@ -296,11 +305,11 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
                 height: 300,
                 child: TabBarView(
                   children: [
-                    const Center(child: Text('Cast Page', style: TextStyle(color: Colors.grey))),
-                    const Center(child: Text('Crew Page', style: TextStyle(color: Colors.grey))),
-                    const Center(child: Text('Details Page', style: TextStyle(color: Colors.grey))),
-                    const Center(child: Text('Genre Page', style: TextStyle(color: Colors.grey))),
-                    const Center(child: Text('Releases Page', style: TextStyle(color: Colors.grey))),
+                    Center(child: Text(text.castPage, style: const TextStyle(color: Colors.grey))),
+                    Center(child: Text(text.crewPage, style: const TextStyle(color: Colors.grey))),
+                    Center(child: Text(text.detailsPage, style: const TextStyle(color: Colors.grey))),
+                    Center(child: Text(text.genrePage, style: const TextStyle(color: Colors.grey))),
+                    Center(child: Text(text.releasesPage, style: const TextStyle(color: Colors.grey))),
                   ],
                 ),
               ),

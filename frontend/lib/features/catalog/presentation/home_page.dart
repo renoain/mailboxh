@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+
+import '../../../core/constants/app_strings.dart';
 import '../../detail/presentation/movie_detail_page.dart'; 
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
+
+  static const AppText text = AppStrings.id;
 
   final List<Map<String, dynamic>> movies = const [
     {
@@ -38,7 +42,7 @@ class HomePage extends StatelessWidget {
           elevation: 0,
           centerTitle: true,
           automaticallyImplyLeading: false, 
-          title: const Text('Letterboxd', style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold, letterSpacing: -0.5)),
+          title: Text(text.appName, style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold, letterSpacing: -0.5)),
           bottom: const TabBar(
             indicatorColor: Color(0xFF00E054),
             indicatorWeight: 3,

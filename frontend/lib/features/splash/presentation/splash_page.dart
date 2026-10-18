@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import '../../../core/constants/app_strings.dart';
 import '../../auth/presentation/login_page.dart';
 import '../../auth/presentation/register_page.dart'; // IMPORT HALAMAN REGISTER
 import '../../catalog/presentation/main_navigation.dart'; 
@@ -11,6 +13,8 @@ class SplashPage extends StatefulWidget {
 }
 
 class _SplashPageState extends State<SplashPage> {
+  static const AppText text = AppStrings.id;
+
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -53,9 +57,9 @@ class _SplashPageState extends State<SplashPage> {
                 ),
                 SizedBox(height: screenWidth < 400 ? 10 : 16),
                 
-                // --- TEKS LETTERBOXD ---
+                // --- TEKS NAMA APLIKASI ---
                 Text(
-                  'Letterboxd',
+                  text.appName,
                   style: TextStyle(
                     color: Colors.white, 
                     fontSize: titleFontSize, 

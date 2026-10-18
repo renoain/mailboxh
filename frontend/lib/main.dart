@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'features/splash/presentation/splash_page.dart';
+
+import 'core/constants/app_strings.dart';
 import 'core/providers/app_state.dart';
+import 'features/splash/presentation/splash_page.dart';
 
 void main() {
   runApp(
@@ -18,7 +20,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Letterboxd Clone',
+      title: AppStrings.appName,
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,

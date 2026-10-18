@@ -21,7 +21,7 @@ abstract final class AppTheme {
       colorScheme: scheme,
       scaffoldBackgroundColor:
           brightness == Brightness.light ? AppColors.bgLight : AppColors.bgDark,
-      textTheme: TextTheme(
+      textTheme: const TextTheme(
         headlineLarge: AppTypography.headlineXl,
         headlineMedium: AppTypography.headlineLg,
         headlineSmall: AppTypography.headlineMd,

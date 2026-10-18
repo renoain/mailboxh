@@ -70,6 +70,31 @@ class AppText {
   final String editReview;
   final String likes;
   final String synopsis;
+  final String reviewModalHint;
+  final String noReview;
+  final String reviewAdded;
+  final String saveReview;
+  final String trailer;
+  final String directedBy;
+  final String reviewAction;
+  final String watchAction;
+  final String watchlistAdd;
+  final String watchlistRemove;
+  final String addedToWatchlist;
+  final String removedFromWatchlist;
+  final String popularReviews;
+  final String signInFirst;
+  final String signInToReview;
+  final String tabCast;
+  final String tabCrew;
+  final String tabDetails;
+  final String tabGenre;
+  final String tabReleases;
+  final String castPage;
+  final String crewPage;
+  final String detailsPage;
+  final String genrePage;
+  final String releasesPage;
 
   // Watchlist dan watched
   final String watchlistEmpty;
@@ -162,6 +187,12 @@ class AppText {
   final String statLists;
   final String statFollowers;
   final String statFollowing;
+  final String editProfile;
+  final String usernameLabel;
+  final String listNameHint;
+  final String artworkAttribution;
+  final String profileDiaryEmpty;
+  final String profileListsEmpty;
 
   // Settings
   final String settingsTitle;
@@ -169,6 +200,11 @@ class AppText {
   final String settingsAbout;
   final String settingsAttribution;
   final String settingsVersion;
+  final String darkMode;
+  final String darkModeHint;
+  final String pushNotifications;
+  final String pushNotificationsHint;
+  final String privacyPolicy;
   final String adminEnter;
   final String adminDashboard;
   final String adminMovies;
@@ -180,6 +216,15 @@ class AppText {
   final String adminAuditLogs;
   final String languageIndonesian;
   final String languageEnglish;
+
+  /// Penanda film sudah ditonton, mengikuti bahasa teks.
+  String markedWatched(String title) => isIndonesian
+      ? '$title ditandai sudah ditonton!'
+      : '$title marked as watched!';
+
+  /// Jumlah film dalam list, mengikuti bahasa teks.
+  String filmCount(int count) =>
+      isIndonesian ? '$count film' : '$count films';
 
   static const AppText _id = AppText._(
     isIndonesian: true,
@@ -218,6 +263,31 @@ class AppText {
     editReview: 'Ubah review',
     likes: 'Suka',
     synopsis: 'Sinopsis',
+    reviewModalHint: 'Tambah review...',
+    noReview: 'Tidak ada ulasan.',
+    reviewAdded: 'Review berhasil ditambahkan.',
+    saveReview: 'Simpan review',
+    trailer: 'Cuplikan',
+    directedBy: 'Disutradarai oleh',
+    reviewAction: 'Review',
+    watchAction: 'Tonton',
+    watchlistAdd: 'Watchlist',
+    watchlistRemove: 'Hapus watchlist',
+    addedToWatchlist: 'Ditambahkan ke Watchlist!',
+    removedFromWatchlist: 'Dihapus dari Watchlist',
+    popularReviews: 'ULASAN POPULER',
+    signInFirst: 'Silakan masuk dulu!',
+    signInToReview: 'Kamu harus masuk untuk memberi review!',
+    tabCast: 'Cast',
+    tabCrew: 'Crew',
+    tabDetails: 'Detail',
+    tabGenre: 'Genre',
+    tabReleases: 'Rilis',
+    castPage: 'Halaman cast',
+    crewPage: 'Halaman crew',
+    detailsPage: 'Halaman detail',
+    genrePage: 'Halaman genre',
+    releasesPage: 'Halaman rilis',
     watchlistEmpty: 'Watchlist masih kosong',
     watchedEmpty: 'Belum ada film yang ditonton',
     watchedAt: 'Ditonton',
@@ -295,6 +365,12 @@ class AppText {
     statLists: 'Lists',
     statFollowers: 'Pengikut',
     statFollowing: 'Mengikuti',
+    editProfile: 'Ubah profil',
+    usernameLabel: 'Nama pengguna',
+    listNameHint: 'Nama list (misal Film Horor Terbaik)',
+    artworkAttribution: 'Karya dari Kelompok 6',
+    profileDiaryEmpty: 'Belum ada film yang di-review.',
+    profileListsEmpty: 'Kamu belum membuat list apa pun.',
     settingsTitle: 'Pengaturan',
     settingsLanguage: 'Bahasa',
     settingsAbout: 'Tentang aplikasi',
@@ -311,6 +387,11 @@ class AppText {
     adminAuditLogs: 'Log Aktivitas',
     languageIndonesian: 'Indonesia',
     languageEnglish: 'Inggris',
+    darkMode: 'Mode gelap',
+    darkModeHint: 'Gunakan tema gelap',
+    pushNotifications: 'Notifikasi',
+    pushNotificationsHint: 'Terima pemberitahuan aktivitas',
+    privacyPolicy: 'Kebijakan privasi',
   );
 
   static const AppText _en = AppText._(
@@ -350,6 +431,31 @@ class AppText {
     editReview: 'Edit review',
     likes: 'Likes',
     synopsis: 'Synopsis',
+    reviewModalHint: 'Add a review...',
+    noReview: 'No review.',
+    reviewAdded: 'Review added.',
+    saveReview: 'Save review',
+    trailer: 'Trailer',
+    directedBy: 'DIRECTED BY',
+    reviewAction: 'Review',
+    watchAction: 'Watch',
+    watchlistAdd: 'Watchlist',
+    watchlistRemove: 'Remove from watchlist',
+    addedToWatchlist: 'Added to watchlist!',
+    removedFromWatchlist: 'Removed from watchlist',
+    popularReviews: 'POPULAR REVIEWS',
+    signInFirst: 'Please sign in first!',
+    signInToReview: 'You must sign in to write a review!',
+    tabCast: 'Cast',
+    tabCrew: 'Crew',
+    tabDetails: 'Details',
+    tabGenre: 'Genre',
+    tabReleases: 'Releases',
+    castPage: 'Cast Page',
+    crewPage: 'Crew Page',
+    detailsPage: 'Details Page',
+    genrePage: 'Genre Page',
+    releasesPage: 'Releases Page',
     watchlistEmpty: 'Watchlist is empty',
     watchedEmpty: 'No films watched yet',
     watchedAt: 'Watched',
@@ -427,6 +533,12 @@ class AppText {
     statLists: 'Lists',
     statFollowers: 'Followers',
     statFollowing: 'Following',
+    editProfile: 'Edit profile',
+    usernameLabel: 'Username',
+    listNameHint: 'List name (e.g. Best Horror Movies)',
+    artworkAttribution: 'Artwork from Kelompok 6',
+    profileDiaryEmpty: 'No films reviewed yet',
+    profileListsEmpty: 'You have not created any lists yet',
     settingsTitle: 'Settings',
     settingsLanguage: 'Language',
     settingsAbout: 'About',
@@ -443,6 +555,11 @@ class AppText {
     adminAuditLogs: 'Activity Logs',
     languageIndonesian: 'Indonesian',
     languageEnglish: 'English',
+    darkMode: 'Dark mode',
+    darkModeHint: 'Use dark theme',
+    pushNotifications: 'Push notifications',
+    pushNotificationsHint: 'Receive activity alerts',
+    privacyPolicy: 'Privacy policy',
   );
 
   /// Konstruktor tunggal yang dipakai oleh dua konstanta bahasa.
@@ -483,6 +600,31 @@ class AppText {
     required this.editReview,
     required this.likes,
     required this.synopsis,
+    required this.reviewModalHint,
+    required this.noReview,
+    required this.reviewAdded,
+    required this.saveReview,
+    required this.trailer,
+    required this.directedBy,
+    required this.reviewAction,
+    required this.watchAction,
+    required this.watchlistAdd,
+    required this.watchlistRemove,
+    required this.addedToWatchlist,
+    required this.removedFromWatchlist,
+    required this.popularReviews,
+    required this.signInFirst,
+    required this.signInToReview,
+    required this.tabCast,
+    required this.tabCrew,
+    required this.tabDetails,
+    required this.tabGenre,
+    required this.tabReleases,
+    required this.castPage,
+    required this.crewPage,
+    required this.detailsPage,
+    required this.genrePage,
+    required this.releasesPage,
     required this.watchlistEmpty,
     required this.watchedEmpty,
     required this.watchedAt,
@@ -559,6 +701,12 @@ class AppText {
     required this.statLists,
     required this.statFollowers,
     required this.statFollowing,
+    required this.editProfile,
+    required this.usernameLabel,
+    required this.listNameHint,
+    required this.artworkAttribution,
+    required this.profileDiaryEmpty,
+    required this.profileListsEmpty,
     required this.settingsTitle,
     required this.settingsLanguage,
     required this.settingsAbout,
@@ -575,5 +723,10 @@ class AppText {
     required this.adminAuditLogs,
     required this.languageIndonesian,
     required this.languageEnglish,
+    required this.darkMode,
+    required this.darkModeHint,
+    required this.pushNotifications,
+    required this.pushNotificationsHint,
+    required this.privacyPolicy,
   });
 }

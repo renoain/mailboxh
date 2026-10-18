@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
+import '../../../core/constants/app_strings.dart';
 import '../../../core/providers/app_state.dart';
 import '../../auth/presentation/login_page.dart';
 import '../../detail/presentation/movie_detail_page.dart';
@@ -10,6 +12,8 @@ import '../../settings/presentation/settings_page.dart';
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
 
+  static const AppText text = AppStrings.id;
+
   void _showEditProfileDialog(BuildContext context, AppState appState) {
     final usernameController = TextEditingController(text: appState.userUsername);
     final emailController = TextEditingController(text: appState.userEmail);
@@ -19,29 +23,29 @@ class ProfilePage extends StatelessWidget {
       builder: (context) {
         return AlertDialog(
           backgroundColor: const Color(0xFF2C3440),
-          title: const Text('Edit Profile', style: TextStyle(color: Colors.white)),
+          title: Text(text.editProfile, style: const TextStyle(color: Colors.white)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
                 controller: usernameController,
                 style: const TextStyle(color: Colors.white),
-                decoration: const InputDecoration(
-                  labelText: 'Username',
-                  labelStyle: TextStyle(color: Colors.grey),
-                  enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
-                  focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFF00E054))),
+                decoration: InputDecoration(
+                  labelText: text.usernameLabel,
+                  labelStyle: const TextStyle(color: Colors.grey),
+                  enabledBorder: const UnderlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
+                  focusedBorder: const UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFF00E054))),
                 ),
               ),
               const SizedBox(height: 16),
               TextField(
                 controller: emailController,
                 style: const TextStyle(color: Colors.white),
-                decoration: const InputDecoration(
-                  labelText: 'Email',
-                  labelStyle: TextStyle(color: Colors.grey),
-                  enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
-                  focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFF00E054))),
+                decoration: InputDecoration(
+                  labelText: text.email,
+                  labelStyle: const TextStyle(color: Colors.grey),
+                  enabledBorder: const UnderlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
+                  focusedBorder: const UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFF00E054))),
                 ),
               ),
             ],
@@ -49,14 +53,14 @@ class ProfilePage extends StatelessWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+              child: Text(text.cancel, style: const TextStyle(color: Colors.grey)),
             ),
             TextButton(
               onPressed: () {
                 appState.updateProfile(usernameController.text, emailController.text);
                 Navigator.pop(context);
               },
-              child: const Text('SAVE', style: TextStyle(color: Color(0xFF00E054), fontWeight: FontWeight.bold)),
+              child: Text(text.save, style: const TextStyle(color: Color(0xFF00E054), fontWeight: FontWeight.bold)),
             ),
           ],
         );
@@ -73,21 +77,21 @@ class ProfilePage extends StatelessWidget {
       builder: (context) {
         return AlertDialog(
           backgroundColor: const Color(0xFF2C3440),
-          title: const Text('Create New List', style: TextStyle(color: Colors.white)),
+          title: Text(text.createList, style: const TextStyle(color: Colors.white)),
           content: TextField(
             controller: nameController,
             style: const TextStyle(color: Colors.white),
-            decoration: const InputDecoration(
-              labelText: 'List Name (e.g. Best Horror Movies)',
-              labelStyle: TextStyle(color: Colors.grey),
-              enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
-              focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFF00E054))),
+            decoration: InputDecoration(
+              labelText: text.listNameHint,
+              labelStyle: const TextStyle(color: Colors.grey),
+              enabledBorder: const UnderlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
+              focusedBorder: const UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFF00E054))),
             ),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+              child: Text(text.cancel, style: const TextStyle(color: Colors.grey)),
             ),
             TextButton(
               onPressed: () {
@@ -101,7 +105,7 @@ class ProfilePage extends StatelessWidget {
                 }
                 Navigator.pop(context);
               },
-              child: const Text('CREATE', style: TextStyle(color: Color(0xFF00E054), fontWeight: FontWeight.bold)),
+              child: Text(text.createList, style: const TextStyle(color: Color(0xFF00E054), fontWeight: FontWeight.bold)),
             ),
           ],
         );
@@ -138,7 +142,7 @@ class ProfilePage extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 16),
-                const Text('Letterboxd', style: TextStyle(color: Colors.white, fontSize: 40, fontWeight: FontWeight.w900)),
+                Text(text.appName, style: const TextStyle(color: Colors.white, fontSize: 40, fontWeight: FontWeight.w900)),
                 const Spacer(flex: 3),
                 Container(height: 1, color: const Color(0xFF2C3440)),
                 Padding(
@@ -150,17 +154,17 @@ class ProfilePage extends StatelessWidget {
                         onTap: () {
                           Navigator.push(context, MaterialPageRoute(builder: (context) => const LoginPage()));
                         },
-                        child: const Text('Sign in', style: TextStyle(color: Color(0xFFB0C0D0), fontSize: 22)),
+                        child: Text(text.loginTitle, style: const TextStyle(color: Color(0xFFB0C0D0), fontSize: 22)),
                       ),
                       const SizedBox(height: 24),
-                      const Text('Create account', style: TextStyle(color: Color(0xFFB0C0D0), fontSize: 22)),
+                      Text(text.registerTitle, style: const TextStyle(color: Color(0xFFB0C0D0), fontSize: 22)),
                     ],
                   ),
                 ),
                 Container(height: 1, color: const Color(0xFF2C3440)),
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 24),
-                  child: Text('Artwork from Kelompok 6', style: TextStyle(color: Color(0xFF6B7A8D), fontSize: 14)),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 24),
+                  child: Text(text.artworkAttribution, style: const TextStyle(color: Color(0xFF6B7A8D), fontSize: 14)),
                 ),
               ],
             ),
@@ -177,7 +181,7 @@ class ProfilePage extends StatelessWidget {
         appBar: AppBar(
           backgroundColor: const Color(0xFF14181C),
           elevation: 0,
-          title: const Text('Profile', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          title: Text(text.profileTitle, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
           centerTitle: true,
           automaticallyImplyLeading: false, 
           actions: [
@@ -222,11 +226,11 @@ class ProfilePage extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        _buildStat('${appState.diary.length}', 'Diary'),
+                        _buildStat('${appState.diary.length}', text.tabDiary),
                         const SizedBox(width: 32),
-                        _buildStat('${appState.watchlist.length}', 'Watchlist'),
+                        _buildStat('${appState.watchlist.length}', text.statWatchlist),
                         const SizedBox(width: 32),
-                        _buildStat('${appState.userLists.length}', 'Lists'), // Dinamis
+                        _buildStat('${appState.userLists.length}', text.statLists), // Dinamis
                       ],
                     ),
                     const SizedBox(height: 24),
@@ -242,20 +246,20 @@ class ProfilePage extends StatelessWidget {
                           ElevatedButton.icon(
                             onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const FeedPage())),
                             icon: const Icon(Icons.rss_feed, color: Colors.white, size: 18),
-                            label: const Text('Activity', style: TextStyle(color: Colors.white)),
+                            label: Text(text.feedTitle, style: const TextStyle(color: Colors.white)),
                             style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF445566)),
                           ),
                           ElevatedButton.icon(
                             onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const MembersPage())),
                             icon: const Icon(Icons.people, color: Colors.black, size: 18),
-                            label: const Text('Friends', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+                            label: Text(text.membersTitle, style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
                             style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF40BCF4)),
                           ),
                           // TOMBOL CREATE LIST
                           ElevatedButton.icon(
                             onPressed: () => _showCreateListDialog(context, appState),
                             icon: const Icon(Icons.add, color: Colors.black, size: 18),
-                            label: const Text('Create List', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+                            label: Text(text.createList, style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
                             style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF00E054)),
                           ),
                         ],
@@ -270,7 +274,7 @@ class ProfilePage extends StatelessWidget {
                         Navigator.popUntil(context, (route) => route.isFirst);
                       },
                       icon: const Icon(Icons.logout, color: Colors.redAccent, size: 18),
-                      label: const Text('Logout', style: TextStyle(color: Colors.redAccent)),
+                      label: Text(text.logout, style: const TextStyle(color: Colors.redAccent)),
                       style: OutlinedButton.styleFrom(
                         side: const BorderSide(color: Color(0xFF2C3440)),
                         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
@@ -283,15 +287,15 @@ class ProfilePage extends StatelessWidget {
               ),
               SliverPersistentHeader(
                 delegate: _SliverAppBarDelegate(
-                  const TabBar(
-                    indicatorColor: Color(0xFF00E054),
+                  TabBar(
+                    indicatorColor: const Color(0xFF00E054),
                     indicatorWeight: 3,
                     labelColor: Colors.white,
                     unselectedLabelColor: Colors.grey,
                     tabs: [
-                      Tab(text: 'Diary'),
-                      Tab(text: 'Watchlist'),
-                      Tab(text: 'Lists'), // TAB BARU
+                      Tab(text: text.tabDiary),
+                      Tab(text: text.watchlistTitle),
+                      Tab(text: text.tabLists), // TAB BARU
                     ],
                   ),
                 ),
@@ -323,7 +327,7 @@ class ProfilePage extends StatelessWidget {
 
   Widget _buildDiaryTab(List<Map<String, dynamic>> diaryList) {
     if (diaryList.isEmpty) {
-      return const Center(child: Text('Belum ada film yang di-review.', style: TextStyle(color: Colors.grey)));
+      return Center(child: Text(text.profileDiaryEmpty, style: const TextStyle(color: Colors.grey)));
     }
     return ListView.builder(
       padding: const EdgeInsets.all(16),
@@ -378,7 +382,7 @@ class ProfilePage extends StatelessWidget {
 
   Widget _buildWatchlistTab(List<Map<String, dynamic>> watchlist) {
     if (watchlist.isEmpty) {
-      return const Center(child: Text('Watchlist masih kosong.', style: TextStyle(color: Colors.grey)));
+      return Center(child: Text(text.watchlistEmpty, style: const TextStyle(color: Colors.grey)));
     }
     return GridView.builder(
       padding: const EdgeInsets.all(16),
@@ -407,7 +411,7 @@ class ProfilePage extends StatelessWidget {
   // WIDGET UNTUK TAB LISTS
   Widget _buildListsTab(List<Map<String, dynamic>> userLists) {
     if (userLists.isEmpty) {
-      return const Center(child: Text('Kamu belum membuat List apa pun.', style: TextStyle(color: Colors.grey)));
+      return Center(child: Text(text.profileListsEmpty, style: const TextStyle(color: Colors.grey)));
     }
     return ListView.builder(
       padding: const EdgeInsets.all(16),
@@ -428,7 +432,7 @@ class ProfilePage extends StatelessWidget {
                   children: [
                     Text(list['name'], style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 4),
-                    Text('${list['movies'].length} Films', style: const TextStyle(color: Colors.grey, fontSize: 14)),
+                    Text(text.filmCount(list['movies'].length), style: const TextStyle(color: Colors.grey, fontSize: 14)),
                   ],
                 ),
               ),
@@ -436,53 +440,6 @@ class ProfilePage extends StatelessWidget {
           ),
         );
       },
-    );
-  }
-}
-
-class _ReviewListPage extends StatelessWidget {
-  const _ReviewListPage();
-  @override
-  Widget build(BuildContext context) {
-    final appState = Provider.of<AppState>(context);
-    return Scaffold(
-      backgroundColor: const Color(0xFF14181C),
-      appBar: AppBar(backgroundColor: const Color(0xFF14181C), title: const Text('Your Reviews', style: TextStyle(color: Colors.white))),
-      body: appState.diary.isEmpty
-          ? const Center(child: Text('Belum ada review.', style: TextStyle(color: Colors.grey)))
-          : ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: appState.diary.length,
-              itemBuilder: (context, index) {
-                final review = appState.diary[index];
-                return Container(
-                  margin: const EdgeInsets.only(bottom: 16),
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(color: const Color(0xFF2C3440), borderRadius: BorderRadius.circular(8)),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 60, height: 90,
-                        decoration: BoxDecoration(color: Colors.grey[800], borderRadius: BorderRadius.circular(4), image: DecorationImage(image: NetworkImage(review['image']), fit: BoxFit.cover)),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(review['title'], style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
-                            const SizedBox(height: 4),
-                            Row(children: List.generate(5, (i) => Icon(i < review['user_rating'] ? Icons.star : Icons.star_border, color: const Color(0xFF00E054), size: 16))),
-                            const SizedBox(height: 8),
-                            Text('"${review['user_review']}"', style: const TextStyle(color: Colors.grey, fontStyle: FontStyle.italic)),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
     );
   }
 }
