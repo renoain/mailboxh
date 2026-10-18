@@ -1,5 +1,34 @@
 ﻿# CHANGELOG - Mailboxh
 
+## [2026-10-19 01:13] - Implementasi API Auth Frontend
+
+Status: Selesai
+
+File yang diubah:
+- frontend/lib/features/auth/domain/auth_models.dart (dibuat, entity AuthUser)
+- frontend/lib/features/auth/domain/auth_repository.dart (diedit, kontrak login, register, fetchCurrentUser, logout)
+- frontend/lib/features/auth/data/user_model.dart (dibuat, model JSON profil user)
+- frontend/lib/features/auth/data/auth_repository.dart (diedit, implementasi endpoint Sanctum dan penyimpanan token)
+- frontend/lib/features/auth/presentation/auth_provider.dart (diedit, AuthNotifier AsyncNotifier AuthUser)
+- frontend/lib/features/auth/presentation/login_page.dart (diedit, ditulis ulang ke Riverpod, AppStrings, dan token)
+- frontend/lib/features/auth/presentation/register_page.dart (diedit, ditulis ulang ke Riverpod, AppStrings, dan token)
+- frontend/lib/features/profile/presentation/profile_page.dart (diedit, tombol logout memanggil API logout)
+- frontend/lib/core/constants/app_strings.dart (diedit, string fieldRequired, invalidEmail, passwordTooShort, passwordConfirmation ID dan EN)
+- frontend/lib/main.dart (diedit, ProviderScope Riverpod di root)
+- frontend/test/features/auth/auth_repository_test.dart (dibuat, 4 unit test dengan fake token storage dan adapter Dio)
+- frontend/test/features/auth/login_page_test.dart (dibuat, widget test render)
+
+Catatan:
+- Belum ada dependency baru; test memakai fake manual tanpa mocktail karena rilis mocktail terakhir lebih dari 12 bulan.
+- Halaman login dan register tetap memakai kelas sama sehingga pemanggilan Navigator.push lama tidak berubah.
+- Navigasi sukses memakai pushReplacement ke MainNavigation mengikuti pola MaterialPageRoute yang berlaku; aktivasi go_router penuh menjadi task tersendiri.
+- Logout memakai riverpod.Consumer dengan prefix agar tidak bentrok dengan Consumer dari package:provider di profile_page.
+
+Verifikasi:
+- hasil linter/analyze: OK (No issues found)
+- hasil test frontend: OK (11 test pass)
+- hasil test backend: OK (130 test pass, 276 assertions)
+
 ## [2026-10-19 00:33] - Sesuaikan SRS dan PROJECT_OVERVIEW dengan Fitur Komentar dan Notifikasi
 
 Status: Selesai
