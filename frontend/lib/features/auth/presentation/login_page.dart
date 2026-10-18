@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../catalog/presentation/main_navigation.dart';
+import 'package:provider/provider.dart'; // Import provider
+import '../../catalog/presentation/main_navigation.dart'; 
+import '../../../core/providers/app_state.dart'; // Import AppState
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -23,12 +25,15 @@ class _LoginPageState extends State<LoginPage> {
           icon: const Icon(Icons.close, color: Colors.white, size: 28),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text('Sign in', style: TextStyle(color: Colors.white, fontSize: 18)),
+        title: const Text(
+          'Sign in',
+          style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.normal),
+        ),
       ),
       body: Center(
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 400), // Agar form tidak terlalu lebar di tablet/laptop
-          child: SingleChildScrollView( // Agar bisa di-scroll saat keyboard muncul di HP
+          constraints: const BoxConstraints(maxWidth: 400),
+          child: SingleChildScrollView(
             padding: const EdgeInsets.all(24.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -40,8 +45,12 @@ class _LoginPageState extends State<LoginPage> {
                   decoration: const InputDecoration(
                     hintText: 'Username or Email',
                     hintStyle: TextStyle(color: Colors.grey),
-                    enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFF2C3440))),
-                    focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFF00E054))),
+                    enabledBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: Color(0xFF2C3440)),
+                    ),
+                    focusedBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: Color(0xFF00E054)),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 30),
@@ -52,16 +61,26 @@ class _LoginPageState extends State<LoginPage> {
                   decoration: const InputDecoration(
                     hintText: 'Password',
                     hintStyle: TextStyle(color: Colors.grey),
-                    enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFF2C3440))),
-                    focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFF00E054))),
+                    enabledBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: Color(0xFF2C3440)),
+                    ),
+                    focusedBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: Color(0xFF00E054)),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 40),
                 ElevatedButton(
                   onPressed: () {
+                    // 1. Ubah status login menjadi true
+                    Provider.of<AppState>(context, listen: false).login();
+                    
+                    // 2. Pindah ke halaman utama
                     Navigator.pushReplacement(
                       context,
-                      MaterialPageRoute(builder: (context) => const MainNavigation()),
+                      MaterialPageRoute(
+                        builder: (context) => const MainNavigation(initialIndex: 3), // 3 = Profile
+                      ),
                     );
                   },
                   style: ElevatedButton.styleFrom(
@@ -70,7 +89,10 @@ class _LoginPageState extends State<LoginPage> {
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
                   ),
-                  child: const Text('SIGN IN', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  child: const Text(
+                    'SIGN IN', 
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)
+                  ),
                 ),
               ],
             ),

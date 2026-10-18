@@ -1,8 +1,15 @@
 import 'package:flutter/material.dart';
-import 'features/splash/presentation/splash_page.dart'; 
+import 'package:provider/provider.dart';
+import 'features/splash/presentation/splash_page.dart';
+import 'core/providers/app_state.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => AppState(),
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -13,7 +20,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Letterboxd Clone',
       debugShowCheckedModeBanner: false,
-           theme: ThemeData(
+      theme: ThemeData(
         useMaterial3: true,
         scaffoldBackgroundColor: const Color(0xFF14181C),
         primaryColor: const Color(0xFF00E054),
@@ -22,32 +29,23 @@ class MyApp extends StatelessWidget {
           secondary: Color(0xFF40BCF4),
           surface: Color(0xFF2C3440),
         ),
-        appBarTheme: const AppBarTheme(
-          backgroundColor: Color(0xFF14181C),
-          elevation: 0,
-        ),
       ),
-      // RESPONSIVE BUILDER (Laptop vs HP)
       builder: (context, child) {
         return LayoutBuilder(
           builder: (context, constraints) {
-            // Jika layar lebar (Laptop/PC), batasi lebarnya jadi 500
             if (constraints.maxWidth > 600) {
               return Container(
-                color: Colors.black, // Background luar
+                color: Colors.black,
                 child: Center(
-                  child: SizedBox(
-                    width: 500, // Lebar aplikasi di laptop
-                    child: child,
-                  ),
+                  child: SizedBox(width: 500, child: child),
                 ),
               );
             }
-            // Jika layar HP, tampilkan full screen
             return child!;
           },
         );
       },
+      // KUNCI HALAMAN PERTAMA ADALAH SPLASH
       home: const SplashPage(),
     );
   }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../auth/presentation/login_page.dart';
+import '../../auth/presentation/register_page.dart'; // IMPORT HALAMAN REGISTER
 import '../../catalog/presentation/main_navigation.dart'; 
 
 class SplashPage extends StatefulWidget {
@@ -64,20 +65,23 @@ class _SplashPageState extends State<SplashPage> {
                 ),
                 const Spacer(flex: 3),
                 
-                // --- MENU LIST ---
+                // --- MENU LIST (Hanya Sign In & Create Account) ---
                 Container(height: 1, color: const Color(0xFF2C3440)),
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 24),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      // 1. Menu Sign In
                       _buildMenuItem('Sign in', menuFontSize, () {
                         Navigator.push(context, MaterialPageRoute(builder: (context) => const LoginPage()));
                       }),
                       const SizedBox(height: 24),
-                      _buildMenuItem('Create account', menuFontSize, () {}),
-                      const SizedBox(height: 24),
-                      _buildMenuItem('Open tour', menuFontSize, () {}),
+                      
+                      // 2. Menu Create Account (Sudah berfungsi)
+                      _buildMenuItem('Create account', menuFontSize, () {
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => const RegisterPage()));
+                      }),
                     ],
                   ),
                 ),
@@ -105,20 +109,18 @@ class _SplashPageState extends State<SplashPage> {
       // --- BOTTOM NAVIGATION BAR ---
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: const Color(0xFF2C3440),
-        selectedItemColor: const Color(0xFF40BCF4),
-        unselectedItemColor: const Color(0xFF8A9BAE),
+        selectedItemColor: const Color(0xFF40BCF4), // Biru terang
+        unselectedItemColor: const Color(0xFF8A9BAE), // Abu-abu
         showSelectedLabels: false,
         showUnselectedLabels: false,
         currentIndex: 0, 
         onTap: (index) {
-          // Bisa langsung masuk ke Films / Search tanpa login
-          if (index == 1 || index == 2) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => MainNavigation(initialIndex: index),
-              ),
-            );
+          if (index == 0) {
+            Navigator.push(context, MaterialPageRoute(builder: (context) => const LoginPage()));
+          } else if (index == 1) {
+            Navigator.push(context, MaterialPageRoute(builder: (context) => const MainNavigation(initialIndex: 1)));
+          } else if (index == 2) {
+            Navigator.push(context, MaterialPageRoute(builder: (context) => const MainNavigation(initialIndex: 2)));
           }
         },
         items: const [
@@ -129,6 +131,7 @@ class _SplashPageState extends State<SplashPage> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.video_library_outlined, size: 28),
+            activeIcon: Icon(Icons.video_library, size: 28),
             label: 'Films',
           ),
           BottomNavigationBarItem(

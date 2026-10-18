@@ -1,52 +1,151 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../../core/providers/app_state.dart';
+import '../../auth/presentation/login_page.dart'; 
 
-class MovieDetailPage extends StatelessWidget {
+class MovieDetailPage extends StatefulWidget {
   final Map<String, dynamic> movieData;
 
   const MovieDetailPage({super.key, required this.movieData});
 
   @override
+  State<MovieDetailPage> createState() => _MovieDetailPageState();
+}
+
+class _MovieDetailPageState extends State<MovieDetailPage> {
+  double _userRating = 0;
+  final TextEditingController _reviewController = TextEditingController();
+
+  final List<Map<String, dynamic>> _reviews = [
+    {
+      'user': 'Budi', 'rating': 5.0, 'text': 'Film yang luar biasa! Aktingnya sangat memukau dan alur ceritanya tidak terduga.', 'likes': 124, 'isLiked': false,
+    },
+    {
+      'user': 'Siti', 'rating': 4.0, 'text': 'Sinematografinya keren banget, tapi bagian ending agak terlalu cepat.', 'likes': 89, 'isLiked': false,
+    }
+  ];
+
+  void _toggleLike(int index) {
+    setState(() {
+      _reviews[index]['isLiked'] = !_reviews[index]['isLiked'];
+      if (_reviews[index]['isLiked']) {
+        _reviews[index]['likes']++;
+      } else {
+        _reviews[index]['likes']--;
+      }
+    });
+  }
+
+  void _showLogReviewModal(BuildContext context, AppState appState) {
+    if (!appState.isLoggedIn) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Kamu harus Sign In untuk memberi review!'), backgroundColor: Colors.redAccent));
+      Navigator.push(context, MaterialPageRoute(builder: (context) => const LoginPage()));
+      return; 
+    }
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: const Color(0xFF2C3440),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return Padding(
+              padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom, left: 16, right: 16, top: 24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('Write a review...', style: TextStyle(color: Colors.white, fontSize: 18)),
+                  const SizedBox(height: 4),
+                  Text(widget.movieData['title'], style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(5, (index) {
+                      return IconButton(
+                        iconSize: 40,
+                        icon: Icon(index < _userRating ? Icons.star : Icons.star_border, color: const Color(0xFF00E054)),
+                        onPressed: () => setModalState(() => _userRating = index + 1.0),
+                      );
+                    }),
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: _reviewController,
+                    maxLines: 4,
+                    style: const TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: 'Add a review...',
+                      hintStyle: const TextStyle(color: Colors.grey),
+                      filled: true,
+                      fillColor: const Color(0xFF14181C),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      appState.addToDiary(widget.movieData, _userRating, _reviewController.text.isEmpty ? 'Tidak ada ulasan.' : _reviewController.text);
+                      setState(() {
+                        _reviews.insert(0, {
+                          'user': appState.userName, 'rating': _userRating, 'text': _reviewController.text.isEmpty ? 'Tidak ada ulasan.' : _reviewController.text, 'likes': 0, 'isLiked': false,
+                        });
+                      });
+                      Navigator.pop(context);
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Review berhasil ditambahkan!'), backgroundColor: Color(0xFF00E054)));
+                    },
+                    style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF00E054), foregroundColor: Colors.black, minimumSize: const Size(double.infinity, 50), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4))),
+                    child: const Text('SAVE REVIEW', style: TextStyle(fontWeight: FontWeight.bold)),
+                  ),
+                  const SizedBox(height: 16),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final appState = Provider.of<AppState>(context);
+    // Cek apakah film ini sudah ada di watchlist
+    final isWatchlisted = appState.isInWatchlist(widget.movieData);
+
     return Scaffold(
       backgroundColor: const Color(0xFF14181C),
       body: DefaultTabController(
-        length: 5, // Sekarang ada 5 Tab (Cast, Crew, Details, Genre, Releases)
+        length: 5,
         child: CustomScrollView(
           slivers: [
-            // 1. BACKDROP & APP BAR
             SliverAppBar(
               expandedHeight: 250.0,
               floating: false,
               pinned: true,
               backgroundColor: const Color(0xFF14181C),
-              leading: IconButton(
-                icon: const Icon(Icons.arrow_back, color: Colors.white),
-                onPressed: () => Navigator.pop(context),
-              ),
-              title: Text(movieData['title'], style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
+              leading: IconButton(icon: const Icon(Icons.arrow_back, color: Colors.white), onPressed: () => Navigator.pop(context)),
+              title: Text(widget.movieData['title'], style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
               flexibleSpace: FlexibleSpaceBar(
                 background: Stack(
                   fit: StackFit.expand,
                   children: [
-                    Image.network(movieData['image'], fit: BoxFit.cover),
+                    Image.network(widget.movieData['image'], fit: BoxFit.cover),
                     const DecoratedBox(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Colors.transparent, Color(0xFF14181C)], stops: [0.4, 1.0]),
-                      ),
+                      decoration: BoxDecoration(gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Colors.transparent, Color(0xFF14181C)], stops: [0.4, 1.0])),
                     ),
                   ],
                 ),
               ),
             ),
-
-            // 2. KONTEN UTAMA
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Judul & Poster Kecil
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -54,28 +153,23 @@ class MovieDetailPage extends StatelessWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(movieData['title'], style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold)),
+                              Text(widget.movieData['title'], style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold)),
                               const SizedBox(height: 8),
-                              Text('${movieData['year']} • DIRECTED BY', style: const TextStyle(color: Colors.grey, fontSize: 12, letterSpacing: 1)),
+                              Text('${widget.movieData['year']} • DIRECTED BY', style: const TextStyle(color: Colors.grey, fontSize: 12, letterSpacing: 1)),
                               const SizedBox(height: 4),
-                              Text(movieData['director'], style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                              Text(widget.movieData['director'], style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
                               const SizedBox(height: 16),
-                              Row(
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                    decoration: BoxDecoration(color: const Color(0xFF445566), borderRadius: BorderRadius.circular(20)),
-                                    child: const Row(
-                                      children: [
-                                        Icon(Icons.play_arrow, color: Colors.white, size: 18),
-                                        SizedBox(width: 4),
-                                        Text('TRAILER', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
-                                      ],
-                                    ),
-                                  ),
-                                  const SizedBox(width: 16),
-                                  Text(movieData['duration'], style: const TextStyle(color: Colors.grey, fontSize: 14)),
-                                ],
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                decoration: BoxDecoration(color: const Color(0xFF445566), borderRadius: BorderRadius.circular(20)),
+                                child: const Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(Icons.play_arrow, color: Colors.white, size: 18),
+                                    SizedBox(width: 4),
+                                    Text('TRAILER', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+                                  ],
+                                ),
                               ),
                             ],
                           ),
@@ -85,201 +179,128 @@ class MovieDetailPage extends StatelessWidget {
                           decoration: BoxDecoration(
                             color: Colors.grey[800],
                             borderRadius: BorderRadius.circular(6),
-                            image: DecorationImage(image: NetworkImage(movieData['image']), fit: BoxFit.cover),
+                            image: DecorationImage(image: NetworkImage(widget.movieData['image']), fit: BoxFit.cover),
                             boxShadow: const [BoxShadow(color: Colors.black54, blurRadius: 10, offset: Offset(0, 5))],
                           ),
                         ),
                       ],
                     ),
                     const SizedBox(height: 24),
-
-                    // Sinopsis
-                    Text(movieData['tagline'], style: const TextStyle(color: Color(0xFFB0C0D0), fontSize: 14, letterSpacing: 1)),
+                    Text(widget.movieData['tagline'], style: const TextStyle(color: Color(0xFFB0C0D0), fontSize: 14, letterSpacing: 1)),
                     const SizedBox(height: 12),
-                    Text(movieData['synopsis'], style: const TextStyle(color: Colors.white70, fontSize: 15, height: 1.5)),
+                    Text(widget.movieData['synopsis'], style: const TextStyle(color: Colors.white70, fontSize: 15, height: 1.5)),
                     const SizedBox(height: 16),
                     const Divider(color: Color(0xFF2C3440)),
                     
-                    // Grafik Rating
-                    const SizedBox(height: 12),
-                    const Text('RATINGS', style: TextStyle(color: Colors.grey, fontSize: 12, letterSpacing: 1.5, fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 16),
+                    // --- 3 TOMBOL UTAMA ---
                     Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        const Icon(Icons.star, color: Color(0xFF00E054), size: 18),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [_buildBar(10), _buildBar(20), _buildBar(30), _buildBar(50), _buildBar(60), _buildBar(45), _buildBar(35), _buildBar(20)],
-                          ),
+                        _buildActionButton(
+                          icon: Icons.visibility, label: 'Watch', color: const Color(0xFF00E054),
+                          onTap: () {
+                            if (!appState.isLoggedIn) {
+                              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Silakan Sign In dulu!'), backgroundColor: Colors.redAccent));
+                              Navigator.push(context, MaterialPageRoute(builder: (context) => const LoginPage()));
+                              return;
+                            }
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('${widget.movieData['title']} ditandai sudah ditonton!'), backgroundColor: const Color(0xFF00E054)));
+                          },
                         ),
-                        const SizedBox(width: 8),
-                        const Text('3.9', style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
-                        const SizedBox(width: 8),
-                        ...List.generate(5, (index) => const Icon(Icons.star, color: Color(0xFF00E054), size: 14)),
+                        _buildActionButton(
+                          icon: Icons.article, label: 'Review', color: const Color(0xFF8A9BAE),
+                          onTap: () => _showLogReviewModal(context, appState),
+                        ),
+                        
+                        // TOMBOL WATCHLIST DINAMIS (Bisa jadi Unwatchlist)
+                        _buildActionButton(
+                          icon: isWatchlisted ? Icons.remove_circle : Icons.add_circle, // Ikon berubah
+                          label: isWatchlisted ? 'Unwatchlist' : 'Watchlist', // Teks berubah
+                          color: isWatchlisted ? Colors.redAccent : const Color(0xFF40BCF4), // Warna berubah jadi merah jika sudah ada
+                          onTap: () {
+                            if (!appState.isLoggedIn) {
+                              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Silakan Sign In dulu!'), backgroundColor: Colors.redAccent));
+                              Navigator.push(context, MaterialPageRoute(builder: (context) => const LoginPage()));
+                              return;
+                            }
+                            
+                            // Logika Add / Remove
+                            if (isWatchlisted) {
+                              appState.removeFromWatchlist(widget.movieData);
+                              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Dihapus dari Watchlist'), backgroundColor: Colors.redAccent));
+                            } else {
+                              appState.addToWatchlist(widget.movieData);
+                              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Ditambahkan ke Watchlist!'), backgroundColor: const Color(0xFF00E054)));
+                            }
+                          },
+                        ),
                       ],
                     ),
+                    
                     const SizedBox(height: 24),
                     const Divider(color: Color(0xFF2C3440)),
-
-                    // Where to watch
-                    ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      title: const Text('Where to watch', style: TextStyle(color: Colors.white, fontSize: 18)),
-                      trailing: const Icon(Icons.chevron_right, color: Colors.grey),
-                      onTap: () {},
-                    ),
-                    const Divider(color: Color(0xFF2C3440)),
                     const SizedBox(height: 16),
-
-                    // 3 Kotak Warna
-                    Row(
-                      children: [
-                        _buildBoxButton('Members', '561k', const Color(0xFF00E054), Icons.remove_red_eye),
-                        _buildBoxButton('Reviews', '266k', const Color(0xFF8A9BAE), Icons.article),
-                        _buildBoxButton('Lists', '138k', const Color(0xFF40BCF4), Icons.video_library),
-                      ],
-                    ),
-                    const SizedBox(height: 32),
-
-                    // Related News
-                    const Text('RELATED NEWS (1 OF 3)', style: TextStyle(color: Colors.grey, fontSize: 12, letterSpacing: 1.5, fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 12),
-                    Container(
-                      height: 120,
-                      decoration: BoxDecoration(color: const Color(0xFF2C3440), borderRadius: BorderRadius.circular(8)),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 140,
-                            decoration: const BoxDecoration(
-                              borderRadius: BorderRadius.horizontal(left: Radius.circular(8)),
-                              image: DecorationImage(image: NetworkImage('https://picsum.photos/seed/news/300/300'), fit: BoxFit.cover),
+                    
+                    // --- BAGIAN ULASAN ---
+                    const Text('POPULAR REVIEWS', style: TextStyle(color: Colors.grey, fontSize: 12, letterSpacing: 1.5, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 16),
+                    ..._reviews.asMap().entries.map((entry) {
+                      int idx = entry.key;
+                      var review = entry.value;
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 24),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                CircleAvatar(radius: 16, backgroundColor: const Color(0xFF2C3440), child: Text(review['user'][0], style: const TextStyle(color: Color(0xFF00E054), fontWeight: FontWeight.bold))),
+                                const SizedBox(width: 12),
+                                Text(review['user'], style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                                const Spacer(),
+                                ...List.generate(5, (i) => Icon(i < review['rating'] ? Icons.star : Icons.star_border, color: const Color(0xFF00E054), size: 14)),
+                                const SizedBox(width: 12),
+                                GestureDetector(
+                                  onTap: () => _toggleLike(idx),
+                                  child: Row(
+                                    children: [
+                                      Icon(review['isLiked'] ? Icons.favorite : Icons.favorite_border, color: review['isLiked'] ? Colors.redAccent : Colors.grey, size: 18),
+                                      const SizedBox(width: 4),
+                                      Text('${review['likes']}', style: TextStyle(color: review['isLiked'] ? Colors.redAccent : Colors.grey, fontSize: 12)),
+                                    ],
+                                  ),
+                                ),
+                              ],
                             ),
-                          ),
-                          const Expanded(
-                            child: Padding(
-                              padding: EdgeInsets.all(12.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text('Show Me the Movies', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
-                                  SizedBox(height: 8),
-                                  Text('Tom Cruise on the origins, influences and comedy of this film.', style: TextStyle(color: Colors.grey, fontSize: 13, height: 1.3)),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 32),
+                            const SizedBox(height: 12),
+                            Text(review['text'], style: const TextStyle(color: Color(0xFFB0C0D0), fontSize: 15, height: 1.5)),
+                          ],
+                        ),
+                      );
+                    }).toList(),
                   ],
                 ),
               ),
             ),
-
-            // 3. TAB BAR (Cast, Crew, Details, Genre, Releases)
             SliverPersistentHeader(
               pinned: true,
               delegate: _SliverAppBarDelegate(
                 const TabBar(
-                  isScrollable: true,
-                  indicatorColor: Color(0xFF00E054),
-                  indicatorWeight: 3,
-                  labelColor: Colors.white,
-                  unselectedLabelColor: Colors.grey,
-                  labelStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  unselectedLabelStyle: TextStyle(fontSize: 16),
-                  tabs: [
-                    Tab(text: 'Cast'),
-                    Tab(text: 'Crew'),
-                    Tab(text: 'Details'),
-                    Tab(text: 'Genre'),
-                    Tab(text: 'Releases'),
-                  ],
+                  isScrollable: true, indicatorColor: Color(0xFF00E054), indicatorWeight: 3, labelColor: Colors.white, unselectedLabelColor: Colors.grey,
+                  tabs: [Tab(text: 'Cast'), Tab(text: 'Crew'), Tab(text: 'Details'), Tab(text: 'Genre'), Tab(text: 'Releases')],
                 ),
               ),
             ),
-
-            // 4. ISI TAB (Sekarang semua terisi!)
             SliverToBoxAdapter(
               child: SizedBox(
-                height: 400,
+                height: 300,
                 child: TabBarView(
                   children: [
-                    // --- TAB CAST ---
-                    ListView(
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                      children: [
-                        _buildListItem('Tom Cruise', 'Rockwell', 'https://picsum.photos/seed/tom/100/100', Icons.person),
-                        _buildListItem('Riz Ahmed', 'Ganesh', 'https://picsum.photos/seed/riz/100/100', Icons.person),
-                        _buildListItem('John Goodman', 'President Compson', 'https://picsum.photos/seed/john/100/100', Icons.person),
-                        _buildListItem('Sandra Hüller', 'Anna', 'https://picsum.photos/seed/sandra/100/100', Icons.person),
-                        _buildListItem('Jesse Plemons', 'Agent', 'https://picsum.photos/seed/jesse/100/100', Icons.person),
-                      ],
-                    ),
-                    
-                    // --- TAB CREW ---
-                    ListView(
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                      children: [
-                        _buildListItem('Alejandro G. Iñárritu', 'Director', '', Icons.movie_creation),
-                        _buildListItem('Jack Fisk', 'Production Design', '', Icons.design_services),
-                        _buildListItem('Sabrina Morris', 'Costume Design', '', Icons.checkroom),
-                        _buildListItem('Ludwig Göransson', 'Original Music', '', Icons.music_note),
-                        _buildListItem('Matthew Libatique', 'Cinematography', '', Icons.camera),
-                      ],
-                    ),
-
-                    // --- TAB DETAILS ---
-                    Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildDetailRow('Director', movieData['director']),
-                          _buildDetailRow('Genre', movieData['genre']),
-                          _buildDetailRow('Release Date', 'October 18, ${movieData['year']}'),
-                          _buildDetailRow('Runtime', movieData['duration']),
-                          _buildDetailRow('Studio', 'Warner Bros. Pictures'),
-                          _buildDetailRow('Language', 'English, Spanish'),
-                        ],
-                      ),
-                    ),
-
-                    // --- TAB GENRE ---
-                    Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Wrap(
-                        spacing: 12,
-                        runSpacing: 12,
-                        children: [
-                          _buildGenreChip('Drama'),
-                          _buildGenreChip('Comedy'),
-                          _buildGenreChip('Action'),
-                          _buildGenreChip('Thriller'),
-                          _buildGenreChip('Sci-Fi'),
-                        ],
-                      ),
-                    ),
-
-                    // --- TAB RELEASES ---
-                    Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildDetailRow('United States', 'October 18, ${movieData['year']}'),
-                          _buildDetailRow('United Kingdom', 'October 20, ${movieData['year']}'),
-                          _buildDetailRow('Indonesia', 'October 22, ${movieData['year']}'),
-                          _buildDetailRow('Japan', 'November 05, ${movieData['year']}'),
-                        ],
-                      ),
-                    ),
+                    const Center(child: Text('Cast Page', style: TextStyle(color: Colors.grey))),
+                    const Center(child: Text('Crew Page', style: TextStyle(color: Colors.grey))),
+                    const Center(child: Text('Details Page', style: TextStyle(color: Colors.grey))),
+                    const Center(child: Text('Genre Page', style: TextStyle(color: Colors.grey))),
+                    const Center(child: Text('Releases Page', style: TextStyle(color: Colors.grey))),
                   ],
                 ),
               ),
@@ -290,79 +311,20 @@ class MovieDetailPage extends StatelessWidget {
     );
   }
 
-  // --- WIDGET BANTUAN ---
-  Widget _buildBar(double height) {
-    return Container(width: 14, height: height, decoration: BoxDecoration(color: const Color(0xFF445566), borderRadius: BorderRadius.circular(2)));
-  }
-
-  Widget _buildBoxButton(String title, String subtitle, Color color, IconData icon) {
-    return Expanded(
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 4),
-        padding: const EdgeInsets.all(12),
-        height: 90,
-        decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(8)),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Icon(icon, color: Colors.white, size: 24),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title, style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
-                Text(subtitle, style: const TextStyle(color: Colors.white70, fontSize: 12)),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // Widget List Umum untuk Cast / Crew
-  Widget _buildListItem(String name, String role, String imageUrl, IconData fallbackIcon) {
-    return ListTile(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      leading: Container(
-        width: 50, height: 50,
-        decoration: BoxDecoration(
-          color: const Color(0xFF2C3440),
-          borderRadius: BorderRadius.circular(4),
-          image: imageUrl.isNotEmpty ? DecorationImage(image: NetworkImage(imageUrl), fit: BoxFit.cover) : null,
-        ),
-        child: imageUrl.isEmpty ? Icon(fallbackIcon, color: Colors.grey) : null,
-      ),
-      title: Text(name, style: const TextStyle(color: Colors.white, fontSize: 18)),
-      subtitle: Text(role, style: const TextStyle(color: Colors.grey, fontSize: 14)),
-      trailing: const Icon(Icons.chevron_right, color: Colors.grey),
-      onTap: () {},
-    );
-  }
-
-  // Widget Baris Detail
-  Widget _buildDetailRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildActionButton({required IconData icon, required String label, required Color color, required VoidCallback onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
         children: [
-          SizedBox(width: 120, child: Text(label, style: const TextStyle(color: Colors.grey, fontSize: 14))),
-          Expanded(child: Text(value, style: const TextStyle(color: Colors.white, fontSize: 14))),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(8)),
+            child: Icon(icon, color: Colors.white, size: 28),
+          ),
+          const SizedBox(height: 8),
+          Text(label, style: const TextStyle(color: Colors.grey, fontSize: 12, fontWeight: FontWeight.bold)),
         ],
       ),
-    );
-  }
-
-  // Widget Chip Genre
-  Widget _buildGenreChip(String label) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: const Color(0xFF2C3440),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(label, style: const TextStyle(color: Colors.white, fontSize: 14)),
     );
   }
 }
