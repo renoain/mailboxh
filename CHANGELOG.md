@@ -1,5 +1,153 @@
 ﻿# CHANGELOG - Mailboxh
 
+## [2026-10-19 00:33] - Sesuaikan SRS dan PROJECT_OVERVIEW dengan Fitur Komentar dan Notifikasi
+
+Status: Selesai
+
+File yang diubah:
+- docs/SRS.md (diedit, ruang lingkup, fungsi utama, batasan, FR-WT-06, FR-REV-06, FR-REV-07, FR-DIA-05, FR-DIA-06, FR-LIKE-01, FR-LIKE-04, FR-INCOMING-03, section 4.28 Komentar Review, section 4.29 Notifikasi, matriks endpoint, catatan incoming activity)
+- docs/PROJECT_OVERVIEW.md (diedit, poin sisi sosial dan daftar fitur ditunda)
+- CHANGELOG.md (diedit, entri ini)
+
+Catatan:
+- Menindaklanjuti konfirmasi user atas catatan task backend sebelumnya: komentar review dan notifikasi in-app diangkat dari fitur ditunda jadi fitur aktif mengikuti hasil backend.
+- Notifikasi push tetap ditunda karena berbeda dengan notifikasi in-app. Incoming activity tidak memuat komentar dan notifikasi karena keduanya punya halaman tersendiri.
+- FR-DIA-05 diluruskan mengikuti implementasi: entri diary tidak memerlukan pasangan watched. FR-LIKE-01 disesuaikan ke likes polymorphic untuk film, review, dan list.
+- FR baru: FR-WT-06 auto-hapus watchlist, FR-REV-06 dan FR-REV-07 rating mandiri, FR-DIA-06 entri ganda per tanggal, FR-LIKE-04 jumlah like review dan list, FR-COM-01 sampai FR-COM-04 komentar, FR-NOTIF-01 sampai FR-NOTIF-03 notifikasi in-app.
+
+Verifikasi:
+- hasil linter/analyze: OK (task dokumentasi murni, tanpa perubahan kode, analyze task sebelumnya No issues found)
+- hasil test: OK (task dokumentasi murni, test task sebelumnya: flutter test 6 pass, php artisan test 130/130 pass)
+
+## [2026-10-19 00:19] - Sempurnakan Logika Backend Serupa Letterboxd
+
+Status: Selesai
+
+File yang diubah:
+- backend/app/Http/Controllers/Api/MovieController.php (diedit, tambah rate dan unrate)
+- backend/app/Http/Controllers/Api/LikeController.php (diedit, likes polymorphic dan notifikasi)
+- backend/app/Http/Controllers/Api/WatchedController.php (diedit, hapus watchlist saat watched)
+- backend/app/Http/Controllers/Api/DiaryController.php (diedit, guard tanggal sama dan hapus watchlist)
+- backend/app/Http/Controllers/Api/LogController.php (diedit, guard tanggal sama dan hapus watchlist)
+- backend/app/Http/Controllers/Api/FollowController.php (diedit, tambah notifikasi follow)
+- backend/app/Http/Controllers/Api/IncomingActivityController.php (diedit, query likes ke skema polymorphic)
+- backend/app/Http/Controllers/Api/ListController.php (diedit, likes_count dan is_liked)
+- backend/app/Http/Controllers/Api/ReviewController.php (diedit, eager load likes)
+- backend/app/Http/Controllers/Api/ProfileController.php (diedit, eager load likes)
+- backend/app/Http/Controllers/Api/CommentController.php (dibuat)
+- backend/app/Http/Controllers/Api/NotificationController.php (dibuat)
+- backend/app/Http/Requests/RateMovieRequest.php (dibuat)
+- backend/app/Http/Requests/StoreCommentRequest.php (dibuat)
+- backend/app/Http/Requests/StoreLikeRequest.php (diedit, likeable_id dan likeable_type)
+- backend/app/Http/Resources/ReviewResource.php (diedit, likes_count, is_liked, comments)
+- backend/app/Http/Resources/ListResource.php (diedit, likes_count dan is_liked)
+- backend/app/Http/Resources/LikeResource.php (diedit, bentuk polymorphic)
+- backend/app/Http/Resources/CommentResource.php (dibuat)
+- backend/app/Http/Resources/NotificationResource.php (dibuat)
+- backend/app/Models/Like.php (diedit, morphMany)
+- backend/app/Models/Review.php (diedit, morphMany likes dan relasi comments)
+- backend/app/Models/Movie.php (diedit, morphMany likes)
+- backend/app/Models/MovieList.php (diedit, morphMany likes)
+- backend/app/Models/User.php (diedit, relasi comments dan notifications)
+- backend/app/Models/Comment.php (dibuat)
+- backend/app/Models/Notification.php (dibuat)
+- backend/app/Services/NotificationService.php (dibuat)
+- backend/app/Services/WatchlistService.php (dibuat)
+- backend/routes/api.php (diedit, route rate, comments, notifications, likes)
+- backend/config/view.php (dibuat, konfigurasi compiled view hilang di repo)
+- backend/database/migrations/0001_01_01_000003_create_movies_table.php (diedit, guard driver SQLite)
+- backend/database/migrations/0001_01_01_000009_create_reviews_table.php (diedit, guard driver SQLite)
+- backend/database/migrations/0001_01_01_000014_create_favorites_table.php (diedit, guard driver SQLite)
+- backend/database/migrations/0001_01_01_000016_create_follows_table.php (diedit, guard driver SQLite)
+- backend/database/migrations/2026_10_18_000001_alter_reviews_rating_nullable.php (dibuat)
+- backend/database/migrations/2026_10_18_000002_alter_diary_entries_unique_by_date.php (dibuat)
+- backend/database/migrations/2026_10_18_000003_alter_likes_polymorphic.php (dibuat)
+- backend/database/migrations/2026_10_18_000004_create_comments_table.php (dibuat)
+- backend/database/migrations/2026_10_18_000005_create_notifications_table.php (dibuat)
+- backend/database/factories/LikeFactory.php (diedit, polymorphic)
+- backend/database/factories/CommentFactory.php (dibuat)
+- backend/database/factories/NotificationFactory.php (dibuat)
+- backend/tests/Feature/RatingTest.php (dibuat)
+- backend/tests/Feature/CommentTest.php (dibuat)
+- backend/tests/Feature/NotificationTest.php (dibuat)
+- backend/tests/Feature/LikeTest.php (diedit, tulis ulang untuk likes polymorphic)
+- backend/tests/Feature/DiaryTest.php (diedit, tambah test tanggal ganda dan watchlist)
+- backend/tests/Feature/WatchedTest.php (diedit, tambah test tanpa diary dan watchlist)
+- backend/tests/Feature/LogTest.php (diedit, tambah test tanggal sama dan watchlist)
+- backend/tests/Feature/AdminMovieTest.php (diedit, fake upload tanpa ekstensi GD)
+- backend/composer.json (diedit, tambah laravel/boost require-dev)
+- backend/composer.lock (diedit, hasil composer require)
+- backend/.mcp.json, backend/boost.json, backend/opencode.json (dibuat oleh boost:install)
+- backend/.agents/, backend/.claude/ (dibuat oleh boost:install, berisi skill guideline)
+- backend/storage/framework/views/.gitignore (dibuat, direktori compiled view)
+- docs/API.md (diedit, endpoint rating, comments, notifications, likes, catatan watched, diary, log, rate limit)
+- docs/DATABASE_SCHEMA.md (diedit, tabel comments dan notifications, likes polymorphic, unique diary, rating nullable, nama migrasi disamakan dengan file asli)
+- docs/ARCHITECTURE.md (diedit, evaluasi dependency laravel/boost)
+- CHANGELOG.md (diedit, entri ini)
+
+Catatan:
+- Enam bagian sesuai permintaan: rating mandiri POST dan DELETE /api/movies/{id}/rate dengan kolom reviews.rating nullable, diary boleh banyak entri per film dengan tanggal berbeda, likes polymorphic, komentar review, notifikasi in-app, dan update docs serta test.
+- Empat migrasi lama diberi guard driver karena SQL constraint MySQL tidak valid di SQLite; SQL MySQL tidak berubah sama sekali. Migrasi likes di SQLite membuat ulang tabel karena SQLite tidak bisa menjatuhkan kolom yang dirujuk foreign key; di MySQL data like film lama disalin ke likeable_id dan likeable_type.
+- Nama response like baru likes_count dan is_liked pada review serta list; like_count pada response detail film tidak diubah karena di luar spesifikasi task.
+- Notifikasi dibuat untuk like review, like list, komentar review, dan follow lewat NotificationService tanpa notifikasi ke diri sendiri; like film tidak membuat notifikasi.
+- Penghapusan watchlist saat Log, Watched, dan Diary dipusatkan di WatchlistService untuk menghindari duplikasi.
+- laravel/boost v2.10.3 dipasang sebagai require-dev; boost:install tidak mengubah backend/AGENTS.md karena 0 guideline, hanya membuat artefak konfigurasi tooling.
+- Test upload admin sebelumnya memakai File::fake yang butuh ekstensi GD; PHP 8.5 di lingkungan ini build static-php-cli tanpa GD dan backend tidak memproses gambar, jadi test memakai create dengan mime type eksplisit. config/view.php dibuat karena file itu hilang sehingga ExampleTest gagal 500.
+- docs/DATABASE_SCHEMA.md masih memuat nama migrasi lama yang tidak ada di repo; seluruh nama diganti mengikuti file asli, termasuk memperbaiki satu baris teks rusak di bagian Penyimpanan File Gambar.
+- SRS.md dan PROJECT_OVERVIEW.md masih menyebut komentar review dan notifikasi sebagai fitur ditunda; belum diubah karena di luar daftar dokumen task ini dan menunggu konfirmasi user.
+- Setup lingkungan: .env dibuat dari .env.example dengan php artisan key:generate (tidak di-commit) dan database mailboxh dibuat lalu dijalankan php artisan migrate:fresh --seed.
+
+Verifikasi:
+- hasil linter/analyze: OK (flutter analyze: No issues found)
+- hasil test: OK (flutter test 6 pass; php artisan test 130/130 pass; php artisan migrate:fresh --seed sukses di MySQL)
+
+## [2026-10-18 23:35] - Pindahkan String UI Tiga Halaman ke AppStrings
+
+Status: Selesai
+
+File yang diubah:
+- frontend/lib/core/constants/app_strings.dart (diedit, tambah 36 field dan 2 method interpolasi)
+- frontend/lib/features/detail/presentation/movie_detail_page.dart (diedit, semua teks lewat AppStrings)
+- frontend/lib/features/profile/presentation/profile_page.dart (diedit, semua teks lewat AppStrings)
+- frontend/lib/features/settings/presentation/settings_page.dart (diedit, semua teks lewat AppStrings)
+- frontend/lib/features/catalog/presentation/home_page.dart (diedit, nama aplikasi lewat AppStrings)
+- frontend/lib/features/splash/presentation/splash_page.dart (diedit, nama aplikasi lewat AppStrings)
+- frontend/lib/main.dart (diedit, title lewat AppStrings.appName)
+- frontend/test/features/settings/settings_page_test.dart (dibuat)
+
+Catatan:
+- Sesuai pilihan user, teks disamakan dengan nilai _id AppStrings sehingga tampilan berubah dari campur Inggris ke Indonesia, misal Settings jadi Pengaturan dan Cancel jadi Batal.
+- Nama Letterboxd dan Letterboxd Clone di splash, home, profil, settings, dan title aplikasi diganti Mailboxh sesuai aturan nama project.
+- Task UI: build web sukses dan screenshot halaman awal di C:/Users/chand/AppData/Local/Temp/opencode/shot_final.png. Screenshot halaman Settings, profil, dan detail butuh interaksi manual karena build Windows gagal, tidak ada toolchain Visual Studio, dan Chrome headless hanya menangkap halaman pertama.
+- Halaman lain seperti home, auth, dan onboarding masih punya teks hardcoded dan menjadi sisa pekerjaan.
+
+Verifikasi:
+- hasil linter/analyze: OK (No issues found)
+- hasil test: OK (6 pass; php artisan test belum ditest, composer tidak tersedia)
+
+## [2026-10-18 23:04] - Tambah Dependency Frontend dan Bersihkan Analyze
+
+Status: Selesai
+
+File yang diubah:
+- frontend/pubspec.yaml (diedit, tambah 7 dependency yang diimpor kode)
+- frontend/pubspec.lock (diedit, hasil flutter pub add)
+- frontend/lib/core/theme/app_theme.dart (diedit, const TextTheme)
+- frontend/lib/core/widgets/app_button.dart (diedit, const SizedBox)
+- frontend/lib/features/detail/presentation/movie_detail_page.dart (diedit, const, hapus toList)
+- frontend/lib/features/profile/presentation/profile_page.dart (diedit, hapus dead code _ReviewListPage)
+- frontend/lib/features/settings/presentation/settings_page.dart (diedit, activeColor ke activeThumbColor)
+- docs/ARCHITECTURE.md (diedit, catatan paket frontend yang belum terpasang)
+
+Catatan:
+- pubspec.yaml sebelumnya hanya berisi provider sehingga 260 issue analyze, 0 dependency dari yang terdokumentasi ikut terpasang.
+- Sesuai pilihan user, hanya 7 paket yang diimpor kode yang dipasang: cached_network_image_ce, dio, flutter_riverpod, flutter_secure_storage, go_router, intl, logger. flutter_lucide, shared_preferences, dan image_picker ditunda sampai dipakai fiturnya.
+- _ReviewListPage dihapus karena tidak direferensikan dan tab profil hanya Diary, Watchlist, Lists.
+
+Verifikasi:
+- hasil linter/analyze: OK (No issues found)
+- hasil test: OK (flutter test 5 pass; php artisan test belum ditest, composer tidak tersedia dan task frontend only)
+
 ## [2026-10-14 22:09] - Perbaiki LogController dan AdminTagController Tambah 8 Test
 
 Status: Selesai

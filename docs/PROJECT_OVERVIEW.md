@@ -29,7 +29,8 @@ oleh admin melalui halaman admin di aplikasi yang sama.
 - Rating dan review tersimpan per user.
 - Diary menampilkan riwayat tontonan beserta tanggal dan tag pribadi.
 - Lists dan four favourites membuat profil user punya kurasi pribadi.
-- Like dan follow memberi sisi sosial tanpa perlu komentar.
+- Like, follow, komentar review, dan notifikasi in-app memberi sisi
+  sosial tanpa perlu direct message.
 - Activity feed di beranda menampilkan tontonan dan penilaian user yang
   diikuti.
 - Profil menampilkan statistik, four favourites, dan daftar film user.
@@ -85,8 +86,8 @@ endpoint berawalan `/api/admin`.
 Masuk ke area admin selalu lewat navigasi `go`, tidak pernah push. Route
 guard di router memeriksa role sebelum halaman dibuka.
 
-Fitur yang ditunda: trailer, komentar pada review, pro tier, journal,
-notifikasi push, direct message.
+Fitur yang ditunda: trailer, pro tier, journal, notifikasi push,
+direct message.
 
 ## 7. Tech Stack
 

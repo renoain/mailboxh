@@ -685,6 +685,12 @@ Sequence saat user membuka detail film:
 | intl | Format tanggal dan angka |
 | logger | Logging |
 
+Entri `flutter_lucide`, `shared_preferences`, dan `image_picker`
+tercantum di atas sebagai rencana, tetapi belum dipasang di
+`frontend/pubspec.yaml` karena belum diimpor kode mana pun. Ketiganya
+ditambahkan bersama fitur yang memakainya, dengan evaluasi tercatat
+pada saat itu.
+
 Evaluasi `image_picker`:
 
 | Aspek | Nilai |
@@ -711,10 +717,23 @@ dengan tema aplikasi.
 | laravel/framework | Framework REST |
 | laravel/sanctum | Token auth |
 | guzzlehttp/guzzle | HTTP client bawaan Laravel, dipakai untuk fetch dari halaman admin bila perlu |
+| laravel/boost | Toolkit agent resmi Laravel, sumber guideline di `backend/AGENTS.md`, hanya require-dev |
 
 Guzzle tidak lagi dipakai untuk memanggil layanan film. Paket ini tetap
 bawaan Laravel dan tidak dihapus karena `Http` facade Laravel
 menggunakannya di bawah hood.
+
+Evaluasi `laravel/boost`:
+
+| Aspek | Nilai |
+|---|---|
+| Tujuan | Menyediakan guideline agent yang akurat untuk codebase Laravel |
+| Alternatif | Menulis `backend/AGENTS.md` manual tanpa toolkit |
+| Pemeliharaan | Rilis resmi Laravel, v2.10.3 |
+| Lisensi | MIT |
+| Kompatibilitas | Sesuai versi Laravel dan PHP 8.5 yang dipakai |
+| Ukuran | Hanya require-dev, tidak masuk build produksi |
+| Dokumentasi | Ada di laravel.com/boost |
 
 ### 8.3 Yang Tidak Dipakai
 

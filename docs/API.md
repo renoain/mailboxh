@@ -407,6 +407,13 @@ ini. `note` opsional.
 Response 201. Gagal dengan 409 bila film sudah tercatat sebagai watched.
 Lihat FR-WT-05.
 
+Catatan:
+
+- Endpoint ini tidak membuat entri `diary_entries`. Entri diary dibuat
+  lewat `POST /api/diary` atau `POST /api/log`.
+- Film yang ada di watchlist otomatis dihapus dari watchlist oleh
+  `WatchlistService`.
+
 #### PATCH /api/watched/{movieId}
 
 Request:
@@ -444,15 +451,25 @@ Response 200: daftar review milik user.
     {
       "id": 7,
       "movie_id": 123,
-      "title": "Judul Film",
-      "poster_path": "/abc.jpg",
+      "movie": {
+        "id": 123,
+        "title": "Judul Film",
+        "poster_url": "http://127.0.0.1:8000/storage/posters/abc.jpg"
+      },
+      "user_id": 1,
       "rating": 4,
       "content": "Bagus.",
+      "likes_count": 3,
+      "is_liked": false,
       "updated_at": "2026-10-14T09:00:00Z"
     }
   ]
 }
 ```
+
+`likes_count` adalah jumlah like review. `is_liked` bernilai true bila
+review disukai oleh user yang memanggil. `movie` menyertakan genre
+bila relasinya dimuat.
 
 #### POST /api/reviews
 
@@ -632,9 +649,13 @@ Kemungkinan gagal: 401, 409, 422.
 
 Catatan:
 
-- Film yang sudah punya entri diary menghasilkan 409.
+- Satu film boleh punya banyak entri diary selama `watched_date`
+  berbeda. Entri dengan tanggal sama pada user dan film yang sama
+  menghasilkan 409.
 - Endpoint ini tidak membuat baris `watched`. Endpoint `POST /api/log`
   membuat keduanya sekaligus.
+- Film yang ada di watchlist otomatis dihapus dari watchlist oleh
+  `WatchlistService`.
 - Tag dilepas lewat `POST /api/diary/{id}/tags`.
 
 #### PUT /api/diary/{id}
@@ -687,10 +708,14 @@ Response 200:
     {
       "id": 5,
       "user_id": 1,
+      "owner_name": "Budi",
       "title": "Klasik 90an",
       "description": "Film yang shredded di masa kecil.",
       "is_public": true,
       "item_count": 12,
+      "likes_count": 3,
+      "is_liked": false,
+      "can_edit": true,
       "created_at": "2026-10-14T08:00:00Z"
     }
   ]
@@ -704,6 +729,8 @@ Catatan:
 - List privat milik user lain tidak dikembalikan. Backend menjawab 403
   bila `user_id` menunjuk ke list privat yang bukan milik pemanggil.
 - `item_count` membuat halaman daftar list tidak perlu request tambahan.
+- `likes_count` dan `is_liked` membuat tombol like tidak perlu request
+  tambahan.
 
 #### POST /api/lists
 
@@ -743,6 +770,9 @@ Response 200 berisi detail list beserta isinya.
     "title": "Klasik 90an",
     "description": "Film yang shredded di masa kecil.",
     "is_public": true,
+    "item_count": 1,
+    "likes_count": 4,
+    "is_liked": true,
     "can_edit": true,
     "items": [
       {
@@ -994,7 +1024,11 @@ Catatan:
 
 ### 3.11 Likes
 
-Seluruh endpoint butuh autentikasi.
+Seluruh endpoint butuh autentikasi. Like bersifat polymorphic dan
+berlaku untuk film, review, dan list.
+
+Nilai `likeable_type`: `App\Models\Movie`, `App\Models\Review`, atau
+`App\Models\MovieList`.
 
 #### POST /api/likes
 
@@ -1002,9 +1036,17 @@ Request:
 
 ```json
 {
-  "movie_id": 123
+  "likeable_id": 123,
+  "likeable_type": "App\\Models\\Review"
 }
 ```
+
+Validasi:
+
+| Field | Aturan |
+|---|---|
+| likeable_id | Wajib, integer |
+| likeable_type | Wajib, salah satu dari tiga class di atas |
 
 Response 201:
 
@@ -1012,31 +1054,39 @@ Response 201:
 {
   "success": true,
   "data": {
-    "movie_id": 123,
+    "likeable_id": 123,
+    "likeable_type": "App\\Models\\Review",
     "liked": true,
-    "like_count": 42
+    "likes_count": 42
   }
 }
 ```
 
-Kemungkinan gagal: 401, 422.
+Kemungkinan gagal: 401, 404, 409, 422.
 
 Catatan:
 
-- Film yang sudah di-like menghasilkan 409.
+- Objek yang sudah disukai menghasilkan 409.
+- Objek yang tidak ada menghasilkan 404.
+- Like review membuat notifikasi `like_review`, like list membuat
+  notifikasi `like_list`, dan like film tidak membuat notifikasi.
 - Like tidak membuat rating, tidak membuat review, dan tidak mengubah
   status watched.
 
-#### DELETE /api/likes/{movieId}
+#### DELETE /api/likes
 
-Response 200 dengan bentuk data yang sama seperti `POST /api/likes`,
-dengan `liked` bernilai false dan `like_count` terbaru.
+Request dan validasi sama dengan `POST /api/likes`.
 
-Kemungkinan gagal: 401, 404.
+Response 200 dengan bentuk data yang sama, `liked` bernilai false dan
+`likes_count` terbaru.
+
+Kemungkinan gagal: 401, 404, 422.
+
+Objek yang belum disukai menghasilkan 404.
 
 #### GET /api/likes/{movieId}
 
-State tombol hati untuk satu film.
+State tombol hati untuk satu film. Path selalu berupa id film.
 
 Response 200:
 
@@ -1046,7 +1096,7 @@ Response 200:
   "data": {
     "movie_id": 123,
     "liked": true,
-    "like_count": 42
+    "likes_count": 42
   }
 }
 ```
@@ -1055,16 +1105,17 @@ Kemungkinan gagal: 401.
 
 #### GET /api/likes
 
-Response 200: film yang di-like user, untuk state tombol hati di katalog.
+Response 200: seluruh like milik user, terbaru di atas, mencakup film,
+review, dan list.
 
 ```json
 {
   "success": true,
   "data": [
     {
-      "movie_id": 123,
-      "title": "Judul Film",
-      "poster_path": "/abc.jpg",
+      "id": 15,
+      "likeable_id": 123,
+      "likeable_type": "App\\Models\\Movie",
       "liked_at": "2026-10-14T08:00:00Z"
     }
   ]
@@ -1409,6 +1460,10 @@ Catatan:
 - Film yang sudah tercatat sebagai watched menghasilkan 409. Edit
   entri yang sudah ada memakai `PATCH /api/watched/{movieId}`,
   `PUT /api/reviews/{id}`, dan endpoint tag.
+- Entri diary dengan `watched_at` yang sama pada user dan film yang
+  sama menghasilkan 409.
+- Film yang ada di watchlist otomatis dihapus dari watchlist oleh
+  `WatchlistService`.
 - Endpoint ini menulis aktivitas `watched`, `rated`, dan `reviewed`
   sekaligus.
 
@@ -1804,6 +1859,207 @@ Catatan:
 - `detail` berisi JSON ringkasan perubahan, bukan dump baris utuh.
   Password dan token tidak pernah masuk ke sini.
 
+### 3.19 Rating
+
+Rating mandiri pada film tanpa entri diary. Seluruh endpoint butuh
+autentikasi.
+
+#### POST /api/movies/{id}/rate
+
+Request:
+
+```json
+{
+  "rating": 4
+}
+```
+
+Validasi: `rating` wajib, integer 1 sampai 5.
+
+Response 201 bila rating pertama kali dibuat, 200 bila nilai
+diperbarui:
+
+```json
+{
+  "success": true,
+  "data": {
+    "movie_id": 123,
+    "review_id": 7,
+    "rating": 4
+  }
+}
+```
+
+Kemungkinan gagal: 401, 404, 422.
+
+Catatan:
+
+- Endpoint ini tidak membuat entri `diary_entries` dan tidak menandai
+  film sebagai watched.
+- Bila user sudah punya review teks untuk film ini, `content` tidak
+  berubah, hanya `rating` yang diperbarui.
+
+#### DELETE /api/movies/{id}/rate
+
+Melepas rating bintang.
+
+Response 200:
+
+```json
+{
+  "success": true,
+  "data": {
+    "movie_id": 123,
+    "rating": null
+  }
+}
+```
+
+Kemungkinan gagal: 401, 404.
+
+Catatan:
+
+- Film yang belum diberi rating menghasilkan 404.
+- Review tanpa teks ikut terhapus bersama ratingnya.
+- Review yang punya teks tetap tersimpan, hanya `rating` menjadi null.
+
+### 3.20 Komentar Review
+
+Komentar pada review user lain. Seluruh endpoint butuh autentikasi.
+
+#### GET /api/reviews/{reviewId}/comments
+
+Response 200: daftar komentar pada review, urut dari yang paling lama.
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 3,
+      "review_id": 7,
+      "user_id": 2,
+      "user_name": "Budi",
+      "content": "Setuju dengan review ini.",
+      "created_at": "2026-10-14T09:00:00Z"
+    }
+  ]
+}
+```
+
+Kemungkinan gagal: 401, 404.
+
+#### POST /api/reviews/{reviewId}/comments
+
+Request:
+
+```json
+{
+  "content": "Setuju dengan review ini."
+}
+```
+
+Validasi: `content` wajib, teks maksimal 1000 karakter.
+
+Response 201 dengan komentar yang tersimpan, memakai bentuk yang sama
+seperti GET di atas.
+
+Kemungkinan gagal: 401, 404, 422.
+
+Catatan:
+
+- Pemilik review menerima notifikasi `comment_review` dengan
+  `reference_id` berupa id komentar, kecuali saat mengomentari review
+  miliknya sendiri.
+- Review yang tidak ada menghasilkan 404.
+
+#### DELETE /api/comments/{id}
+
+Response 200:
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": 3,
+    "deleted": true
+  }
+}
+```
+
+Kemungkinan gagal: 401, 403, 404.
+
+Catatan:
+
+- Hanya penulis komentar yang boleh menghapusnya. Komentar user lain
+  menghasilkan 403.
+- Menghapus review menghapus seluruh komentarnya lewat cascade.
+
+### 3.21 Notifikasi
+
+Notifikasi sosial milik user yang login.
+
+#### GET /api/notifications
+
+Response 200: daftar notifikasi, terbaru di atas.
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 9,
+      "type": "like_review",
+      "reference_id": 7,
+      "actor_id": 2,
+      "actor_name": "Budi",
+      "is_read": false,
+      "created_at": "2026-10-14T09:00:00Z"
+    }
+  ]
+}
+```
+
+Kemungkinan gagal: 401.
+
+#### PUT /api/notifications/{id}/read
+
+Response 200 dengan notifikasi yang sama, `is_read` bernilai true.
+
+Kemungkinan gagal: 401, 404.
+
+Notifikasi milik user lain menghasilkan 404.
+
+#### PUT /api/notifications/read-all
+
+Response 200:
+
+```json
+{
+  "success": true,
+  "data": {
+    "updated": 3
+  }
+}
+```
+
+`updated` adalah jumlah notifikasi yang berubah dari belum dibaca
+menjadi sudah dibaca.
+
+Kemungkinan gagal: 401.
+
+Catatan:
+
+- Nilai `type`: `like_review`, `comment_review`, `follow`, dan
+  `like_list`.
+- `reference_id` menunjuk objek pemicu: id review untuk `like_review`,
+  id komentar untuk `comment_review`, id baris follows untuk `follow`,
+  dan id list untuk `like_list`.
+- Backend membuat notifikasi otomatis saat like review, komentar, dan
+  follow terjadi, lewat `NotificationService`.
+- Tidak ada notifikasi untuk tindakan user terhadap objek miliknya
+  sendiri, dan like film tidak membuat notifikasi.
+
 ## 4. Kode Error
 
 | Kode | Arti |
@@ -1837,6 +2093,7 @@ Aturan:
 | `GET /api/feed` | 30 request per menit per user |
 | `GET /api/activity/incoming` | 30 request per menit per user |
 | `GET /api/members` | 30 request per menit per user |
+| `GET /api/notifications` | 30 request per menit per user |
 
 Endpoint movies memakai batas per IP bila request tidak membawa token,
 dan batas per user bila token valid. Guest tidak boleh menghabiskan kuota
@@ -1860,6 +2117,9 @@ Saat terlampaui, backend menjawab 429 dengan header `Retry-After`.
 - Penulisan ke tabel `activities` dilakukan lewat satu service, bukan
   langsung di controller. Endpoint yang memicu aktivitas: watched,
   reviews, likes, lists, follow.
+- Penulisan ke tabel `notifications` dilakukan lewat
+  `NotificationService`. Endpoint yang memicu notifikasi: likes review,
+  likes list, komentar review, dan follow.
 - Penulisan ke tabel `admin_audit_logs` dilakukan lewat
   `AdminAuditService`. Setiap controller admin yang mengubah data wajib
   memanggilnya.

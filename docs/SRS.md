@@ -13,9 +13,10 @@ dengan backend REST API Laravel dan database MySQL.
 ### 1.2 Ruang Lingkup
 
 Aplikasi mencakup katalog film, pencatatan tontonan, watchlist, rating,
-review, diary, lists, tags, four favourites, like, follow members, dan
-activity feed, ditambah area admin untuk mengelola katalog dan
-moderasi konten. Data film diinput manual oleh admin.
+review, diary, lists, tags, four favourites, like, follow members,
+komentar review, notifikasi in-app, dan activity feed, ditambah area
+admin untuk mengelola katalog dan moderasi konten. Data film diinput
+manual oleh admin.
 
 ### 1.3 Definisi
 
@@ -54,6 +55,8 @@ melihat riwayat tontonan.
 - Four favourites di profil.
 - Like terpisah dari rating.
 - Follow antar member.
+- Komentar pada review user lain.
+- Notifikasi in-app dari interaksi sosial.
 - Activity feed di beranda.
 - Profil dan statistik user.
 - Pengelolaan katalog, genre, dan user oleh admin.
@@ -70,16 +73,18 @@ melihat riwayat tontonan.
 
 - Katalog film hanya berisi film yang sudah diinput admin. Tidak ada
   akses ke katalog film eksternal.
-- Fitur sosial yang tersedia hanya follow dan activity feed. Komentar,
-  direct message, dan mention tidak ada di MVP.
+- Fitur sosial yang tersedia: follow, activity feed, like, komentar
+  review, dan notifikasi in-app. Direct message dan mention tidak ada
+  di MVP.
 - Endpoint katalog film dapat dipanggil tanpa login. Halaman yang
   memakai katalog tetap butuh login karena memerlukan state user.
 - Admin hanya dapat mengubah role user lain. Tidak dapat menghapus akun
   dan tidak dapat mengubah password user lain.
 - Moderasi dibatasi pada penghapusan review, list, dan tag. Film tidak
   pernah dihapus fisik.
-- Tanpa push notification. Activity feed hanya dimuat saat aplikasi
-  dibuka atau saat user menarik untuk refresh.
+- Tanpa push notification. Notifikasi hanya tampil in-app lewat
+  halaman notifikasi. Activity feed hanya dimuat saat aplikasi dibuka
+  atau saat user menarik untuk refresh.
 - Tanpa trailer dan tanpa streaming video.
 
 ### 2.5 Asumsi
@@ -152,6 +157,8 @@ melihat riwayat tontonan.
 - FR-WT-04: User dapat mengubah tanggal tonton pada entri watched.
 - FR-WT-05: Film yang sama tidak dapat tercatat sebagai watched lebih
   dari sekali.
+- FR-WT-06: Menandai watched atau membuat entri diary menghapus film
+  dari watchlist secara otomatis.
 
 ### 4.6 Rating dan Review
 
@@ -160,6 +167,10 @@ melihat riwayat tontonan.
 - FR-REV-03: User dapat mengubah rating dan review.
 - FR-REV-04: User dapat menghapus rating dan review.
 - FR-REV-05: Satu user hanya memiliki satu rating dan review per film.
+- FR-REV-06: Rating dapat dibuat mandiri tanpa menulis review dan
+  tanpa membuat entri diary.
+- FR-REV-07: Melepas rating mandiri hanya menghapus bintang. Teks
+  review tetap tersimpan bila ada.
 
 ### 4.7 Profil
 
@@ -185,8 +196,10 @@ melihat riwayat tontonan.
 - FR-DIA-04: Diary dapat menampilkan catatan opsional per entri
   tontonan.
 - FR-DIA-05: User dapat menambah, mengubah, dan menghapus entri diary.
-  Entri diary harus berpasangan dengan status watched untuk film yang
-  sama.
+  Entri diary tidak memerlukan baris watched untuk film yang sama.
+- FR-DIA-06: Satu film dapat memiliki banyak entri diary selama tanggal
+  tonton berbeda. Entri dengan tanggal sama pada user dan film yang
+  sama hanya boleh satu.
 
 ### 4.9 Onboarding dan Pengaturan
 
@@ -237,11 +250,14 @@ melihat riwayat tontonan.
 
 ### 4.13 Like
 
-- FR-LIKE-01: User dapat memberikan like pada film.
+- FR-LIKE-01: User dapat memberikan like pada film, review, dan list.
 - FR-LIKE-02: User dapat membatalkan like.
 - FR-LIKE-03: Like berdiri sendiri dari rating bintang dan review. User
   dapat like film yang belum ia tonton atau beri rating, dan sebaliknya.
   Jumlah like per film ditampilkan pada detail film.
+- FR-LIKE-04: Jumlah like review dan like list ditampilkan bersama
+  review dan list. Like review dan like list membuat notifikasi untuk
+  pemiliknya.
 
 ### 4.14 Follow Members
 
@@ -271,8 +287,8 @@ melihat riwayat tontonan.
 - FR-INCOMING-02: Incoming activity diurutkan dari yang terbaru dan
   memuat nama pelaku, jenis aktivitas, dan film yang berkaitan.
 - FR-INCOMING-03: User dapat membuka profil pelaku atau filmnya langsung
-  dari halaman incoming activity. Komentar tidak termasuk incoming
-  activity karena fitur komentar ditunda.
+  dari halaman incoming activity. Komentar dan notifikasi tidak tampil
+  di incoming activity karena keduanya punya halaman tersendiri.
 
 ### 4.17 Members
 
@@ -390,6 +406,28 @@ Beranda mengambil keenam section dalam satu permintaan.
   keterangan.
 - FR-ADM-LOG-02: Admin dapat melihat log aktivitas dengan filter admin
   dan jenis entitas, serta pagination. Admin tidak dapat menghapus log.
+
+### 4.28 Komentar Review
+
+- FR-COM-01: User dapat mengomentari review user lain dengan teks
+  maksimal 1000 karakter.
+- FR-COM-02: User dapat melihat daftar komentar pada satu review,
+  diurutkan dari yang paling lama.
+- FR-COM-03: User hanya dapat menghapus komentarnya sendiri. Menghapus
+  review menghapus seluruh komentarnya.
+- FR-COM-04: Pemilik review menerima notifikasi saat review-nya
+  dikomentari, kecuali saat mengomentari review miliknya sendiri.
+
+### 4.29 Notifikasi
+
+- FR-NOTIF-01: User menerima notifikasi in-app saat review-nya disukai,
+  review-nya dikomentari, list-nya disukai, atau ada user yang
+  mengikuti.
+- FR-NOTIF-02: User dapat melihat daftar notifikasi terbaru, menandai
+  satu notifikasi sudah dibaca, dan menandai seluruh notifikasi sudah
+  dibaca.
+- FR-NOTIF-03: Notifikasi tidak pernah dibuat untuk tindakan user
+  terhadap objek miliknya sendiri. Like film tidak membuat notifikasi.
 
 ## 5. Kebutuhan Non-Fungsional
 
@@ -568,9 +606,12 @@ Beranda mengambil keenam section dalam satu permintaan.
 | FR-WT-02 | Watched | DELETE /api/watched/{movieId} |
 | FR-WT-03 | Watched | GET /api/watched |
 | FR-WT-04 | Watched | PATCH /api/watched/{movieId} |
+| FR-WT-06 | Detail, Form Log | POST /api/watched, POST /api/diary, POST /api/log |
 | FR-REV-01 | Form Review | POST /api/reviews |
 | FR-REV-03 | Form Review | PUT /api/reviews/{id} |
 | FR-REV-04 | Detail | DELETE /api/reviews/{id} |
+| FR-REV-06 | Detail | POST /api/movies/{id}/rate |
+| FR-REV-07 | Detail | DELETE /api/movies/{id}/rate |
 | FR-PROF-01 | Profile | GET /api/profile |
 | FR-PROF-02 | Profile | GET /api/profile/stats |
 | FR-PROF-03 | Profile | GET /api/watchlist, GET /api/watched |
@@ -582,6 +623,7 @@ Beranda mengambil keenam section dalam satu permintaan.
 | FR-DIA-03 | Diary | GET /api/diary |
 | FR-DIA-04 | Diary | POST /api/diary dengan field note |
 | FR-DIA-05 | Diary | POST /api/diary, PUT /api/diary/{id}, DELETE /api/diary/{id} |
+| FR-DIA-06 | Diary | POST /api/diary |
 | FR-LIST-01 | Form List | POST /api/lists |
 | FR-LIST-02 | Form List | PUT /api/lists/{id}, DELETE /api/lists/{id} |
 | FR-LIST-03 | List Detail | POST /api/lists/{id}/items, DELETE /api/lists/{id}/items/{movieId} |
@@ -596,9 +638,10 @@ Beranda mengambil keenam section dalam satu permintaan.
 | FR-FAV-01 | Four Favourites | PUT /api/favorites |
 | FR-FAV-02 | Four Favourites | PUT /api/favorites |
 | FR-FAV-03 | Profile, Public Profile | GET /api/favorites, GET /api/users/{userId} |
-| FR-LIKE-01 | Detail Film | POST /api/likes |
-| FR-LIKE-02 | Detail Film | DELETE /api/likes/{movieId} |
+| FR-LIKE-01 | Detail Film, Review, List Detail | POST /api/likes dengan body likeable_id dan likeable_type |
+| FR-LIKE-02 | Detail Film, Review, List Detail | DELETE /api/likes dengan body likeable_id dan likeable_type |
 | FR-LIKE-03 | Detail Film | GET /api/likes/{movieId} |
+| FR-LIKE-04 | Review, List Detail | GET /api/reviews, GET /api/lists/{id} |
 | FR-FOLLOW-01 | Public Profile | POST /api/follow/{userId} |
 | FR-FOLLOW-02 | Public Profile | DELETE /api/follow/{userId} |
 | FR-FOLLOW-03 | Followers, Following | GET /api/followers, GET /api/following |
@@ -651,6 +694,13 @@ Beranda mengambil keenam section dalam satu permintaan.
 | FR-ADM-TAG-03 | Admin Tags | GET /api/admin/tags dengan parameter q |
 | FR-ADM-LOG-01 | Admin Audit Logs | tanpa endpoint, penulisan di AdminAuditService |
 | FR-ADM-LOG-02 | Admin Audit Logs | GET /api/admin/audit-logs |
+| FR-COM-01 | Comments | POST /api/reviews/{id}/comments |
+| FR-COM-02 | Comments | GET /api/reviews/{id}/comments |
+| FR-COM-03 | Comments | DELETE /api/comments/{id} |
+| FR-COM-04 | Comments | POST /api/reviews/{id}/comments |
+| FR-NOTIF-01 | Notifikasi | GET /api/notifications |
+| FR-NOTIF-02 | Notifikasi | GET /api/notifications, PUT /api/notifications/{id}/read, PUT /api/notifications/read-all |
+| FR-NOTIF-03 | Notifikasi | tanpa endpoint, batasan di NotificationService |
 | FR-APP-01 | Onboarding | tanpa endpoint, flag lokal |
 | FR-APP-04 | Settings | tanpa endpoint, teks dari AppStrings |
 
@@ -662,7 +712,8 @@ tulis diary adalah `POST /api/diary`, `PUT /api/diary/{id}`, dan
 Catatan: `GET /api/activity/incoming` tidak memakai tabel terpisah.
 Backend menggabungkan aktivitas `followed` yang menunjuk user yang
 sedang login dengan aktivitas `liked` pada film yang ada di list publik
-user tersebut. Komentar tidak termasuk karena fitur komentar ditunda.
+user tersebut. Komentar review dan notifikasi tidak termasuk incoming
+activity karena keduanya punya halaman tersendiri.
 
 Catatan: seluruh endpoint `/api/admin/*` memakai dua middleware,
 `auth:sanctum` dan `EnsureUserIsAdmin`. Request tanpa token menjawab
