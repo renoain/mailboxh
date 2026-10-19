@@ -24,6 +24,8 @@ dependencies:
   intl: ^0.20.3
   logger: ^2.8.0
   shared_preferences: ^2.5.3
+  image_picker: ^1.1.2
+  file_picker: ^13.1.0
 
 dev_dependencies:
   flutter_test:
