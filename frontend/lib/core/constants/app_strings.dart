@@ -66,6 +66,8 @@ class AppText {
   final String invalidEmail;
   final String passwordTooShort;
   final String passwordConfirmation;
+  final String artworkCredit;
+  final String nextButton;
 
   // Detail film
   final String addToWatchlist;
@@ -265,6 +267,8 @@ class AppText {
     invalidEmail: 'Email tidak valid',
     passwordTooShort: 'Kata sandi minimal 8 karakter',
     passwordConfirmation: 'Konfirmasi kata sandi',
+    artworkCredit: 'Artwork dari Kelompok 6',
+    nextButton: 'Lanjut',
     addToWatchlist: 'Tambah ke watchlist',
     markWatched: 'Tandai sudah ditonton',
     writeReview: 'Tulis review',
@@ -437,6 +441,8 @@ class AppText {
     invalidEmail: 'Invalid email',
     passwordTooShort: 'Password must be at least 8 characters',
     passwordConfirmation: 'Confirm password',
+    artworkCredit: 'Artwork from Kelompok 6',
+    nextButton: 'Continue',
     addToWatchlist: 'Add to watchlist',
     markWatched: 'Mark as watched',
     writeReview: 'Write review',
@@ -610,6 +616,8 @@ class AppText {
     required this.invalidEmail,
     required this.passwordTooShort,
     required this.passwordConfirmation,
+    required this.artworkCredit,
+    required this.nextButton,
     required this.addToWatchlist,
     required this.markWatched,
     required this.writeReview,

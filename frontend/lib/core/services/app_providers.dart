@@ -3,12 +3,17 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../services/api_client.dart';
+import '../services/onboarding_storage.dart';
 import '../services/token_storage.dart';
 
 /// Penyimpanan token sesi. Di-override pada test.
 final Provider<TokenStorage> tokenStorageProvider = Provider<TokenStorage>(
   (Ref ref) => TokenStorage(),
 );
+
+/// Penanda pemakaian pertama. Di-override pada test.
+final Provider<OnboardingStorage> onboardingStorageProvider =
+    Provider<OnboardingStorage>((Ref ref) => const OnboardingStorage());
 
 /// Klien HTTP tunggal. Di-override pada test.
 final Provider<ApiClient> apiClientProvider = Provider<ApiClient>(

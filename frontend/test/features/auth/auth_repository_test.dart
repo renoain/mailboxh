@@ -1,69 +1,14 @@
 // Uji repository auth terhadap respons backend palsu.
 
-import 'dart:convert';
-import 'dart:typed_data';
-
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mailboxh/core/error/app_exception.dart';
 import 'package:mailboxh/core/services/api_client.dart';
-import 'package:mailboxh/core/services/token_storage.dart';
 import 'package:mailboxh/features/auth/data/auth_repository.dart';
 import 'package:mailboxh/features/auth/domain/auth_models.dart';
 import 'package:mailboxh/features/auth/domain/auth_repository.dart';
 
-/// Token storage palsu berbasis memori untuk test.
-class FakeTokenStorage implements TokenStorage {
-  String? token;
-
-  @override
-  Future<String?> read() async => token;
-
-  @override
-  Future<String?> readRefresh() async => null;
-
-  @override
-  Future<void> save(String value) async {
-    token = value;
-  }
-
-  @override
-  Future<void> saveRefresh(String value) async {}
-
-  @override
-  Future<bool> hasToken() async => token != null;
-
-  @override
-  Future<void> clear() async {
-    token = null;
-  }
-}
-
-/// Adapter HTTP palsu yang selalu menjawab dengan [statusCode] dan [body].
-class FakeHttpClientAdapter implements HttpClientAdapter {
-  FakeHttpClientAdapter(this.body, {this.statusCode = 200});
-
-  final Map<String, dynamic> body;
-  final int statusCode;
-
-  @override
-  Future<ResponseBody> fetch(
-    RequestOptions options,
-    Stream<Uint8List>? requestStream,
-    Future<void>? cancelFuture,
-  ) async {
-    return ResponseBody.fromString(
-      jsonEncode(body),
-      statusCode,
-      headers: {
-        Headers.contentTypeHeader: [Headers.jsonContentType],
-      },
-    );
-  }
-
-  @override
-  void close({bool force = false}) {}
-}
+import '../../helpers/fakes.dart';
 
 Map<String, dynamic> _loginBody() => <String, dynamic>{
       'success': true,
