@@ -1,5 +1,27 @@
 ﻿# CHANGELOG - Mailboxh
 
+## [2026-10-19 10:00] - Pasang GoRouter dan Daftarkan Semua Route Frontend
+
+Status: Selesai
+
+File yang diubah:
+- frontend/lib/main.dart (diedit, ganti MaterialApp ke MaterialApp.router dengan buildRouter)
+- frontend/lib/core/router/app_router.dart (ditulis ulang, mendaftarkan 23 route dengan redirect guard auth)
+- CHANGELOG.md (diedit, entri task ini ditambahkan di paling atas)
+
+Catatan:
+- Backend tidak diubah; semua endpoint MVP sudah ada di backend/routes/api.php.
+- main.dart sekarang pakai MaterialApp.router, GoRouter menjadi router tunggal.
+- app_router mendaftarkan semua route: splash, onboarding, login, register, home, search, watchlist, watched, diary, lists, listDetail, listNew, listEdit, favoritesEdit, feed, incoming, members, publicProfile, profile, followers, following, settings, review, reviewForm, log.
+- Redirect guard: user sudah login dialihkan dari halaman auth (login/register/onboarding) ke home; user belum login dialihkan dari route privat ke login. Splash tetap menangani pemulihan sesi saat awal.
+- MovieDetailPage dan MemberProfilePage belum difaftarkan sebagai route karena butuh data parameter (movieData, memberName) yang tidak tersedia dari path parameter; masih bisa diakses via Navigator.push dari kode lama.
+- Navigation lama (Navigator.push dengan MaterialPageRoute) tetap bekerja bersama GoRouter.
+
+Verifikasi:
+- hasil linter/analyze: OK (No issues found)
+- hasil test frontend: OK (18 test pass)
+- hasil test backend: belum ditest (task tidak menyentuh backend)
+
 ## [2026-10-19 08:19] - Perbaiki Log Interceptor dan Komentar Logger
 
 Status: Selesai

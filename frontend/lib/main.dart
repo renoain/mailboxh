@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 
 import 'core/constants/app_strings.dart';
 import 'core/providers/app_state.dart';
-import 'features/splash/presentation/splash_page.dart';
+import 'core/router/app_router.dart';
 
 void main() {
   runApp(
@@ -22,9 +22,10 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       title: AppStrings.appName,
       debugShowCheckedModeBanner: false,
+      routerConfig: buildRouter(),
       theme: ThemeData(
         useMaterial3: true,
         scaffoldBackgroundColor: const Color(0xFF14181C),
@@ -50,8 +51,6 @@ class MyApp extends StatelessWidget {
           },
         );
       },
-      // KUNCI HALAMAN PERTAMA ADALAH SPLASH
-      home: const SplashPage(),
     );
   }
 }
