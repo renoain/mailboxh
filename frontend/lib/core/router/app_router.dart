@@ -19,6 +19,7 @@ import '../../features/auth/presentation/auth_provider.dart';
 import '../../features/auth/presentation/login_page.dart';
 import '../../features/auth/presentation/register_page.dart';
 import '../../features/catalog/presentation/home_page.dart';
+import '../../features/catalog/presentation/main_navigation.dart';
 import '../../features/catalog/presentation/search_page.dart';
 import '../../features/diary/presentation/diary_page.dart';
 import '../../features/feed/presentation/feed_page.dart';
@@ -200,6 +201,59 @@ GoRouter buildRouter([Object? refOrContainer]) {
       return AppRoutes.login;
     },
     routes: [
+      StatefulShellRoute.indexedStack(
+        builder: (BuildContext context, GoRouterState state,
+            StatefulNavigationShell navigationShell) {
+          return MainShell(navigationShell: navigationShell);
+        },
+        branches: <StatefulShellBranch>[
+          StatefulShellBranch(
+            routes: <RouteBase>[
+              GoRoute(
+                path: AppRoutes.home,
+                builder: (BuildContext context, GoRouterState state) =>
+                    const HomePage(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: <RouteBase>[
+              GoRoute(
+                path: AppRoutes.search,
+                builder: (BuildContext context, GoRouterState state) =>
+                    const SearchPage(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: <RouteBase>[
+              GoRoute(
+                path: AppRoutes.log,
+                builder: (BuildContext context, GoRouterState state) =>
+                    const LogFormPage(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: <RouteBase>[
+              GoRoute(
+                path: AppRoutes.feed,
+                builder: (BuildContext context, GoRouterState state) =>
+                    const FeedPage(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: <RouteBase>[
+              GoRoute(
+                path: AppRoutes.profile,
+                builder: (BuildContext context, GoRouterState state) =>
+                    const ProfilePage(),
+              ),
+            ],
+          ),
+        ],
+      ),
       GoRoute(
         path: AppRoutes.splash,
         builder: (BuildContext context, GoRouterState state) =>
@@ -219,15 +273,6 @@ GoRouter buildRouter([Object? refOrContainer]) {
         path: AppRoutes.register,
         builder: (BuildContext context, GoRouterState state) =>
             const RegisterPage(),
-      ),
-      GoRoute(
-        path: AppRoutes.home,
-        builder: (BuildContext context, GoRouterState state) => const HomePage(),
-      ),
-      GoRoute(
-        path: AppRoutes.search,
-        builder: (BuildContext context, GoRouterState state) =>
-            const SearchPage(),
       ),
       GoRoute(
         path: AppRoutes.watchlist,
@@ -270,11 +315,6 @@ GoRouter buildRouter([Object? refOrContainer]) {
             const FavoritesEditPage(),
       ),
       GoRoute(
-        path: AppRoutes.feed,
-        builder: (BuildContext context, GoRouterState state) =>
-            const FeedPage(),
-      ),
-      GoRoute(
         path: AppRoutes.incoming,
         builder: (BuildContext context, GoRouterState state) =>
             const IncomingPage(),
@@ -290,11 +330,6 @@ GoRouter buildRouter([Object? refOrContainer]) {
           final userId = state.pathParameters['userId'] ?? '';
           return MemberProfilePage(memberName: userId);
         },
-      ),
-      GoRoute(
-        path: AppRoutes.profile,
-        builder: (BuildContext context, GoRouterState state) =>
-            const ProfilePage(),
       ),
       GoRoute(
         path: AppRoutes.followers,
@@ -321,12 +356,6 @@ GoRouter buildRouter([Object? refOrContainer]) {
         builder: (BuildContext context, GoRouterState state) =>
             const ReviewFormPage(),
       ),
-      GoRoute(
-        path: AppRoutes.log,
-        builder: (BuildContext context, GoRouterState state) =>
-            const LogFormPage(),
-      ),
-
       // Rute admin dilindungi oleh AdminLayout dengan pengecekan role admin.
       GoRoute(
         path: AppRoutes.adminDashboard,

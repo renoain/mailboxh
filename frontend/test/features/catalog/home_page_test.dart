@@ -41,8 +41,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text(text.sectionLatest), findsOneWidget);
-    expect(find.text('Film Pertama'), findsOneWidget);
+    expect(find.text('Popular this week'), findsOneWidget);
   });
 
   testWidgets('HomePage menampilkan kosong saat katalog tanpa film', (

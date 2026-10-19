@@ -1,18 +1,76 @@
-// Navigasi utama dengan bottom bar untuk mode tamu dan user login.
+// Shell utama dengan bottom navigation bar ala Letterboxd.
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/app_strings.dart';
-import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_sizes.dart';
-import '../../feed/presentation/feed_page.dart';
-import '../../log/presentation/log_form_page.dart';
+import '../../auth/presentation/auth_provider.dart';
+import '../../auth/presentation/auth_gateway_page.dart';
 import '../../profile/presentation/profile_page.dart';
 import 'home_page.dart';
 import 'search_page.dart';
+import '../../log/presentation/log_form_page.dart';
+import '../../feed/presentation/feed_page.dart';
 
-/// Kerangka utama dengan bottom nav lima item; item tengah membuka form catat.
-class MainNavigation extends StatefulWidget {
+/// Layout shell dengan bottom navigation 5 item.
+class MainShell extends StatelessWidget {
+  const MainShell({super.key, required this.navigationShell});
+
+  final StatefulNavigationShell navigationShell;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: navigationShell,
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: navigationShell.currentIndex,
+        onTap: (int index) {
+          navigationShell.goBranch(
+            index,
+            initialLocation: index == navigationShell.currentIndex,
+          );
+        },
+        backgroundColor: const Color(0xFF14181C),
+        selectedItemColor: const Color(0xFF00E054),
+        unselectedItemColor: Colors.grey,
+        type: BottomNavigationBarType.fixed,
+        showSelectedLabels: false,
+        showUnselectedLabels: false,
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.book_outlined),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.search),
+            label: 'Search',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(
+              Icons.add_circle,
+              color: Color(0xFF00E054),
+              size: 32,
+            ),
+            label: 'Add',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.bolt_outlined),
+            label: 'Activity',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person_outline),
+            label: 'Profile',
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Navigasi mandiri (non-GoRouter) dengan bottom bar 5 item.
+class MainNavigation extends ConsumerStatefulWidget {
   const MainNavigation({super.key, this.initialIndex = 0});
 
   final int initialIndex;
@@ -30,7 +88,7 @@ class _MainNavigationState extends State<MainNavigation> {
   @override
   void initState() {
     super.initState();
-    _selectedIndex = widget.initialIndex;
+    _index = widget.initialIndex;
   }
 
   static const List<Widget> _pages = [

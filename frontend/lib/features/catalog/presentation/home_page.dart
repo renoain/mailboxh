@@ -168,8 +168,8 @@ class _FilmsTab extends ConsumerWidget {
 class _PosterSection extends StatelessWidget {
   const _PosterSection({required this.title, required this.movies});
 
-  final String title;
-  final List<Movie> movies;
+  final AsyncValue<HomeData> home;
+  final WidgetRef ref;
 
   @override
   Widget build(BuildContext context) {
