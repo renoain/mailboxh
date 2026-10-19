@@ -1,4 +1,4 @@
-﻿# DESIGN SYSTEM - Mailboxh
+# DESIGN SYSTEM - Mailboxh
 
 Design token untuk aplikasi Mailboxh. Semua widget wajib merujuk ke
 token di dokumen ini.
@@ -94,6 +94,7 @@ token di dokumen ini.
 |---|---|---|
 | color-bg | #101412 | Latar utama |
 | color-bg-alt | #171C1A | Latar alternatif, input |
+| color-letterboxd-bg | #14181C | Latar tema profil Letterboxd |
 
 #### Surface
 
@@ -154,6 +155,7 @@ lain melengkapi kebutuhan layout yang tidak terpuaskan oleh set dasar.
 | Token | Value |
 |---|---|
 | space-xs | 4 |
+| space-poster-gap | 6 |
 | space-sm | 8 |
 | space-md | 16 |
 | space-lg | 24 |
@@ -164,7 +166,7 @@ lain melengkapi kebutuhan layout yang tidak terpuaskan oleh set dasar.
 | space-3xl | 48 |
 | space-4xl | 64 |
 
-Semua nilai kelipatan 4.
+Semua nilai kelipatan 4, kecuali space-poster-gap (6px) khusus untuk Four Favourites rapat.
 
 ## 5. Border Radius
 

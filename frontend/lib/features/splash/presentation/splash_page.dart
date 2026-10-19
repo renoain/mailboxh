@@ -9,8 +9,6 @@ import '../../../core/theme/app_sizes.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/widgets/brand_logo.dart';
 import '../../auth/presentation/auth_provider.dart';
-import '../../auth/presentation/login_page.dart';
-import '../../auth/presentation/register_page.dart';
 import '../../catalog/presentation/main_navigation.dart';
 import '../../onboarding/presentation/onboarding_page.dart';
 import 'welcome_view.dart';
@@ -43,10 +41,21 @@ class _SplashPageState extends ConsumerState<SplashPage> {
     }
     if (!mounted) return;
     if (signedIn) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const MainNavigation()),
-      );
+      final user = await ref.read(authProvider.future);
+      if (!mounted) return;
+      if (user != null && user.isAdmin) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => AdminLayout(child: const AdminDashboardPage()),
+          ),
+        );
+      } else {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const MainNavigation()),
+        );
+      }
       return;
     }
     final bool seenOnboarding =
@@ -59,7 +68,10 @@ class _SplashPageState extends ConsumerState<SplashPage> {
       );
       return;
     }
-    setState(() => _sessionChecked = true);
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => const MainNavigation()),
+    );
   }
 
   void _open(Widget page) {

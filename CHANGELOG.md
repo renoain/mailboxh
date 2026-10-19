@@ -1,4 +1,261 @@
-﻿# CHANGELOG - Mailboxh
+# CHANGELOG - Mailboxh
+
+## [2026-10-19 16:40] - Remember Me di Login
+
+Status: Selesai
+
+File yang diubah:
+- frontend/lib/features/auth/presentation/login_page.dart (diedit, checkbox Ingat Saya, simpan/hapus saved_email)
+- frontend/lib/core/constants/app_strings.dart (diedit, tambah rememberMe)
+
+Catatan:
+- Password tidak disimpan. Hanya email yang disimpan di SharedPreferences.
+
+Verifikasi:
+- hasil linter/analyze: OK (0 error, info saja)
+- hasil test: OK (20 passed)
+
+## [2026-10-19 16:30] - Admin Back 2x dan Mode Switch
+
+Status: Selesai
+
+File yang diubah:
+- frontend/lib/features/admin/presentation/admin_layout.dart (diedit, PopScope 2x back ke /home, tombol Lihat sebagai User)
+- frontend/lib/features/profile/presentation/profile_page.dart (diedit, tombol Kembali ke Mode Admin untuk admin)
+- frontend/lib/core/constants/app_strings.dart (diedit, tambah backToUserPage)
+
+Catatan:
+- Route guard tetap memblokir user biasa dari /admin/*.
+
+Verifikasi:
+- hasil linter/analyze: OK (0 error, info saja)
+- hasil test: OK (20 passed)
+
+## [2026-10-19 16:20] - Dokumentasi Batch Import di API.md
+
+Status: Selesai
+
+File yang diubah:
+- docs/API.md (diedit, tambah POST /api/admin/movies/batch-import)
+- docs/ARCHITECTURE.md (sudah berisi Manajemen File & Storage)
+- AGENTS.md (sudah berisi aturan penyimpanan gambar)
+- README.md (sudah memuat storage:link)
+- docs/BATCH_IMPORT.md (dihapus, sesuai permintaan tidak membuat file baru)
+
+Catatan:
+- Dokumentasi batch import digabung ke docs yang sudah ada.
+
+Verifikasi:
+- hasil linter/analyze: belum ditest
+- hasil test: belum ditest
+
+## [2026-10-19 16:10] - Dokumentasi Batch Import dan Storage
+
+Status: Selesai
+
+File yang dibuat:
+- docs/BATCH_IMPORT.md (dibuat, dokumentasi teknis batch import)
+
+File yang diubah:
+- docs/ARCHITECTURE.md (diedit, tambah Manajemen File & Storage)
+- README.md (sudah memuat storage:link)
+- AGENTS.md (diedit, aturan penyimpanan gambar)
+
+Catatan:
+- Menjelaskan format ZIP, penamaan poster, dan laporan unmatched.
+
+Verifikasi:
+- hasil linter/analyze: belum ditest
+- hasil test: belum ditest
+
+## [2026-10-19 16:00] - Bersihkan UI Splash dari Menu Login
+
+Status: Selesai
+
+File yang diubah:
+- frontend/lib/features/splash/presentation/splash_page.dart (diedit, hapus menu login/register, hanya loading lalu home)
+
+Catatan:
+- Hot restart kini langsung ke home guest.
+
+Verifikasi:
+- hasil linter/analyze: OK (0 error, info saja)
+- hasil test: OK (20 passed)
+
+## [2026-10-19 15:50] - Splash Langsung ke Home Guest
+
+Status: Selesai
+
+File yang diubah:
+- frontend/lib/features/splash/presentation/splash_page.dart (diedit, onboarding selesai mengarah ke MainNavigation)
+- frontend/test/features/splash/splash_page_test.dart (diedit, ekspektasi Home)
+
+Catatan:
+- Tombol lanjutkan sebagai tamu di AuthGateway dihapus.
+
+Verifikasi:
+- hasil linter/analyze: OK (0 error, info saja)
+- hasil test: OK (20 passed)
+
+## [2026-10-19 15:40] - AuthGateway dan Navbar Guest
+
+Status: Selesai
+
+File yang dibuat:
+- frontend/lib/features/auth/presentation/auth_gateway_page.dart (dibuat, halaman pilihan Sign In / Create Account)
+
+File yang diubah:
+- frontend/lib/features/catalog/presentation/main_navigation.dart (diedit, mode guest menampilkan AuthGateway di tab profil)
+- frontend/lib/core/constants/app_strings.dart (diedit, tambah continueAsGuest)
+
+Catatan:
+- Onboarding tetap mengarah ke home guest.
+
+Verifikasi:
+- hasil linter/analyze: OK (0 error, info saja)
+- hasil test: OK (20 passed)
+
+## [2026-10-19 15:30] - Profil Guest dan Akses Home Tanpa Login
+
+Status: Selesai
+
+File yang diubah:
+- frontend/lib/features/profile/presentation/profile_page.dart (diedit, tampilan guest dengan tombol Create Account dan Sign In)
+- frontend/lib/core/constants/app_strings.dart (diedit, tambah teks guest profil)
+- frontend/lib/core/router/app_router.dart (sudah mendukung /home tanpa token)
+- frontend/test/features/profile/profile_page_test.dart (diedit, override authProvider)
+
+Catatan:
+- Guest dapat melihat katalog dan tab profil menampilkan pilihan akun.
+
+Verifikasi:
+- hasil linter/analyze: OK (0 error, info saja)
+- hasil test: OK (20 passed)
+
+## [2026-10-19 15:20] - Urutan Navbar Bawah Home-Search-Profile
+
+Status: Selesai
+
+File yang diubah:
+- frontend/lib/features/catalog/presentation/main_navigation.dart (diedit, urutan kiri home, tengah search, kanan profile, guard guest)
+
+Catatan:
+- Guest menekan profil menampilkan SnackBar loginRequired lalu ke login.
+
+Verifikasi:
+- hasil linter/analyze: OK (0 error, info saja)
+- hasil test: OK (20 passed)
+
+## [2026-10-19 15:10] - Alur Onboarding Langsung ke Home
+
+Status: Selesai
+
+File yang diubah:
+- frontend/lib/features/onboarding/presentation/onboarding_page.dart (diedit, setelah onboarding langsung ke MainNavigation/Home)
+
+Catatan:
+- Onboarding tidak lagi mengarah ke halaman login.
+
+Verifikasi:
+- hasil linter/analyze: OK (0 error, info saja)
+- hasil test: OK (20 passed)
+
+## [2026-10-19 15:00] - Perbaikan Fitur Autentikasi dan Redirect Role
+
+Status: Selesai
+
+File yang diubah:
+- frontend/lib/core/router/app_router.dart (diedit, redirect berbasis role guest/user/admin dan auto-refresh dari authProvider)
+- frontend/lib/core/constants/app_strings.dart (diedit, tambah loginRequired dan invalidCredentials)
+- frontend/lib/features/auth/presentation/auth_provider.dart (dipakai untuk auto-login dari token)
+- frontend/lib/features/auth/presentation/login_page.dart (diedit, SnackBar kredensial salah dan navigasi role)
+- frontend/lib/features/auth/presentation/register_page.dart (diedit, navigasi role)
+- frontend/lib/features/splash/presentation/splash_page.dart (diedit, navigasi role setelah restore sesi)
+- frontend/lib/features/detail/presentation/movie_detail_page.dart (diedit, SnackBar loginRequired)
+- frontend/lib/main.dart (diedit, buildRouter dengan ref)
+
+Catatan:
+- Token tetap disimpan di flutter_secure_storage.
+- Role admin diarahkan ke dashboard, user ke home, guest ke login untuk rute non-katalog.
+
+Verifikasi:
+- hasil linter/analyze: OK (0 error, info saja)
+- hasil test: OK (20 passed)
+
+## [2026-10-19 14:30] - Implementasi Halaman Profile dan Four Favourites di Flutter
+
+Status: Selesai
+
+File yang dibuat:
+- frontend/lib/features/profile/domain/profile_models.dart (dibuat/diperbarui, model UserProfile dengan username, bio, UserStats, Movie, FavoriteFilm)
+- frontend/test/features/favorites/favorites_edit_page_test.dart (dibuat, widget test untuk FavoritesEditPage)
+
+File yang diubah:
+- frontend/lib/features/profile/domain/profile_repository.dart (diedit, tambah getUserStats, getUserFilms, getFavorites)
+- frontend/lib/features/profile/data/profile_repository.dart (diedit, implementasi pemanggilan /profile/stats, /watched, dan /favorites)
+- frontend/lib/features/profile/presentation/profile_provider.dart (diedit, ProfileNotifier dengan AsyncNotifier, userFilmsProvider, userStatsProvider)
+- frontend/lib/features/profile/presentation/profile_page.dart (ditulis ulang, UI Letterboxd dark theme, header avatar 72px, statistik 3 kolom, Four Favourites rapat gap 6px, TabBar 5 tab dengan GridView film ditonton)
+- frontend/lib/features/favorites/domain/favorite_repository.dart (diedit, kontrak getFavorites dan updateFavorites)
+- frontend/lib/features/favorites/data/favorite_repository.dart (diimplementasikan, request GET /api/favorites dan PUT /api/favorites)
+- frontend/lib/features/favorites/presentation/favorite_provider.dart (diimplementasikan, FavoritesNotifier dengan AsyncNotifier)
+- frontend/lib/features/favorites/presentation/favorites_edit_page.dart (diimplementasikan, grid 2x2, bottom sheet pencarian film watched, simpan via PUT /api/favorites)
+- frontend/lib/core/constants/app_strings.dart (diedit, tambah token teks profil, statistik, dan favourites)
+- frontend/lib/core/theme/app_colors.dart (diedit, tambah token letterboxdBg)
+- frontend/lib/core/theme/app_spacing.dart (diedit, tambah token posterGap 6px)
+- docs/DESIGN_SYSTEM.md (diedit, catat token color-letterboxd-bg dan space-poster-gap)
+- frontend/test/features/profile/profile_page_test.dart (diedit, diselaraskan dengan model dan FakeProfileRepository terbaru)
+- CHANGELOG.md (diedit, entri task ini ditambahkan di paling atas)
+
+Catatan:
+- Desain tema gelap Letterboxd dengan latar #14181C (AppColors.letterboxdBg).
+- Header profil memuat avatar 72px, nama tebal, username abu-abu, dan tombol Edit Profile yang terhubung ke /settings lewat go_router.
+- Statistik profil menampilkan 3 kolom: Films, This Year, Lists.
+- Four Favourites menampilkan 4 poster rapat dengan gap 6px (AppSpacing.posterGap), tanda tambah untuk slot kosong, dan tombol edit menuju /favorites/edit.
+- TabBar memiliki 5 tab: FILMS, REVIEWS, DIARY, WATCHLIST, LISTS. Tab FILMS menampilkan GridView 4 kolom film dari /api/watched.
+- Halaman FavoritesEditPage menampilkan grid 2x2 dengan bottom sheet picker untuk mencari film dari daftar watched, disimpan via PUT /api/favorites.
+- app_router.dart tidak diubah sesuai instruksi.
+
+Verifikasi:
+- hasil linter/analyze: OK (No issues found)
+- hasil test frontend: OK (20 test pass)
+- hasil test backend: belum ditest (task tidak menyentuh backend)
+
+## [2026-10-19 11:00] - Implementasi Fitur Admin di Flutter
+
+Status: Selesai
+
+File yang dibuat:
+- frontend/lib/features/admin/domain/admin_models.dart (dibuat, model DashboardSummary, AdminMovie, AdminGenre, AdminUser, AdminReview, BatchImportResult)
+- frontend/lib/features/admin/domain/admin_repository.dart (dibuat, interface AdminRepository)
+- frontend/lib/features/admin/data/admin_repository.dart (dibuat, implementasi AdminRepositoryImpl dengan endpoint admin backend)
+- frontend/lib/features/admin/presentation/admin_provider.dart (dibuat, AdminNotifier dengan NotifierProvider)
+- frontend/lib/features/admin/presentation/admin_layout.dart (dibuat, layout dengan drawer dan guard role admin)
+- frontend/lib/features/admin/presentation/pages/admin_dashboard_page.dart (dibuat, halaman dashboard statistik)
+- frontend/lib/features/admin/presentation/pages/admin_movies_page.dart (dibuat, halaman kelola film)
+- frontend/lib/features/admin/presentation/pages/admin_movie_form_page.dart (dibuat, halaman form film dengan upload poster)
+- frontend/lib/features/admin/presentation/pages/admin_users_page.dart (dibuat, halaman kelola user dan role)
+- frontend/lib/features/admin/presentation/pages/admin_reviews_page.dart (dibuat, halaman moderasi review)
+- frontend/lib/features/admin/presentation/pages/admin_genres_page.dart (dibuat, halaman kelola genre)
+- frontend/lib/features/admin/presentation/pages/admin_batch_import_page.dart (dibuat, halaman impor batch ZIP)
+
+File yang diubah:
+- frontend/lib/pubspec.yaml (diedit, tambah dependensi image_picker dan file_picker)
+- frontend/lib/core/constants/app_strings.dart (diedit, tambah string admin: adminAddMovie, adminUploadPoster, adminBatchImport, adminRoleAdmin, adminRoleUser)
+- frontend/lib/core/router/app_router.dart (diedit, tambah 7 route admin dengan AdminLayout wrapper)
+- CHANGELOG.md (diedit, entri task ini ditambahkan di paling atas)
+
+Catatan:
+- Backend tidak diubah; semua endpoint admin sudah ada di backend/routes/api.php.
+- Admin route dilindungi oleh AdminLayout yang memeriksa role == 'admin' lewat authProvider.
+- Route admin: /admin/dashboard, /admin/movies, /admin/movies/form, /admin/genres, /admin/users, /admin/reviews, /admin/batch-import.
+- AdminMovieFormPage menggunakan image_picker untuk upload poster dan MultipartFile (Dio) untuk multipart/form-data.
+- AdminBatchImportPage menggunakan file_picker untuk memilih file ZIP.
+- State management menggunakan NotifierProvider (Riverpod 3.x) bukan StateNotifier.
+
+Verifikasi:
+- hasil linter/analyze: OK (No issues found)
+- hasil test frontend: OK (18 test pass)
+- hasil test backend: belum ditest (task tidak menyentuh backend)
 
 ## [2026-10-19 10:00] - Pasang GoRouter dan Daftarkan Semua Route Frontend
 

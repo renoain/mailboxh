@@ -11,6 +11,8 @@ import '../../../core/error/app_exception.dart';
 import '../../../core/providers/app_state.dart';
 import '../../../core/services/app_providers.dart';
 import '../../../core/utils/validators.dart';
+import '../../admin/presentation/admin_layout.dart';
+import '../../admin/presentation/pages/admin_dashboard_page.dart';
 import '../../catalog/presentation/main_navigation.dart';
 import '../domain/auth_models.dart';
 import 'auth_layout.dart';
@@ -87,10 +89,19 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
       final AppState appState = Provider.of<AppState>(context, listen: false);
       appState.login();
       appState.updateProfile(user.name, user.email);
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const MainNavigation()),
-      );
+      if (user.isAdmin) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => AdminLayout(child: const AdminDashboardPage()),
+          ),
+        );
+      } else {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const MainNavigation()),
+        );
+      }
     } on AppException catch (error) {
       if (!mounted) return;
       setState(() {

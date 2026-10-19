@@ -132,6 +132,14 @@ class AppText {
   final String popularReviews;
   final String signInFirst;
   final String signInToReview;
+  final String loginRequired;
+  final String invalidCredentials;
+  final String rememberMe;
+  final String guestProfileMessage;
+  final String createAccount;
+  final String signIn;
+  final String continueAsGuest;
+  final String backToUserPage;
   final String tabCast;
   final String tabCrew;
   final String tabDetails;
@@ -237,6 +245,16 @@ class AppText {
   final String artworkAttribution;
   final String profileDiaryEmpty;
   final String profileListsEmpty;
+  final String statThisYear;
+  final String statFilms;
+  final String tabWatchlist;
+  final String favoriteFilms;
+  final String favoritesEditTitle;
+  final String favoritesUpdated;
+  final String selectFromWatched;
+  final String searchWatchedHint;
+  final String emptyWatchedFilms;
+  final String slotEmptyLabel;
 
   // Settings
   final String settingsTitle;
@@ -258,6 +276,11 @@ class AppText {
   final String adminLists;
   final String adminTags;
   final String adminAuditLogs;
+  final String adminAddMovie;
+  final String adminUploadPoster;
+  final String adminBatchImport;
+  final String adminRoleAdmin;
+  final String adminRoleUser;
   final String languageIndonesian;
   final String languageEnglish;
 
@@ -372,6 +395,14 @@ class AppText {
     popularReviews: 'ULASAN POPULER',
     signInFirst: 'Silakan masuk dulu!',
     signInToReview: 'Kamu harus masuk untuk memberi review!',
+    loginRequired: 'Silakan login untuk melanjutkan',
+    invalidCredentials: 'Email atau password salah',
+    rememberMe: 'Ingat Saya',
+    guestProfileMessage: 'Buat catatan filmmu, beri rating, dan bagikan ke teman.',
+    createAccount: 'Create Account',
+    signIn: 'Sign In',
+    continueAsGuest: 'Lanjutkan sebagai Tamu',
+    backToUserPage: 'Tekan kembali sekali lagi untuk ke User Page',
     tabCast: 'Cast',
     tabCrew: 'Crew',
     tabDetails: 'Detail',
@@ -462,6 +493,16 @@ class AppText {
     artworkAttribution: 'Karya dari Kelompok 6',
     profileDiaryEmpty: 'Belum ada film yang di-review.',
     profileListsEmpty: 'Kamu belum membuat list apa pun.',
+    statThisYear: 'Tahun ini',
+    statFilms: 'Film',
+    tabWatchlist: 'Watchlist',
+    favoriteFilms: 'FAVORITE FILMS',
+    favoritesEditTitle: 'Pilih Empat Favorit',
+    favoritesUpdated: 'Film favorit berhasil disimpan',
+    selectFromWatched: 'Pilih dari film ditonton',
+    searchWatchedHint: 'Cari judul film...',
+    emptyWatchedFilms: 'Belum ada film yang ditonton untuk dipilih',
+    slotEmptyLabel: 'Pilih Film',
     settingsTitle: 'Pengaturan',
     settingsLanguage: 'Bahasa',
     settingsAbout: 'Tentang aplikasi',
@@ -476,6 +517,11 @@ class AppText {
     adminLists: 'List',
     adminTags: 'Tag',
     adminAuditLogs: 'Log Aktivitas',
+    adminAddMovie: 'Tambah Film',
+    adminUploadPoster: 'Pilih Poster',
+    adminBatchImport: 'Impor Batch',
+    adminRoleAdmin: 'Admin',
+    adminRoleUser: 'User',
     languageIndonesian: 'Indonesia',
     languageEnglish: 'Inggris',
     darkMode: 'Mode gelap',
@@ -587,6 +633,14 @@ class AppText {
     popularReviews: 'POPULAR REVIEWS',
     signInFirst: 'Please sign in first!',
     signInToReview: 'You must sign in to write a review!',
+    loginRequired: 'Please log in to continue',
+    invalidCredentials: 'Email or password is incorrect',
+    rememberMe: 'Remember Me',
+    guestProfileMessage: 'Create your film notes, rate them, and share with friends.',
+    createAccount: 'Create Account',
+    signIn: 'Sign In',
+    continueAsGuest: 'Continue as Guest',
+    backToUserPage: 'Press back again to go to User Page',
     tabCast: 'Cast',
     tabCrew: 'Crew',
     tabDetails: 'Details',
@@ -677,6 +731,16 @@ class AppText {
     artworkAttribution: 'Artwork from Kelompok 6',
     profileDiaryEmpty: 'No films reviewed yet',
     profileListsEmpty: 'You have not created any lists yet',
+    statThisYear: 'This Year',
+    statFilms: 'Films',
+    tabWatchlist: 'Watchlist',
+    favoriteFilms: 'FAVORITE FILMS',
+    favoritesEditTitle: 'Pick Four Favourites',
+    favoritesUpdated: 'Favorite films saved successfully',
+    selectFromWatched: 'Select from watched films',
+    searchWatchedHint: 'Search film title...',
+    emptyWatchedFilms: 'No watched films available to select',
+    slotEmptyLabel: 'Pick Film',
     settingsTitle: 'Settings',
     settingsLanguage: 'Language',
     settingsAbout: 'About',
@@ -691,6 +755,11 @@ class AppText {
     adminLists: 'Lists',
     adminTags: 'Tags',
     adminAuditLogs: 'Activity Logs',
+    adminAddMovie: 'Add Film',
+    adminUploadPoster: 'Choose Poster',
+    adminBatchImport: 'Batch Import',
+    adminRoleAdmin: 'Admin',
+    adminRoleUser: 'User',
     languageIndonesian: 'Indonesian',
     languageEnglish: 'English',
     darkMode: 'Dark mode',
@@ -797,6 +866,14 @@ class AppText {
     required this.popularReviews,
     required this.signInFirst,
     required this.signInToReview,
+    required this.loginRequired,
+    required this.invalidCredentials,
+    required this.rememberMe,
+    required this.guestProfileMessage,
+    required this.createAccount,
+    required this.signIn,
+    required this.continueAsGuest,
+    required this.backToUserPage,
     required this.tabCast,
     required this.tabCrew,
     required this.tabDetails,
@@ -886,6 +963,16 @@ class AppText {
     required this.artworkAttribution,
     required this.profileDiaryEmpty,
     required this.profileListsEmpty,
+    required this.statThisYear,
+    required this.statFilms,
+    required this.tabWatchlist,
+    required this.favoriteFilms,
+    required this.favoritesEditTitle,
+    required this.favoritesUpdated,
+    required this.selectFromWatched,
+    required this.searchWatchedHint,
+    required this.emptyWatchedFilms,
+    required this.slotEmptyLabel,
     required this.settingsTitle,
     required this.settingsLanguage,
     required this.settingsAbout,
@@ -900,6 +987,11 @@ class AppText {
     required this.adminLists,
     required this.adminTags,
     required this.adminAuditLogs,
+    required this.adminAddMovie,
+    required this.adminUploadPoster,
+    required this.adminBatchImport,
+    required this.adminRoleAdmin,
+    required this.adminRoleUser,
     required this.languageIndonesian,
     required this.languageEnglish,
     required this.darkMode,

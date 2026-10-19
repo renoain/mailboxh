@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mailboxh/core/constants/app_strings.dart';
 import 'package:mailboxh/core/services/app_providers.dart';
 import 'package:mailboxh/core/theme/app_theme.dart';
+import 'package:mailboxh/features/catalog/presentation/main_navigation.dart';
 import 'package:mailboxh/features/onboarding/presentation/onboarding_page.dart';
 import 'package:mailboxh/features/splash/presentation/splash_page.dart';
 
@@ -35,7 +36,7 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('SplashPage menampilkan menu saat onboarding sudah selesai', (
+  testWidgets('SplashPage mengarahkan ke Home saat onboarding sudah selesai', (
     WidgetTester tester,
   ) async {
     await pumpSplash(

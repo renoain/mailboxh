@@ -1,8 +1,21 @@
 // Daftar route aplikasi dan penjaga route privat.
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../features/admin/presentation/pages/admin_dashboard_page.dart';
+import '../../features/admin/presentation/admin_layout.dart';
+import '../../features/admin/presentation/pages/admin_batch_import_page.dart';
+import '../../features/admin/presentation/pages/admin_genres_page.dart';
+import '../../features/admin/presentation/pages/admin_movie_form_page.dart';
+import '../../features/admin/presentation/pages/admin_movies_page.dart';
+import '../../features/admin/presentation/pages/admin_reviews_page.dart';
+import '../../features/admin/presentation/pages/admin_users_page.dart';
+import '../../core/services/api_client.dart';
+import '../../features/auth/data/auth_repository.dart';
+import '../../features/auth/domain/auth_models.dart';
+import '../../features/auth/presentation/auth_provider.dart';
 import '../../features/auth/presentation/login_page.dart';
 import '../../features/auth/presentation/register_page.dart';
 import '../../features/catalog/presentation/home_page.dart';
@@ -27,6 +40,7 @@ import '../../features/settings/presentation/settings_page.dart';
 import '../../features/splash/presentation/splash_page.dart';
 import '../../features/watchlist/presentation/watchlist_page.dart';
 import '../../features/watched/presentation/watched_page.dart';
+import '../../core/services/app_providers.dart';
 import '../../core/services/token_storage.dart';
 
 /// Nama path sebagai konstanta supaya tidak ada string path di widget.
@@ -67,6 +81,16 @@ abstract final class AppRoutes {
 
   static const String watchlist = '/watchlist';
 
+  // Rute admin
+  static const String admin = '/admin';
+  static const String adminDashboard = '/admin/dashboard';
+  static const String adminMovies = '/admin/movies';
+  static const String adminMovieForm = '/admin/movies/form';
+  static const String adminGenres = '/admin/genres';
+  static const String adminUsers = '/admin/users';
+  static const String adminReviews = '/admin/reviews';
+  static const String adminBatchImport = '/admin/batch-import';
+
   static const List<String> publicPages = [
     splash,
     onboarding,
@@ -83,23 +107,97 @@ abstract final class AppRoutes {
 
 /// Membangun [GoRouter] aplikasi. Route privat dijaga di sini, bukan
 /// dengan pemeriksaan token di dalam `build`.
-GoRouter buildRouter() {
+GoRouter buildRouter([Object? refOrContainer]) {
+  final ValueNotifier<int> refresh = ValueNotifier<int>(0);
+  if (refOrContainer is Ref) {
+    refOrContainer.listen<AsyncValue<AuthUser?>>(
+      authProvider,
+      (AsyncValue<AuthUser?>? previous, AsyncValue<AuthUser?> next) {
+        refresh.value++;
+      },
+    );
+  } else if (refOrContainer is ProviderContainer) {
+    refOrContainer.listen<AsyncValue<AuthUser?>>(
+      authProvider,
+      (AsyncValue<AuthUser?>? previous, AsyncValue<AuthUser?> next) {
+        refresh.value++;
+      },
+    );
+  }
+
+  TokenStorage resolveTokenStorage() {
+    if (refOrContainer is Ref) {
+      return refOrContainer.read(tokenStorageProvider);
+    }
+    if (refOrContainer is ProviderContainer) {
+      return refOrContainer.read(tokenStorageProvider);
+    }
+    return TokenStorage();
+  }
+
+  Future<AuthUser?> resolveUser() async {
+    if (refOrContainer is Ref) {
+      try {
+        return await refOrContainer.read(authProvider.future);
+      } catch (_) {
+        return null;
+      }
+    }
+    if (refOrContainer is ProviderContainer) {
+      try {
+        return await refOrContainer.read(authProvider.future);
+      } catch (_) {
+        return null;
+      }
+    }
+    final TokenStorage storage = TokenStorage();
+    if (!await storage.hasToken()) return null;
+    try {
+      final ApiClient client = ApiClient(tokenStorage: storage);
+      final AuthRepositoryImpl repository = AuthRepositoryImpl(
+        apiClient: client,
+        tokenStorage: storage,
+      );
+      return await repository.fetchCurrentUser();
+    } catch (_) {
+      await storage.clear();
+      return null;
+    }
+  }
+
   return GoRouter(
     initialLocation: AppRoutes.splash,
+    refreshListenable: refresh,
     redirect: (BuildContext context, GoRouterState state) async {
-      final hasToken = await TokenStorage().hasToken();
-      final isAuthPage = AppRoutes.authPages.contains(state.matchedLocation);
-      final isPublicPage = AppRoutes.publicPages.contains(state.matchedLocation);
+      final TokenStorage storage = resolveTokenStorage();
+      final bool hasToken = await storage.hasToken();
+      final AuthUser? user = await resolveUser();
+      final String location = state.matchedLocation;
+      final bool isAuthPage = AppRoutes.authPages.contains(location);
+      final bool isPublicPage = AppRoutes.publicPages.contains(location);
+      final bool isCatalog = location == AppRoutes.home ||
+          location == AppRoutes.search ||
+          location.startsWith('/movie/');
+      final bool isAdminRoute = location.startsWith('/admin');
 
-      if (hasToken && isAuthPage) {
-        return AppRoutes.home;
+      if (user != null) {
+        if (isAuthPage) {
+          return user.isAdmin ? AppRoutes.adminDashboard : AppRoutes.home;
+        }
+        if (isAdminRoute && !user.isAdmin) {
+          return AppRoutes.home;
+        }
+        return null;
       }
 
-      if (!hasToken && !isPublicPage) {
-        return AppRoutes.login;
+      if (hasToken) {
+        await storage.clear();
       }
 
-      return null;
+      if (isAuthPage || isPublicPage || isCatalog) {
+        return null;
+      }
+      return AppRoutes.login;
     },
     routes: [
       GoRoute(
@@ -227,6 +325,43 @@ GoRouter buildRouter() {
         path: AppRoutes.log,
         builder: (BuildContext context, GoRouterState state) =>
             const LogFormPage(),
+      ),
+
+      // Rute admin dilindungi oleh AdminLayout dengan pengecekan role admin.
+      GoRoute(
+        path: AppRoutes.adminDashboard,
+        builder: (BuildContext context, GoRouterState state) =>
+            AdminLayout(child: const AdminDashboardPage()),
+      ),
+      GoRoute(
+        path: AppRoutes.adminMovies,
+        builder: (BuildContext context, GoRouterState state) =>
+            AdminLayout(child: const AdminMoviesPage()),
+      ),
+      GoRoute(
+        path: AppRoutes.adminMovieForm,
+        builder: (BuildContext context, GoRouterState state) =>
+            AdminLayout(child: const AdminMovieFormPage()),
+      ),
+      GoRoute(
+        path: AppRoutes.adminGenres,
+        builder: (BuildContext context, GoRouterState state) =>
+            AdminLayout(child: const AdminGenresPage()),
+      ),
+      GoRoute(
+        path: AppRoutes.adminUsers,
+        builder: (BuildContext context, GoRouterState state) =>
+            AdminLayout(child: const AdminUsersPage()),
+      ),
+      GoRoute(
+        path: AppRoutes.adminReviews,
+        builder: (BuildContext context, GoRouterState state) =>
+            AdminLayout(child: const AdminReviewsPage()),
+      ),
+      GoRoute(
+        path: AppRoutes.adminBatchImport,
+        builder: (BuildContext context, GoRouterState state) =>
+            AdminLayout(child: const AdminBatchImportPage()),
       ),
     ],
     errorBuilder: (BuildContext context, GoRouterState state) => Scaffold(

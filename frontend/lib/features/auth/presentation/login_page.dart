@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' hide Provider;
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/constants/app_assets.dart';
 import '../../../core/constants/app_strings.dart';
@@ -11,6 +12,8 @@ import '../../../core/error/app_exception.dart';
 import '../../../core/providers/app_state.dart';
 import '../../../core/services/app_providers.dart';
 import '../../../core/utils/validators.dart';
+import '../../admin/presentation/admin_layout.dart';
+import '../../admin/presentation/pages/admin_dashboard_page.dart';
 import '../../catalog/presentation/main_navigation.dart';
 import '../domain/auth_models.dart';
 import 'auth_layout.dart';
@@ -33,6 +36,22 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
   String? _error;
   bool _isLoading = false;
+  bool _rememberMe = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSavedEmail();
+  }
+
+  Future<void> _loadSavedEmail() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? savedEmail = prefs.getString('saved_email');
+    if (savedEmail != null && savedEmail.isNotEmpty) {
+      _emailController.text = savedEmail;
+      setState(() => _rememberMe = true);
+    }
+  }
 
   @override
   void dispose() {
@@ -60,6 +79,13 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       setState(() => _error = validationError);
       return;
     }
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    if (_rememberMe) {
+      await prefs.setString('saved_email', _emailController.text.trim());
+    } else {
+      await prefs.remove('saved_email');
+    }
+
     setState(() {
       _error = null;
       _isLoading = true;
@@ -75,14 +101,30 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       final AppState appState = Provider.of<AppState>(context, listen: false);
       appState.login();
       appState.updateProfile(user.name, user.email);
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const MainNavigation()),
-      );
+      if (user.isAdmin) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => AdminLayout(child: const AdminDashboardPage()),
+          ),
+        );
+      } else {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const MainNavigation()),
+        );
+      }
     } on AppException catch (error) {
       if (!mounted) return;
+      if (error is UnauthorizedException) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(text.invalidCredentials)),
+        );
+      }
       setState(() {
-        _error = error.message;
+        _error = error is UnauthorizedException
+            ? text.invalidCredentials
+            : error.message;
         _isLoading = false;
       });
     } catch (_) {

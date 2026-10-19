@@ -1,3 +1,5 @@
+// Navigasi utama dengan bottom bar untuk mode tamu dan user login.
+
 import 'package:flutter/material.dart';
 
 import '../../../core/constants/app_strings.dart';
@@ -16,7 +18,7 @@ class MainNavigation extends StatefulWidget {
   final int initialIndex;
 
   @override
-  State<MainNavigation> createState() => _MainNavigationState();
+  ConsumerState<MainNavigation> createState() => _MainNavigationState();
 }
 
 class _MainNavigationState extends State<MainNavigation> {
