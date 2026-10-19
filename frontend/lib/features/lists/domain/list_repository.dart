@@ -4,5 +4,13 @@
 abstract class ListRepository {
   const ListRepository();
 
-  // Method repository diisi pada task implementasi endpoint.
+  Future<List<Map<String, dynamic>>> getLists();
+
+  Future<Map<String, dynamic>> getListDetail(int id);
+
+  Future<void> createList(String title, String? description);
+
+  Future<void> addMovieToList(int listId, int movieId);
+
+  Future<void> deleteList(int id);
 }
