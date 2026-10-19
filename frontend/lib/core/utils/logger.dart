@@ -1,4 +1,4 @@
-// Logger aplikasi. Mel干线 print di produksi.
+// Logger aplikasi. Menggantikan print di produksi.
 
 import 'package:logger/logger.dart';
 

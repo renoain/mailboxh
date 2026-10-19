@@ -59,7 +59,11 @@ class ApiClient {
 
     AppLogger.warn(
       'Permintaan gagal',
-      data: '${error.requestOptions.method} ${error.requestOptions.path}',
+      data: error.type == DioExceptionType.badResponse
+          ? '${error.requestOptions.method} '
+              '${error.requestOptions.path} status=$status'
+          : '${error.requestOptions.method} '
+              '${error.requestOptions.path} type=${error.type.name}',
     );
 
     handler.reject(
