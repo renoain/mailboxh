@@ -37,6 +37,8 @@ class WatchedController extends Controller
             'watched_at' => $request->date('watched_at') ?? now()->toDateString(),
         ]);
 
+        $request->user()->watchlists()->where('movie_id', $movieId)->delete();
+
         $logger->log($request->user()->id, ActivityLogger::TYPE_WATCHED, $watched->id, [
             'movie_id' => $movieId,
             'watched_at' => $watched->watched_at->toDateString(),

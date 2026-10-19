@@ -37,7 +37,7 @@ class ProfileController extends Controller
 
     public function reviews(Request $request): JsonResponse
     {
-        $query = $request->user()->reviews()->with('movie.genres');
+        $query = $request->user()->reviews()->with('movie.genres')->withCount('likes');
 
         match ($request->string('sort')->toString()) {
             'rating' => $query->orderByDesc('rating'),

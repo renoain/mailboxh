@@ -11,6 +11,8 @@ class ReviewResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
+        $userId = $request->user()?->id;
+
         return [
             'id' => $this->id,
             'movie_id' => $this->movie_id,
@@ -19,6 +21,9 @@ class ReviewResource extends JsonResource
             'user_name' => $this->whenLoaded('user', fn () => $this->user->name),
             'rating' => $this->rating,
             'content' => $this->content,
+            'likes_count' => $this->whenCounted('likes', 0),
+            'is_liked' => $userId !== null && $this->likes()->where('user_id', $userId)->exists(),
+            'comments' => CommentResource::collection($this->whenLoaded('comments')),
             'updated_at' => $this->updated_at?->toIso8601String(),
         ];
     }

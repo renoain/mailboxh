@@ -9,12 +9,17 @@ use App\Http\Traits\ApiResponse;
 use App\Models\Follow;
 use App\Models\User;
 use App\Services\ActivityLogger;
+use App\Services\NotificationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class FollowController extends Controller
 {
     use ApiResponse;
+
+    public function __construct(private readonly NotificationService $notifications)
+    {
+    }
 
     public function store(Request $request, int $userId, ActivityLogger $logger): JsonResponse
     {
@@ -39,6 +44,8 @@ class FollowController extends Controller
         $logger->log($me->id, ActivityLogger::TYPE_FOLLOWED, $follow->id, [
             'following_name' => $target->name,
         ]);
+
+        $this->notifications->forFollow($userId, $me->id, $follow->id);
 
         return $this->success([
             'user_id' => $userId,

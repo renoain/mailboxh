@@ -61,17 +61,25 @@ class DiaryController extends Controller
     public function store(StoreDiaryRequest $request): JsonResponse
     {
         $movieId = $request->integer('movie_id');
+        $watchedDate = $request->date('watched_date') ?? now()->toDateString();
 
-        if (DiaryEntry::where('user_id', $request->user()->id)->where('movie_id', $movieId)->exists()) {
-            return $this->failure('Entri diary untuk film ini sudah ada.', 409);
+        $exists = DiaryEntry::where('user_id', $request->user()->id)
+            ->where('movie_id', $movieId)
+            ->where('watched_date', $watchedDate)
+            ->exists();
+
+        if ($exists) {
+            return $this->failure('Entri diary untuk tanggal ini sudah ada.', 409);
         }
 
         $entry = DiaryEntry::create([
             'user_id' => $request->user()->id,
             'movie_id' => $movieId,
-            'watched_date' => $request->date('watched_date') ?? now()->toDateString(),
+            'watched_date' => $watchedDate,
             'note' => $request->input('note'),
         ]);
+
+        $request->user()->watchlists()->where('movie_id', $movieId)->delete();
 
         return $this->success(new DiaryResource($entry->load(['movie.genres', 'tags'])), null, 201);
     }

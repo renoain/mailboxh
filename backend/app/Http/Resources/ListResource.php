@@ -11,6 +11,8 @@ class ListResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
+        $userId = $request->user()?->id;
+
         return [
             'id' => $this->id,
             'user_id' => $this->user_id,
@@ -19,7 +21,9 @@ class ListResource extends JsonResource
             'description' => $this->description,
             'is_public' => (bool) $this->is_public,
             'item_count' => $this->whenCounted('items'),
-            'can_edit' => $request->user()?->id === $this->user_id,
+            'likes_count' => $this->whenCounted('likes', 0),
+            'is_liked' => $userId !== null && $this->likes()->where('user_id', $userId)->exists(),
+            'can_edit' => $userId === $this->user_id,
             'created_at' => $this->created_at?->toIso8601String(),
         ];
     }

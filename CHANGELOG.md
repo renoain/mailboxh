@@ -1,6 +1,129 @@
 ﻿# CHANGELOG - Mailboxh
 
-## [2026-10-14 22:09] - Perbaiki LogController dan AdminTagController Tambah 8 Test
+## [2026-10-19 17:00] - Implementasi Fitur Admin Flutter (Dashboard, Film, User, Review, Genre, Batch Import)
+
+Status: Selesai
+
+File yang diubah:
+- frontend/pubspec.yaml (diedit, tambah dependensi image_picker, file_picker)
+- frontend/lib/core/services/token_storage.dart (diedit, tambah simpan/baca/hapus role user dan cek isAdmin)
+- frontend/lib/core/services/app_providers.dart (diedit, SessionNotifier sekarang mengembalikan SessionData dengan isAdmin)
+- frontend/lib/core/router/app_router.dart (diedit, tambah route admin dengan guard role admin)
+- frontend/lib/features/admin/domain/admin_model.dart (dibuat, model DashboardSummary, AdminMovie, AdminGenre, AdminUser, AdminReview, BatchImportResult)
+- frontend/lib/features/admin/domain/admin_repository.dart (dibuat, kontrak AdminRepository)
+- frontend/lib/features/admin/data/admin_repository.dart (dibuat, implementasi semua endpoint admin via API)
+- frontend/lib/features/admin/presentation/admin_provider.dart (dibuat, AdminNotifier + Riverpod provider)
+- frontend/lib/features/admin/presentation/pages/admin_dashboard_page.dart (dibuat, halaman dashboard admin)
+- frontend/lib/features/admin/presentation/pages/admin_movies_page.dart (dibuat, daftar film dalam bentuk list)
+- frontend/lib/features/admin/presentation/pages/admin_movie_form_page.dart (dibuat, form tambah/ubah film dengan upload poster)
+- frontend/lib/features/admin/presentation/pages/admin_users_page.dart (dibuat, daftar dan ubah role user)
+- frontend/lib/features/admin/presentation/pages/admin_reviews_page.dart (dibuat, moderasi review)
+- frontend/lib/features/admin/presentation/pages/admin_genres_page.dart (dibuat, kelola genre)
+- frontend/lib/features/admin/presentation/pages/admin_batch_import_page.dart (dibuat, impor massal lewat ZIP)
+
+Catatan:
+- Semua halaman admin dilindungi route guard, hanya dapat diakses jika user memiliki role admin.
+- Route admin: /admin/dashboard, /admin/movies, /admin/movies/form, /admin/movies/:id/edit, /admin/users, /admin/reviews, /admin/genres, /admin/batch-import.
+- Upload poster memakai image_picker dari galeri, impor ZIP memakai file_picker.
+- State management pakai Riverpod (StateNotifier).
+- Semua string UI via AppStrings, tema pakai token di core/theme.
+- 0 error pada flutter analyze untuk kode admin baru, 0 warning.
+- flutter test: 5/5 passed.
+
+Verifikasi:
+- flutter analyze: 0 error (hanya info/warning pada file lama)
+- flutter test: 5/5 passed
+
+## [2026-10-19 16:00] - Implementasi Frontend Core, Auth, dan Katalog Film
+
+Status: Selesai
+
+File yang diubah:
+- frontend/pubspec.yaml (diedit, tambah dependensi riverpod, dio, secure_storage, go_router, cached_network_image_ce, flutter_lucide)
+- frontend/lib/main.dart (diedit, pakai AppRouter/go_router dan AppTheme)
+- frontend/lib/core/router/app_router.dart (diedit, route privat dan path konstanta)
+- frontend/lib/core/utils/formatters.dart (diedit, hapus dependensi intl)
+- frontend/lib/core/utils/logger.dart (diedit, hapus dependensi logger)
+- frontend/lib/features/auth/domain/auth_repository.dart (dibuat, kontrak AuthRepository + model UserModel/AuthResult)
+- frontend/lib/features/auth/data/auth_repository.dart (dibuat, implementasi login/register/logout via API)
+- frontend/lib/features/auth/presentation/auth_provider.dart (dibuat, AuthNotifier + Riverpod provider)
+- frontend/lib/features/auth/presentation/login_page.dart (dibuat, halaman login dengan AppStrings dan theme token)
+- frontend/lib/features/auth/presentation/register_page.dart (dibuat, halaman register dengan AppStrings dan theme token)
+- frontend/lib/features/catalog/domain/movie.dart (dibuat, model Movie)
+- frontend/lib/features/catalog/domain/movie_repository.dart (dibuat, kontrak MovieRepository)
+- frontend/lib/features/catalog/data/movie_repository.dart (dibuat, implementasi getMovies/getMovieDetail via API)
+- frontend/lib/features/catalog/presentation/catalog_provider.dart (dibuat, CatalogNotifier + Riverpod provider)
+- frontend/lib/features/catalog/presentation/home_page.dart (dibuat, grid film dengan RefreshIndicator)
+- frontend/lib/features/catalog/presentation/search_page.dart (dibuat, pencarian film)
+- frontend/lib/features/detail/presentation/movie_detail_page.dart (dibuat, halaman detail film placeholder)
+
+Catatan:
+- Core: ApiClient, TokenStorage, AppRouter, AppTheme, AppColors, AppTypography, AppRadius, AppSpacing, widget global (AppButton, CustomTextField, MovieCard, LoadingIndicator, AppErrorState, EmptyState) sudah digunakan.
+- Auth: login/register menyimpan token ke FlutterSecureStorage, logout menghapus token, route privat diarahkan ke login bila belum ada token.
+- Katalog: home menampilkan grid film dari backend, search mencari film, detail film membuka halaman detail.
+- Semua string UI via AppStrings (ID/EN), tanpa hardcode warna/spacing/radius, tanpa logika bisnis di widget.
+- State management pakai Riverpod (StateNotifier), bukan Provider.
+
+Verifikasi:
+- flutter analyze: 0 error, 0 warning (hanya info-level pada file existing)
+- flutter test: 5/5 passed
+
+## [2026-10-19 15:00] - Sempurnakan Backend Meniru Perilaku Letterboxd
+
+Status: Selesai
+
+File yang diubah:
+- backend/app/Http/Controllers/Api/CommentController.php (dibuat)
+- backend/app/Http/Controllers/Api/LikeController.php (diedit, polymorphic like)
+- backend/app/Http/Controllers/Api/MovieController.php (diedit, tambah rate/unrate)
+- backend/app/Http/Controllers/Api/NotificationController.php (dibuat)
+- backend/app/Http/Controllers/Api/WatchedController.php (diedit, hapus watchlist otomatis)
+- backend/app/Http/Controllers/Api/DiaryController.php (diedit, unique tanggal, hapus watchlist)
+- backend/app/Http/Controllers/Api/LogController.php (diedit, hapus watchlist otomatis)
+- backend/app/Http/Controllers/Api/FollowController.php (diedit, notifikasi follow)
+- backend/app/Http/Controllers/Api/ListController.php (diedit, likes_count/is_liked)
+- backend/app/Http/Controllers/Api/ReviewController.php (diedit, withCount likes)
+- backend/app/Http/Controllers/Api/IncomingActivityController.php (diedit, polymorphic likes)
+- backend/app/Http/Requests/RateMovieRequest.php (dibuat)
+- backend/app/Http/Requests/StoreCommentRequest.php (dibuat)
+- backend/app/Http/Requests/StoreLikeRequest.php (diedit, polymorphic)
+- backend/app/Http/Resources/CommentResource.php (dibuat)
+- backend/app/Http/Resources/LikeResource.php (diedit, polymorphic)
+- backend/app/Http/Resources/ListResource.php (diedit, likes_count/is_liked)
+- backend/app/Http/Resources/ReviewResource.php (diedit, likes_count/is_liked/comments)
+- backend/app/Models/Comment.php (dibuat)
+- backend/app/Models/Like.php (diedit, polymorphic)
+- backend/app/Models/Movie.php (diedit, morphMany likes)
+- backend/app/Models/MovieList.php (diedit, morphMany likes)
+- backend/app/Models/Notification.php (dibuat)
+- backend/app/Models/Review.php (diedit, morphMany likes + comments)
+- backend/app/Models/User.php (diedit, relasi notifications)
+- backend/app/Services/NotificationService.php (dibuat)
+- backend/database/migrations/0001_01_01_000021_change_likes_to_polymorphic.php (dibuat)
+- backend/database/migrations/0001_01_01_000022_update_diary_entries_unique.php (dibuat)
+- backend/database/migrations/0001_01_01_000023_create_comments_table.php (dibuat)
+- backend/database/migrations/0001_01_01_000024_create_notifications_table.php (dibuat)
+- backend/database/factories/CommentFactory.php (dibuat)
+- backend/database/factories/LikeFactory.php (diedit, polymorphic)
+- backend/database/factories/NotificationFactory.php (dibuat)
+- backend/routes/api.php (diedit, endpoint baru)
+- backend/tests/Feature/CommentTest.php (dibuat)
+- backend/tests/Feature/LikeTest.php (diedit, polymorphic)
+- backend/tests/Feature/NotificationTest.php (dibuat)
+- backend/tests/Feature/RatingTest.php (dibuat)
+- docs/API.md (diedit)
+- docs/DATABASE_SCHEMA.md (diedit)
+
+Catatan:
+- Rating berdiri sendiri: POST/DELETE /api/movies/{id}/rate menyimpan/hapus bintang 1-5 di reviews tanpa entri diary; content nullable.
+- Watched dan log dipisah: watched hanya insert tabel watched; diary_entries insert entri log; unique (user_id, movie_id, watched_date); otomatis hapus watchlist via controller.
+- Like polymorphic: likeable_id, likeable_type (Movie/Review/MovieList); Like morphTo; Movie/Review/MovieList morphMany likes; likes_count dan is_liked pada ReviewResource dan ListResource.
+- Komentar review: tabel comments; CommentController (index/store/destroy); ReviewResource sertakan comments.
+- Notifikasi sosial: tabel notifications; type like_review, comment_review, follow, like_list; NotificationService; NotificationController; otomatis insert saat like review/list, komentar, dan follow.
+
+Verifikasi:
+- php artisan migrate:fresh --seed: OK (MySQL, relasi aman)
+- php artisan test: OK (107 passed)
 
 Status: Selesai
 

@@ -4,10 +4,14 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Requests\RateMovieRequest;
 use App\Http\Resources\MovieResource;
+use App\Http\Resources\ReviewResource;
 use App\Http\Traits\ApiResponse;
 use App\Models\Genre;
 use App\Models\Movie;
+use App\Models\Review;
+use App\Services\ActivityLogger;
 use App\Services\MovieStatsService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -78,5 +82,51 @@ class MovieController extends Controller
         ])->resolve($request);
 
         return $this->success($payload);
+    }
+
+    public function rate(RateMovieRequest $request, int $id, ActivityLogger $logger): JsonResponse
+    {
+        $movie = Movie::find($id);
+
+        if ($movie === null) {
+            return $this->failure('Film tidak ditemukan.', 404);
+        }
+
+        $review = Review::where('user_id', $request->user()->id)->where('movie_id', $id)->first();
+
+        if ($review === null) {
+            $review = Review::create([
+                'user_id' => $request->user()->id,
+                'movie_id' => $id,
+                'rating' => $request->integer('rating'),
+            ]);
+
+            $logger->log($request->user()->id, ActivityLogger::TYPE_RATED, $review->id, [
+                'movie_id' => $id,
+                'rating' => $review->rating,
+            ]);
+        } else {
+            $review->update(['rating' => $request->integer('rating')]);
+        }
+
+        $this->detachWatchlist($request, $id);
+
+        return $this->success(new ReviewResource($review->fresh('movie.genres')), null, 201);
+    }
+
+    public function unrate(Request $request, int $id): JsonResponse
+    {
+        $deleted = $request->user()->reviews()->where('movie_id', $id)->delete();
+
+        if ($deleted === 0) {
+            return $this->failure('Rating tidak ditemukan.', 404);
+        }
+
+        return $this->success(null);
+    }
+
+    private function detachWatchlist(Request $request, int $movieId): void
+    {
+        $request->user()->watchlists()->where('movie_id', $movieId)->delete();
     }
 }

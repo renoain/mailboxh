@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'features/splash/presentation/splash_page.dart';
-import 'core/providers/app_state.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+
+import 'core/router/app_router.dart';
+import 'core/theme/app_theme.dart';
 
 void main() {
   runApp(
-    ChangeNotifierProvider(
-      create: (context) => AppState(),
-      child: const MyApp(),
+    const ProviderScope(
+      child: MyApp(),
     ),
   );
 }
@@ -17,36 +18,13 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Letterboxd Clone',
+    return MaterialApp.router(
+      title: 'Mailboxh',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        useMaterial3: true,
-        scaffoldBackgroundColor: const Color(0xFF14181C),
-        primaryColor: const Color(0xFF00E054),
-        colorScheme: const ColorScheme.dark(
-          primary: Color(0xFF00E054),
-          secondary: Color(0xFF40BCF4),
-          surface: Color(0xFF2C3440),
-        ),
-      ),
-      builder: (context, child) {
-        return LayoutBuilder(
-          builder: (context, constraints) {
-            if (constraints.maxWidth > 600) {
-              return Container(
-                color: Colors.black,
-                child: Center(
-                  child: SizedBox(width: 500, child: child),
-                ),
-              );
-            }
-            return child!;
-          },
-        );
-      },
-      // KUNCI HALAMAN PERTAMA ADALAH SPLASH
-      home: const SplashPage(),
+      theme: AppTheme.light,
+      darkTheme: AppTheme.dark,
+      themeMode: ThemeMode.system,
+      routerConfig: buildRouter(),
     );
   }
 }

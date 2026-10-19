@@ -19,7 +19,13 @@ class ReviewController extends Controller
 
     public function index(Request $request): JsonResponse
     {
-        $reviews = $request->user()->reviews()->with('movie.genres')->latest()->get();
+        $query = $request->user()->reviews()->with('movie.genres')->withCount('likes');
+
+        if ($request->boolean('with_comments')) {
+            $query->with('comments.user');
+        }
+
+        $reviews = $query->latest()->get();
 
         return $this->success(ReviewResource::collection($reviews)->resolve($request));
     }

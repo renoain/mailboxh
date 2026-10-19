@@ -1,27 +1,43 @@
-// Halaman onboarding.
+// Halaman onboarding pertama kali aplikasi dibuka.
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/app_strings.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
-
-/// Halaman [OnboardingPage].
+import '../../../core/widgets/app_button.dart';
+import '../../../core/router/app_router.dart';
 class OnboardingPage extends StatelessWidget {
   const OnboardingPage({super.key});
 
-  static const AppText text = AppStrings.id;
-
   @override
   Widget build(BuildContext context) {
+    final text = AppStrings.of(Localizations.localeOf(context).languageCode);
+
     return Scaffold(
-      appBar: AppBar(title: Text(text.onboardingTitle)),
-      body: Padding(
-        padding: const EdgeInsets.all(AppSpacing.md),
+      body: SafeArea(
         child: Center(
-          child: Text(
-            text.onboardingTitle,
-            style: AppTypography.headlineSm,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                text.onboardingTitle,
+                style: AppTypography.headlineLg,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              AppButton(
+                label: text.loginTitle,
+                onPressed: () => context.pushNamed(AppRoutes.login),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              AppButton(
+                label: text.registerTitle,
+                variant: AppButtonVariant.secondary,
+                onPressed: () => context.pushNamed(AppRoutes.register),
+              ),
+            ],
           ),
         ),
       ),

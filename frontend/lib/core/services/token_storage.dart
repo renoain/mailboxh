@@ -9,6 +9,7 @@ class TokenStorage {
 
   static const String _tokenKey = 'session_token';
   static const String _refreshKey = 'refresh_token';
+  static const String _roleKey = 'user_role';
 
   final FlutterSecureStorage _storage;
 
@@ -23,8 +24,19 @@ class TokenStorage {
 
   Future<bool> hasToken() async => (await read()) != null;
 
+  /// Baca role user yang tersimpan.
+  Future<String?> readRole() => _storage.read(key: _roleKey);
+
+  /// Simpan role user.
+  Future<void> saveRole(String role) =>
+      _storage.write(key: _roleKey, value: role);
+
+  /// Periksa apakah user memiliki role admin.
+  Future<bool> isAdmin() async => (await readRole()) == 'admin';
+
   Future<void> clear() async {
     await _storage.delete(key: _tokenKey);
     await _storage.delete(key: _refreshKey);
+    await _storage.delete(key: _roleKey);
   }
 }

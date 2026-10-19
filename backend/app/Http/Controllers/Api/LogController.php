@@ -10,6 +10,7 @@ use App\Models\DiaryEntry;
 use App\Models\Review;
 use App\Models\Tag;
 use App\Models\Watched;
+use App\Models\Watchlist;
 use App\Services\ActivityLogger;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
@@ -40,6 +41,8 @@ class LogController extends Controller
                 'movie_id' => $movieId,
                 'watched_at' => $watchedAt,
             ]);
+
+            Watchlist::where('user_id', $userId)->where('movie_id', $movieId)->delete();
 
             $entry = DiaryEntry::create([
                 'user_id' => $userId,

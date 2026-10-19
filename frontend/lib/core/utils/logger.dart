@@ -1,23 +1,34 @@
-// Logger aplikasi. Mel干线 print di produksi.
+// Logger aplikasi. Hindari print di produksi, jangan log data sensitif.
 
-import 'package:logger/logger.dart';
-
-/// Membungkus logger paket agar satu titik konfigurasi untuk seluruh app.
+/// Membungkus log agar satu titik konfigurasi untuk seluruh app.
 abstract final class AppLogger {
-  static final Logger _logger = Logger(
-    printer: SimplePrinter(printTime: false, colors: true),
-  );
+  static const bool _isDebug = bool.fromEnvironment('dart.vm.product') == false;
 
-  /// Menulis log. Jangan pernah mengirim token, password, atau API key.
-  static void info(String message, {Object? data}) =>
-      _logger.i(message, error: data);
+  /// Menulis log informasi. Jangan pernah mengirim token, password, atau API key.
+  static void info(String message, {Object? data}) {
+    if (!_isDebug) return;
+    final String extra = data != null ? ' | $data' : '';
+    print('[INFO] $message$extra');
+  }
 
-  static void debug(String message, {Object? data}) =>
-      _logger.d(message, error: data);
+  static void debug(String message, {Object? data}) {
+    if (!_isDebug) return;
+    final String extra = data != null ? ' | $data' : '';
+    print('[DEBUG] $message$extra');
+  }
 
-  static void warn(String message, {Object? data}) =>
-      _logger.w(message, error: data);
+  static void warn(String message, {Object? data}) {
+    final String extra = data != null ? ' | $data' : '';
+    print('[WARN] $message$extra');
+  }
 
-  static void error(String message, {Object? data, StackTrace? stackTrace}) =>
-      _logger.e(message, error: data, stackTrace: stackTrace);
+  static void error(
+    String message, {
+    Object? data,
+    StackTrace? stackTrace,
+  }) {
+    final String extra = data != null ? ' | $data' : '';
+    print('[ERROR] $message$extra');
+    if (stackTrace != null) print(stackTrace);
+  }
 }

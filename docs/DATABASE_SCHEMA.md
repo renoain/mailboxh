@@ -207,7 +207,8 @@ Catatan:
 
 Catatan tontonan milik user beserta tanggal dan catatan.
 
-Migration: `2026_10_14_000006_create_diary_entries_table.php`.
+Migration: `0001_01_01_000008_create_diary_entries_table.php`, lalu
+`0001_01_01_000022_update_diary_entries_unique.php`.
 
 | Kolom | Tipe | Constraint | Keterangan |
 |---|---|---|---|
@@ -219,7 +220,7 @@ Migration: `2026_10_14_000006_create_diary_entries_table.php`.
 | created_at | timestamp | nullable | |
 | updated_at | timestamp | nullable | |
 
-Unique: `(user_id, movie_id)`.
+Unique: `(user_id, movie_id, watched_date)`.
 
 Index: `(user_id, watched_date)` untuk urutan diary.
 Index: `movie_id` untuk menagih film yang tidak ada di watchlist.
@@ -228,6 +229,9 @@ Catatan:
 
 - Tabel ini terpisah dari `watched`. `watched` menandai status sudah
   ditonton, `diary_entries` menyimpan catatan tontonannya.
+- Entri diary boleh berulang untuk `movie_id` yang sama selama
+  `watched_date` berbeda. User dapat mencatat tontonan ulang film yang
+  sama pada tanggal berbeda.
 - Entri diary boleh dibuat tanpa baris `watched` yang sesuai. Endpoint
   `POST /api/log` membuat keduanya sekaligus.
 - `watched_id` tidak ada di tabel ini. Relasi ke `watched` dijaga di
@@ -237,7 +241,7 @@ Catatan:
 
 Rating dan review user untuk film.
 
-Migration: `2026_10_14_000007_create_reviews_table.php`.
+Migration: `0001_01_01_000009_create_reviews_table.php`.
 
 | Kolom | Tipe | Constraint | Keterangan |
 |---|---|---|---|
@@ -245,7 +249,7 @@ Migration: `2026_10_14_000007_create_reviews_table.php`.
 | user_id | bigint | FK users, cascade, not null | |
 | movie_id | bigint | FK movies, cascade, not null | |
 | rating | tinyint | not null | Nilai 1 sampai 5 |
-| content | text | nullable | Isi review teks |
+| content | text | nullable | Isi review teks, boleh kosong |
 | created_at | timestamp | nullable | |
 | updated_at | timestamp | nullable | |
 
@@ -256,6 +260,9 @@ Index: `(movie_id)` untuk query Top Rated.
 Catatan:
 
 - Rating wajib diisi karena review tanpa rating tidak disimpan pada MVP.
+- `content` boleh null supaya rating berdiri sendiri tanpa teks review.
+  Endpoint `POST /api/movies/{id}/rate` membuat baris dengan `content`
+  null tanpa membuat entri diary.
 - Gunakan CHECK constraint agar rating selalu di rentang 1 sampai 5.
 - Film yang kehilangan seluruh review tidak lagi masuk Top Rated.
 
@@ -381,26 +388,35 @@ Catatan:
 
 ### 3.14 likes
 
-Tanda suka pada film, terpisah dari rating bintang.
+Tanda suka polymorphic pada film, review, atau list, terpisah dari
+rating bintang.
 
-Migration: `2026_10_14_000013_create_likes_table.php`.
+Migration: `0001_01_01_000015_create_likes_table.php`, lalu
+`0001_01_01_000021_change_likes_to_polymorphic.php`.
 
 | Kolom | Tipe | Constraint | Keterangan |
 |---|---|---|---|
 | id | bigint | PK, auto increment | |
 | user_id | bigint | FK users, cascade, not null | Pemberi like |
-| movie_id | bigint | FK movies, cascade, not null | |
+| likeable_id | bigint | not null | ID target |
+| likeable_type | varchar(255) | not null | Class target |
 | created_at | timestamp | nullable | |
 | updated_at | timestamp | nullable | |
 
-Unique: `(user_id, movie_id)`.
+Unique: `(user_id, likeable_id, likeable_type)`.
 
-Index: `(movie_id)` untuk menghitung jumlah like per film.
+Index: `(likeable_type, likeable_id)` untuk menghitung jumlah like.
+
+`likeable_type` berisi `App\Models\Movie`, `App\Models\Review`, atau
+`App\Models\MovieList`.
 
 Catatan:
 
 - Like tidak memengaruhi rating dan tidak membuat review.
 - User dapat like film yang belum pernah ia tonton atau beri rating.
+- Like pada review dan list membuat baris `notifications`.
+- Relasi didefinisikan lewat `morphMany` di model `Movie`, `Review`,
+  dan `MovieList`, serta `morphTo` di model `Like`.
 
 ### 3.15 follows
 
@@ -507,6 +523,64 @@ Catatan:
   baris. Jangan pernah menaruh password atau token di sini.
 - `updated_at` tetap ada karena migration memakai `timestamps()`, walau
   log tidak pernah diubah.
+### 3.18 comments
+
+Komentar pada review milik user lain.
+
+Migration: `0001_01_01_000023_create_comments_table.php`.
+
+| Kolom | Tipe | Constraint | Keterangan |
+|---|---|---|---|
+| id | bigint | PK, auto increment | |
+| review_id | bigint | FK reviews, cascade, not null | Review induk |
+| user_id | bigint | FK users, cascade, not null | Penulis komentar |
+| content | text | not null | Isi komentar, maksimal 1000 karakter |
+| created_at | timestamp | nullable | |
+| updated_at | timestamp | nullable | |
+
+Index: `(review_id)` untuk daftar komentar per review.
+
+Catatan:
+
+- Menghapus review menghapus seluruh komentarnya lewat cascade.
+- Komentar membuat notifikasi `comment_review` untuk pemilik review.
+- Hanya pemilik komentar atau admin yang boleh menghapus komentar.
+
+### 3.19 notifications
+
+Notifikasi sosial untuk user penerima.
+
+Migration: `0001_01_01_000024_create_notifications_table.php`.
+
+| Kolom | Tipe | Constraint | Keterangan |
+|---|---|---|---|
+| id | bigint | PK, auto increment | |
+| user_id | bigint | FK users, cascade, not null | Penerima notifikasi |
+| actor_id | bigint | FK users, cascade, not null | Pelaku tindakan |
+| type | varchar(40) | not null | Lihat tabel di bawah |
+| reference_id | bigint | nullable | Id like, komentar, atau follow |
+| is_read | boolean | not null, default false | Status sudah dibaca |
+| created_at | timestamp | nullable | |
+| updated_at | timestamp | nullable | |
+
+Index: `(user_id, is_read)` untuk daftar notifikasi belum dibaca.
+
+Nilai kolom `type`:
+
+| Type | Dipicu saat |
+|---|---|
+| like_review | User lain me-like review |
+| comment_review | User lain berkomentar pada review |
+| follow | User lain mulai mengikuti |
+| like_list | User lain me-like list |
+
+Catatan:
+
+- Tabel ini hanya ditulis oleh `NotificationService`.
+- Tidak ada notifikasi bila pelaku dan penerima adalah user yang sama.
+- Notifikasi tidak pernah dihapus oleh user. `is_read` diubah lewat
+  endpoint notifikasi.
+
 ## 4. Relasi
 
 - users satu ke banyak watchlist.
@@ -519,15 +593,18 @@ Catatan:
 - users satu ke banyak likes.
 - users satu ke banyak activities.
 - users satu ke banyak admin_audit_logs sebagai admin.
+- users satu ke banyak notifications sebagai penerima dan sebagai pelaku.
 - users banyak ke banyak users lewat follows, dengan alias `followers`
   dan `following`.
 - movies satu ke banyak watchlist, watched, diary_entries, reviews,
-  list_items, favorites, dan likes.
+  list_items, dan favorites.
+- movies satu ke banyak likes lewat morphMany `likeable`.
 - movies satu ke banyak movie_genres.
 - genres satu ke banyak movie_genres.
 - movies banyak ke banyak genres lewat movie_genres.
-- lists satu ke banyak list_items.
+- lists satu ke banyak list_items dan likes lewat morphMany `likeable`.
 - list_items satu ke banyak movies.
+- reviews satu ke banyak comments dan likes lewat morphMany `likeable`.
 - diary_entries banyak ke banyak tags lewat diary_tags.
 
 Perubahan terhadap skema sebelumnya:
@@ -536,6 +613,12 @@ Perubahan terhadap skema sebelumnya:
 - Semua kolom `tmdb_id` diganti `movie_id` dengan foreign key ke
   `movies.id`.
 - Tabel `diary_entries` ditambahkan kembali sebagai tabel tersendiri.
+- Unique `diary_entries` diubah dari `(user_id, movie_id)` menjadi
+  `(user_id, movie_id, watched_date)` agar tontonan ulang bisa dicatat.
+- Tabel `likes` diubah dari khusus film menjadi polymorphic dengan
+  `likeable_id` dan `likeable_type`.
+- Tabel `comments` ditambahkan untuk komentar pada review.
+- Tabel `notifications` ditambahkan untuk notifikasi sosial.
 - Tabel `genres` dan `movie_genres` ditambahkan.
 - Tabel `admin_audit_logs` ditambahkan.
 - Kolom `role` ditambahkan pada `users`.

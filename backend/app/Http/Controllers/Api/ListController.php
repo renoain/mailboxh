@@ -26,7 +26,7 @@ class ListController extends Controller
         $userId = $request->integer('user_id') ?: $request->user()->id;
         $scope = $request->string('scope')->toString();
 
-        $query = MovieList::query()->with('user')->withCount('items');
+        $query = MovieList::query()->with('user')->withCount(['items', 'likes']);
 
         if ($scope === 'public') {
             $query->where('is_public', true);
@@ -58,7 +58,7 @@ class ListController extends Controller
 
     public function show(Request $request, int $id): JsonResponse
     {
-        $list = MovieList::with(['user', 'items.movie.genres'])->withCount('items')->find($id);
+        $list = MovieList::with(['user', 'items.movie.genres'])->withCount(['items', 'likes'])->find($id);
 
         if ($list === null) {
             return $this->failure('List tidak ditemukan.', 404);
@@ -76,6 +76,8 @@ class ListController extends Controller
             'description' => $list->description,
             'is_public' => (bool) $list->is_public,
             'item_count' => $list->items_count,
+            'likes_count' => $list->likes_count,
+            'is_liked' => $list->likes()->where('user_id', $request->user()->id)->exists(),
             'can_edit' => $list->user_id === $request->user()->id,
             'items' => ListItemResource::collection($list->items)->resolve($request),
         ]);

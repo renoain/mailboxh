@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\Admin\AdminTagController;
 use App\Http\Controllers\Api\Admin\AdminUserController;
 use App\Http\Controllers\Api\Admin\AdminMovieBatchController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\CommentController;
 use App\Http\Controllers\Api\DiaryController;
 use App\Http\Controllers\Api\FavoriteController;
 use App\Http\Controllers\Api\FeedController;
@@ -24,6 +25,7 @@ use App\Http\Controllers\Api\ListController;
 use App\Http\Controllers\Api\LogController;
 use App\Http\Controllers\Api\MemberController;
 use App\Http\Controllers\Api\MovieController;
+use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\PublicProfileController;
 use App\Http\Controllers\Api\ReviewController;
@@ -123,10 +125,17 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function (): void {
         Route::patch('watched/{movieId}', [WatchedController::class, 'update']);
         Route::delete('watched/{movieId}', [WatchedController::class, 'destroy']);
 
+        Route::post('movies/{id}/rate', [MovieController::class, 'rate']);
+        Route::delete('movies/{id}/rate', [MovieController::class, 'unrate']);
+
         Route::get('reviews', [ReviewController::class, 'index']);
         Route::post('reviews', [ReviewController::class, 'store']);
         Route::put('reviews/{id}', [ReviewController::class, 'update']);
         Route::delete('reviews/{id}', [ReviewController::class, 'destroy']);
+
+        Route::get('reviews/{id}/comments', [CommentController::class, 'index']);
+        Route::post('reviews/{id}/comments', [CommentController::class, 'store']);
+        Route::delete('comments/{id}', [CommentController::class, 'destroy']);
 
         Route::get('diary', [DiaryController::class, 'index']);
         Route::post('diary', [DiaryController::class, 'store']);
@@ -152,15 +161,18 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function (): void {
         Route::put('favorites', [FavoriteController::class, 'update']);
 
         Route::post('likes', [LikeController::class, 'store']);
-        Route::delete('likes/{movieId}', [LikeController::class, 'destroy']);
+        Route::delete('likes', [LikeController::class, 'destroy']);
         Route::get('likes', [LikeController::class, 'index']);
-        Route::get('likes/{movieId}', [LikeController::class, 'show']);
 
         Route::post('follow/{userId}', [FollowController::class, 'store']);
         Route::delete('follow/{userId}', [FollowController::class, 'destroy']);
 
         Route::post('log', [LogController::class, 'store']);
     });
+
+    Route::get('notifications', [NotificationController::class, 'index']);
+    Route::put('notifications/{id}/read', [NotificationController::class, 'markRead']);
+    Route::put('notifications/read-all', [NotificationController::class, 'readAll']);
 
     Route::get('profile', [ProfileController::class, 'show']);
     Route::get('profile/stats', [ProfileController::class, 'stats']);

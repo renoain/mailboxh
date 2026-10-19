@@ -27,4 +27,14 @@ class Review extends Model
     {
         return $this->belongsTo(Movie::class);
     }
+
+    public function likes()
+    {
+        return $this->morphMany(Like::class, 'likeable');
+    }
+
+    public function comments()
+    {
+        return $this->hasMany(Comment::class);
+    }
 }
