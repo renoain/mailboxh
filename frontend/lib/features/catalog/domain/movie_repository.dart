@@ -1,8 +1,18 @@
 // Kontrak repository fitur catalog.
 
-/// Kontrak akses data untuk fitur catalog.
+import 'movie_models.dart';
+
+/// Kontrak akses data untuk katalog film.
 abstract class MovieRepository {
   const MovieRepository();
 
-  // Method repository diisi pada task implementasi endpoint.
+  /// Mengambil enam section beranda dalam satu permintaan.
+  Future<HomeData> fetchHome();
+
+  /// Mengambil daftar film satu halaman untuk list dan pencarian.
+  Future<MoviePage> fetchMovies({
+    String? query,
+    MovieSort sort,
+    int page,
+  });
 }

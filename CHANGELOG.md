@@ -1,5 +1,54 @@
 ﻿# CHANGELOG - Mailboxh
 
+## [2026-10-19 08:19] - Perbaiki Log Interceptor dan Komentar Logger
+
+Status: Selesai
+
+File yang diubah:
+- frontend/lib/core/services/api_client.dart (diedit, log gagal memuat status code untuk respons HTTP dan tipe DioException untuk kegagalan koneksi)
+- frontend/lib/core/utils/logger.dart (diedit, benahi komentar header yang rusak)
+- frontend/lib/features/settings/presentation/settings_page.dart (dipulihkan ke versi commit, AppStrings dikembalikan)
+- frontend/lib/features/detail/presentation/movie_detail_page.dart (dipulihkan ke versi commit, AppStrings dikembalikan)
+
+Catatan:
+- Penyebab investigasi: POST /register gagal karena backend tidak berjalan di port 8000, bukan karena validasi atau rate limit.
+- Sebelumnya connection error dan respons 4xx/5xx terlihat sama di log sehingga menyulitkan diagnosis; sekarang log membedakan keduanya tanpa membocorkan data sensitif.
+- Working tree sebelumnya memuat regresi pada settings_page.dart dan movie_detail_page.dart yang mengembalikan string literal menggantikan AppStrings, sehingga settings_page_test.dart gagal dan aturan string UI dilanggar. Keduanya dipulihkan dengan git checkout ke versi commit 581aef5.
+- Entri ini diperbarui pada task yang sama setelah pemulihan file; entri task lain tidak disentuh.
+
+Verifikasi:
+- hasil linter/analyze: OK (No issues found)
+- hasil test frontend: OK (18 test pass)
+- hasil test backend: belum ditest (task tidak menyentuh backend)
+
+## [2026-10-19 07:33] - Implementasi Catalog API Frontend
+
+Status: Selesai
+
+File yang diubah:
+- frontend/lib/features/catalog/domain/movie_models.dart (dibuat, entity Genre, Movie, MovieSort, MovieQuery, MoviePage, HomeData)
+- frontend/lib/features/catalog/domain/movie_repository.dart (diedit, kontrak fetchHome dan fetchMovies)
+- frontend/lib/features/catalog/data/movie_model.dart (dibuat, model JSON film dan genre)
+- frontend/lib/features/catalog/data/movie_repository.dart (diedit, implementasi endpoint home dan movies)
+- frontend/lib/features/catalog/presentation/catalog_provider.dart (diedit, homeProvider dan moviesProvider family)
+- frontend/lib/features/catalog/presentation/home_page.dart (diedit, ditulis ulang ke API dengan enam section)
+- frontend/lib/features/catalog/presentation/search_page.dart (diedit, ditulis ulang ke API dengan debounce, chip urutan, dan muat lebih banyak)
+- frontend/lib/core/constants/app_strings.dart (diedit, 12 string section, sort, dan hasil pencarian ID dan EN)
+- frontend/test/features/catalog/movie_repository_test.dart (dibuat, 2 unit test parse home dan paginator)
+- frontend/test/features/catalog/home_page_test.dart (dibuat, widget test section dan katalog kosong)
+- frontend/test/features/catalog/search_page_test.dart (dibuat, widget test state awal)
+
+Catatan:
+- Home memakai satu permintaan GET /api/home sesuai docs/UI_PAGES.md; feed di bawah Home menjadi task tersendiri karena belum ada integrasi feed.
+- Tap film belum membuka halaman Detail karena MovieDetailPage lama masih dummy dan membutuhkan rewrite terintegrasi; integrasi Detail menjadi task berikutnya.
+- Filter genre di Search ditunda: backend GET /api/movies baru menerima genre_id tunggal sementara UI_PAGES mendeskripsikan multi-pilih.
+- MovieQuery diberi operator == dan hashCode agar cache FutureProvider.family bekerja.
+
+Verifikasi:
+- hasil linter/analyze: OK (No issues found)
+- hasil test frontend: OK (18 test pass)
+- hasil test backend: OK (130 test pass, 276 assertions)
+
 ## [2026-10-19 01:33] - Tambah Session Restore dan Onboarding Flag di Splash
 
 Status: Selesai

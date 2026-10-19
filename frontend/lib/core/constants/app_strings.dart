@@ -68,6 +68,17 @@ class AppText {
   final String passwordConfirmation;
   final String artworkCredit;
   final String nextButton;
+  final String sectionFeatured;
+  final String sectionLatest;
+  final String sectionTopRated;
+  final String sectionMostWatched;
+  final String sectionMostWatchlisted;
+  final String sectionExplore;
+  final String sortTitle;
+  final String sortReleaseDate;
+  final String sortRating;
+  final String moviesNotFound;
+  final String loadMore;
 
   // Detail film
   final String addToWatchlist;
@@ -269,6 +280,17 @@ class AppText {
     passwordConfirmation: 'Konfirmasi kata sandi',
     artworkCredit: 'Artwork dari Kelompok 6',
     nextButton: 'Lanjut',
+    sectionFeatured: 'Unggulan',
+    sectionLatest: 'Terbaru',
+    sectionTopRated: 'Rating tertinggi',
+    sectionMostWatched: 'Paling banyak ditonton',
+    sectionMostWatchlisted: 'Paling banyak di-watchlist',
+    sectionExplore: 'Jelajahi',
+    sortTitle: 'Judul',
+    sortReleaseDate: 'Tanggal rilis',
+    sortRating: 'Rating',
+    moviesNotFound: 'Film tidak ditemukan',
+    loadMore: 'Muat lebih banyak',
     addToWatchlist: 'Tambah ke watchlist',
     markWatched: 'Tandai sudah ditonton',
     writeReview: 'Tulis review',
@@ -443,6 +465,17 @@ class AppText {
     passwordConfirmation: 'Confirm password',
     artworkCredit: 'Artwork from Kelompok 6',
     nextButton: 'Continue',
+    sectionFeatured: 'Featured',
+    sectionLatest: 'Latest',
+    sectionTopRated: 'Top rated',
+    sectionMostWatched: 'Most watched',
+    sectionMostWatchlisted: 'Most watchlisted',
+    sectionExplore: 'Explore',
+    sortTitle: 'Title',
+    sortReleaseDate: 'Release date',
+    sortRating: 'Rating',
+    moviesNotFound: 'No movies found',
+    loadMore: 'Load more',
     addToWatchlist: 'Add to watchlist',
     markWatched: 'Mark as watched',
     writeReview: 'Write review',
@@ -618,6 +651,17 @@ class AppText {
     required this.passwordConfirmation,
     required this.artworkCredit,
     required this.nextButton,
+    required this.sectionFeatured,
+    required this.sectionLatest,
+    required this.sectionTopRated,
+    required this.sectionMostWatched,
+    required this.sectionMostWatchlisted,
+    required this.sectionExplore,
+    required this.sortTitle,
+    required this.sortReleaseDate,
+    required this.sortRating,
+    required this.moviesNotFound,
+    required this.loadMore,
     required this.addToWatchlist,
     required this.markWatched,
     required this.writeReview,

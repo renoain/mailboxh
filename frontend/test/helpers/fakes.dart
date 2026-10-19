@@ -6,6 +6,8 @@ import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:mailboxh/core/services/onboarding_storage.dart';
 import 'package:mailboxh/core/services/token_storage.dart';
+import 'package:mailboxh/features/catalog/domain/movie_models.dart';
+import 'package:mailboxh/features/catalog/domain/movie_repository.dart';
 
 /// Token storage palsu berbasis memori untuk test.
 class FakeTokenStorage implements TokenStorage {
@@ -45,6 +47,36 @@ class FakeOnboardingStorage implements OnboardingStorage {
   Future<void> markSeen() async {
     seen = true;
   }
+}
+
+/// Repository katalog palsu untuk widget test.
+class FakeMovieRepository implements MovieRepository {
+  FakeMovieRepository({HomeData? home, MoviePage? page})
+      : home = home ??
+            const HomeData(
+              featured: <Movie>[],
+              latest: <Movie>[],
+              topRated: <Movie>[],
+              mostWatched: <Movie>[],
+              mostWatchlisted: <Movie>[],
+              explore: <Movie>[],
+            ),
+        page = page ??
+            const MoviePage(movies: <Movie>[], page: 1, perPage: 20, total: 0);
+
+  final HomeData home;
+  final MoviePage page;
+
+  @override
+  Future<HomeData> fetchHome() async => home;
+
+  @override
+  Future<MoviePage> fetchMovies({
+    String? query,
+    MovieSort sort = MovieSort.latest,
+    int page = 1,
+  }) async =>
+      this.page;
 }
 
 /// Adapter HTTP palsu yang selalu menjawab dengan [statusCode] dan [body].
