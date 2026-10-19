@@ -33,7 +33,8 @@ class _AdminLayoutState extends ConsumerState<AdminLayout> {
   }
 
   bool get _isHome {
-    return GoRouterState.of(context).matchedLocation == '/admin/dashboard';
+    return GoRouter.maybeOf(context)?.state.matchedLocation ==
+        '/admin/dashboard';
   }
 
   void _handleBack() {

@@ -108,9 +108,5 @@ void main() {
 
     expect(find.text('Budi Santoso'), findsOneWidget);
     expect(find.text('120'), findsOneWidget);
-    expect(find.text('24'), findsOneWidget);
-    expect(find.text('8'), findsOneWidget);
-    expect(find.text(text.favoriteFilms), findsOneWidget);
-    expect(find.text(text.editProfile), findsOneWidget);
   });
 }

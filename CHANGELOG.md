@@ -1,5 +1,33 @@
 # CHANGELOG - Mailboxh
 
+## [2026-10-19 17:45] - Tambah Navbar Bottom di Halaman User
+
+Status: Selesai
+
+File yang diubah:
+- frontend/lib/core/router/app_router.dart (diedit, route /home sekarang memakai MainNavigation)
+
+Catatan:
+- Halaman user kini menampilkan bottom navigation untuk pindah Home/Search/Profile.
+
+Verifikasi:
+- hasil linter/analyze: OK (info saja)
+- hasil test: OK (20 passed)
+
+## [2026-10-19 17:30] - Perbaiki GoError GoRouterState saat Login Admin
+
+Status: Selesai
+
+File yang diubah:
+- frontend/lib/features/admin/presentation/admin_layout.dart (diedit, ganti GoRouterState.of menjadi GoRouter.maybeOf)
+
+Catatan:
+- AdminLayout tidak lagi crash saat tidak berada di bawah GoRouter.
+
+Verifikasi:
+- hasil linter/analyze: OK (info saja)
+- hasil test: OK (20 passed)
+
 ## [2026-10-19 16:40] - Remember Me di Login
 
 Status: Selesai

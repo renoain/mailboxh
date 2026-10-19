@@ -2,12 +2,12 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/app_strings.dart';
 import '../../../core/services/app_providers.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
-import '../../catalog/presentation/main_navigation.dart';
 
 /// Halaman pengantar yang menandai onboarding selesai lalu ke Login.
 class OnboardingPage extends ConsumerWidget {
@@ -18,10 +18,7 @@ class OnboardingPage extends ConsumerWidget {
   Future<void> _complete(BuildContext context, WidgetRef ref) async {
     await ref.read(onboardingStorageProvider).markSeen();
     if (!context.mounted) return;
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (_) => const MainNavigation()),
-    );
+    context.go('/home');
   }
 
   @override

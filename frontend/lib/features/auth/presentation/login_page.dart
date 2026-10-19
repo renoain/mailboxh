@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' hide Provider;
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -12,9 +13,6 @@ import '../../../core/services/app_providers.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/validators.dart';
-import '../../admin/presentation/admin_layout.dart';
-import '../../admin/presentation/pages/admin_dashboard_page.dart';
-import '../../catalog/presentation/main_navigation.dart';
 import '../domain/auth_models.dart';
 import 'auth_provider.dart';
 import 'register_page.dart';
@@ -100,19 +98,11 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       final AppState appState = Provider.of<AppState>(context, listen: false);
       appState.login();
       appState.updateProfile(user.name, user.email);
-      if (user.isAdmin) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (_) => AdminLayout(child: const AdminDashboardPage()),
-          ),
-        );
-      } else {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const MainNavigation()),
-        );
-      }
+       if (user.isAdmin) {
+         context.go('/admin/dashboard');
+       } else {
+         context.go('/home');
+       }
     } on AppException catch (error) {
       if (!mounted) return;
       if (error is UnauthorizedException) {
