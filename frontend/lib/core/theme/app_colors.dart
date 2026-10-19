@@ -41,6 +41,7 @@ abstract final class AppColors {
   static const Color bgAltDark = Color(0xFF171C1A);
   static const Color surfaceDark = Color(0xFF1A211E);
   static const Color surfaceDimDark = Color(0xFF232B27);
+  static const Color letterboxdBg = Color(0xFF14181C);
 
   static const Color textPrimaryDark = Color(0xFFE8EDEA);
   static const Color textSecondaryDark = Color(0xFFA0ABA5);

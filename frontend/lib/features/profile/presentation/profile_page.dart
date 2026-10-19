@@ -1,466 +1,496 @@
+// Halaman profil user dengan header, statistik, four favourites, dan tab navigasi.
+
+import 'package:cached_network_image_ce/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart' as riverpod;
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../core/constants/app_env.dart';
 import '../../../core/constants/app_strings.dart';
-import '../../../core/providers/app_state.dart';
-import '../../auth/presentation/auth_provider.dart';
-import '../../auth/presentation/login_page.dart';
-import '../../detail/presentation/movie_detail_page.dart';
-import '../../feed/presentation/feed_page.dart'; 
-import '../../members/presentation/members_page.dart'; 
-import '../../settings/presentation/settings_page.dart'; 
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_radius.dart';
+import '../../../core/theme/app_spacing.dart';
+import '../../../core/theme/app_typography.dart';
+import '../../../core/widgets/app_error_state.dart';
+import '../../../core/widgets/empty_state.dart';
+import '../../../core/widgets/loading_indicator.dart';
+import '../../favorites/presentation/favorite_provider.dart';
+import '../domain/profile_models.dart';
+import 'profile_provider.dart';
 
-class ProfilePage extends StatelessWidget {
+/// Halaman profil pengguna yang sedang login.
+class ProfilePage extends ConsumerWidget {
   const ProfilePage({super.key});
 
   static const AppText text = AppStrings.id;
 
-  void _showEditProfileDialog(BuildContext context, AppState appState) {
-    final usernameController = TextEditingController(text: appState.userUsername);
-    final emailController = TextEditingController(text: appState.userEmail);
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          backgroundColor: const Color(0xFF2C3440),
-          title: Text(text.editProfile, style: const TextStyle(color: Colors.white)),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: usernameController,
-                style: const TextStyle(color: Colors.white),
-                decoration: InputDecoration(
-                  labelText: text.usernameLabel,
-                  labelStyle: const TextStyle(color: Colors.grey),
-                  enabledBorder: const UnderlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
-                  focusedBorder: const UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFF00E054))),
-                ),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: emailController,
-                style: const TextStyle(color: Colors.white),
-                decoration: InputDecoration(
-                  labelText: text.email,
-                  labelStyle: const TextStyle(color: Colors.grey),
-                  enabledBorder: const UnderlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
-                  focusedBorder: const UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFF00E054))),
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text(text.cancel, style: const TextStyle(color: Colors.grey)),
-            ),
-            TextButton(
-              onPressed: () {
-                appState.updateProfile(usernameController.text, emailController.text);
-                Navigator.pop(context);
-              },
-              child: Text(text.save, style: const TextStyle(color: Color(0xFF00E054), fontWeight: FontWeight.bold)),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  // Fungsi untuk memunculkan form buat List
-  void _showCreateListDialog(BuildContext context, AppState appState) {
-    final nameController = TextEditingController();
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          backgroundColor: const Color(0xFF2C3440),
-          title: Text(text.createList, style: const TextStyle(color: Colors.white)),
-          content: TextField(
-            controller: nameController,
-            style: const TextStyle(color: Colors.white),
-            decoration: InputDecoration(
-              labelText: text.listNameHint,
-              labelStyle: const TextStyle(color: Colors.grey),
-              enabledBorder: const UnderlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
-              focusedBorder: const UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFF00E054))),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text(text.cancel, style: const TextStyle(color: Colors.grey)),
-            ),
-            TextButton(
-              onPressed: () {
-                if (nameController.text.isNotEmpty) {
-                  // Simulasi menambahkan list dengan 3 film contoh
-                  appState.addList(nameController.text, [
-                    {'title': 'Digger', 'image': 'https://image.tmdb.org/t/p/w500/1E5baAaEse26fej7uHcjOgEE2t2.jpg', 'year': '2026', 'director': 'Alejandro G. Iñárritu', 'genre': 'Drama', 'duration': '129 mins', 'tagline': '', 'synopsis': ''},
-                    {'title': 'Resident Evil', 'image': 'https://image.tmdb.org/t/p/w500/7QCbZcn2t25H8DkYq7eF4vO8uJk.jpg', 'year': '2024', 'director': 'Zach Cregger', 'genre': 'Horror', 'duration': '110 mins', 'tagline': '', 'synopsis': ''},
-                    {'title': 'Spider-Man', 'image': 'https://image.tmdb.org/t/p/w500/8Vt6mWEReuy4Of61Lnj5Xj704m8.jpg', 'year': '2026', 'director': 'Destin Daniel Cretton', 'genre': 'Action', 'duration': '140 mins', 'tagline': '', 'synopsis': ''},
-                  ]);
-                }
-                Navigator.pop(context);
-              },
-              child: Text(text.createList, style: const TextStyle(color: Color(0xFF00E054), fontWeight: FontWeight.bold)),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   @override
-  Widget build(BuildContext context) {
-    final appState = Provider.of<AppState>(context);
+  Widget build(BuildContext context, WidgetRef ref) {
+    final AsyncValue<UserProfile> profileAsync = ref.watch(profileProvider);
+    final AsyncValue<List<FavoriteFilm>> favoritesAsync =
+        ref.watch(favoritesProvider);
+    final AsyncValue<List<Movie>> filmsAsync = ref.watch(userFilmsProvider);
 
-    // JIKA BELUM LOGIN
-    if (!appState.isLoggedIn) {
-      return Scaffold(
-        backgroundColor: const Color(0xFF14181C),
-        body: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 480),
-            child: Column(
-              children: [
-                const Spacer(flex: 2),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(width: 60, height: 60, decoration: const BoxDecoration(color: Color(0xFFFF8000), shape: BoxShape.circle)),
-                    Transform.translate(
-                      offset: const Offset(-15, 0),
-                      child: Container(width: 60, height: 60, decoration: const BoxDecoration(color: Color(0xFF00E054), shape: BoxShape.circle)),
-                    ),
-                    Transform.translate(
-                      offset: const Offset(-30, 0),
-                      child: Container(width: 60, height: 60, decoration: const BoxDecoration(color: Color(0xFF40BCF4), shape: BoxShape.circle)),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                Text(text.appName, style: const TextStyle(color: Colors.white, fontSize: 40, fontWeight: FontWeight.w900)),
-                const Spacer(flex: 3),
-                Container(height: 1, color: const Color(0xFF2C3440)),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 24),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      InkWell(
-                        onTap: () {
-                          Navigator.push(context, MaterialPageRoute(builder: (context) => const LoginPage()));
-                        },
-                        child: Text(text.loginTitle, style: const TextStyle(color: Color(0xFFB0C0D0), fontSize: 22)),
-                      ),
-                      const SizedBox(height: 24),
-                      Text(text.registerTitle, style: const TextStyle(color: Color(0xFFB0C0D0), fontSize: 22)),
-                    ],
-                  ),
-                ),
-                Container(height: 1, color: const Color(0xFF2C3440)),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 24),
-                  child: Text(text.artworkAttribution, style: const TextStyle(color: Color(0xFF6B7A8D), fontSize: 14)),
-                ),
-              ],
-            ),
+    return Scaffold(
+      backgroundColor: AppColors.letterboxdBg,
+      appBar: AppBar(
+        backgroundColor: AppColors.letterboxdBg,
+        elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings_outlined),
+            color: AppColors.textPrimaryDark,
+            onPressed: () => context.push('/settings'),
+          ),
+        ],
+      ),
+      body: profileAsync.when(
+        loading: () => const Center(
+          child: LoadingIndicator(message: 'Memuat profil'),
+        ),
+        error: (Object error, StackTrace stackTrace) => Center(
+          child: AppErrorState(
+            message: error.toString(),
+            onRetry: () => ref.read(profileProvider.notifier).reload(),
           ),
         ),
-      );
-    }
+        data: (UserProfile profile) {
+          final UserStats stats = profile.stats ??
+              const UserStats(
+                totalWatched: 0,
+                totalWatchlist: 0,
+                totalReviews: 0,
+              );
 
-    // JIKA SUDAH LOGIN
-    return DefaultTabController(
-      length: 3, // Sekarang ada 3 Tab (Diary, Watchlist, Lists)
-      child: Scaffold(
-        backgroundColor: const Color(0xFF14181C),
-        appBar: AppBar(
-          backgroundColor: const Color(0xFF14181C),
-          elevation: 0,
-          title: Text(text.profileTitle, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-          centerTitle: true,
-          automaticallyImplyLeading: false, 
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.settings, color: Colors.white),
-              onPressed: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => const SettingsPage()));
-              },
-            ),
-          ],
-        ),
-        body: NestedScrollView(
-          headerSliverBuilder: (context, innerBoxIsScrolled) {
-            return [
-              SliverToBoxAdapter(
-                child: Column(
-                  children: [
-                    const SizedBox(height: 20),
-                    GestureDetector(
-                      onTap: () => _showEditProfileDialog(context, appState),
-                      child: const CircleAvatar(
-                        radius: 50,
-                        backgroundColor: Color(0xFF2C3440),
-                        child: Icon(Icons.person, size: 60, color: Colors.white),
+          return DefaultTabController(
+            length: 5,
+            child: NestedScrollView(
+              headerSliverBuilder:
+                  (BuildContext context, bool innerBoxIsScrolled) {
+                return <Widget>[
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.md,
                       ),
-                    ),
-                    const SizedBox(height: 16),
-                    
-                    Text(
-                      appState.userUsername, 
-                      style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      appState.userEmail, 
-                      style: const TextStyle(color: Colors.grey, fontSize: 16)
-                    ),
-                    
-                    const SizedBox(height: 20),
-                    
-                    // Statistik
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        _buildStat('${appState.diary.length}', text.tabDiary),
-                        const SizedBox(width: 32),
-                        _buildStat('${appState.watchlist.length}', text.statWatchlist),
-                        const SizedBox(width: 32),
-                        _buildStat('${appState.userLists.length}', text.statLists), // Dinamis
-                      ],
-                    ),
-                    const SizedBox(height: 24),
-                    
-                    // TOMBOL NAVIGASI
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        alignment: WrapAlignment.center,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          ElevatedButton.icon(
-                            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const FeedPage())),
-                            icon: const Icon(Icons.rss_feed, color: Colors.white, size: 18),
-                            label: Text(text.feedTitle, style: const TextStyle(color: Colors.white)),
-                            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF445566)),
-                          ),
-                          ElevatedButton.icon(
-                            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const MembersPage())),
-                            icon: const Icon(Icons.people, color: Colors.black, size: 18),
-                            label: Text(text.membersTitle, style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
-                            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF40BCF4)),
-                          ),
-                          // TOMBOL CREATE LIST
-                          ElevatedButton.icon(
-                            onPressed: () => _showCreateListDialog(context, appState),
-                            icon: const Icon(Icons.add, color: Colors.black, size: 18),
-                            label: Text(text.createList, style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
-                            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF00E054)),
-                          ),
+                          _buildProfileHeader(context, profile),
+                          const SizedBox(height: AppSpacing.lg),
+                          _buildStatsRow(stats),
+                          const SizedBox(height: AppSpacing.lg),
+                          _buildFourFavourites(context, favoritesAsync),
+                          const SizedBox(height: AppSpacing.md),
                         ],
                       ),
                     ),
-                    const SizedBox(height: 16),
-                    
-                    // TOMBOL LOGOUT
-                    riverpod.Consumer(
-                      builder: (context, ref, _) => OutlinedButton.icon(
-                        onPressed: () async {
-                          await ref.read(authProvider.notifier).signOut();
-                          if (!context.mounted) return;
-                          Provider.of<AppState>(context, listen: false).logout();
-                          Navigator.popUntil(context, (route) => route.isFirst);
-                        },
-                        icon: const Icon(Icons.logout, color: Colors.redAccent, size: 18),
-                        label: Text(text.logout, style: const TextStyle(color: Colors.redAccent)),
-                        style: OutlinedButton.styleFrom(
-                          side: const BorderSide(color: Color(0xFF2C3440)),
-                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-                        ),
+                  ),
+                  SliverPersistentHeader(
+                    pinned: true,
+                    delegate: _ProfileTabBarDelegate(
+                      tabBar: TabBar(
+                        isScrollable: true,
+                        tabAlignment: TabAlignment.start,
+                        labelColor: AppColors.primaryDark,
+                        unselectedLabelColor: AppColors.textSecondaryDark,
+                        indicatorColor: AppColors.primaryDark,
+                        indicatorSize: TabBarIndicatorSize.label,
+                        tabs: [
+                          Tab(text: text.tabFilms),
+                          Tab(text: text.tabReviews),
+                          Tab(text: text.tabDiary),
+                          Tab(text: text.tabWatchlist),
+                          Tab(text: text.tabLists),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 20),
-                  ],
-                ),
-              ),
-              SliverPersistentHeader(
-                delegate: _SliverAppBarDelegate(
-                  TabBar(
-                    indicatorColor: const Color(0xFF00E054),
-                    indicatorWeight: 3,
-                    labelColor: Colors.white,
-                    unselectedLabelColor: Colors.grey,
-                    tabs: [
-                      Tab(text: text.tabDiary),
-                      Tab(text: text.watchlistTitle),
-                      Tab(text: text.tabLists), // TAB BARU
-                    ],
                   ),
-                ),
-                pinned: true,
+                ];
+              },
+              body: TabBarView(
+                children: [
+                  _buildFilmsTab(context, ref, filmsAsync),
+                  _buildEmptyTab(context, text.noReview, Icons.rate_review_outlined),
+                  _buildEmptyTab(context, text.diaryEmpty, Icons.calendar_today_outlined),
+                  _buildEmptyTab(context, text.watchlistEmpty, Icons.bookmark_border_outlined),
+                  _buildEmptyTab(context, text.profileListsEmpty, Icons.list_alt_outlined),
+                ],
               ),
-            ];
-          },
-          body: TabBarView(
-            children: [
-              _buildDiaryTab(appState.diary),
-              _buildWatchlistTab(appState.watchlist),
-              _buildListsTab(appState.userLists), // ISI TAB BARU
-            ],
-          ),
-        ),
+            ),
+          );
+        },
       ),
     );
   }
 
-  Widget _buildStat(String count, String label) {
-    return Column(
+  /// Header profil: avatar 72px, nama, username, tombol edit profile.
+  Widget _buildProfileHeader(BuildContext context, UserProfile profile) {
+    final String initial =
+        profile.name.isNotEmpty ? profile.name[0].toUpperCase() : '?';
+    final String usernameText = profile.username.isNotEmpty
+        ? profile.username
+        : profile.name.toLowerCase().replaceAll(' ', '');
+
+    return Row(
       children: [
-        Text(count, style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
-        const SizedBox(height: 4),
-        Text(label, style: const TextStyle(color: Colors.grey, fontSize: 12, letterSpacing: 1)),
+        SizedBox(
+          width: 72,
+          height: 72,
+          child: profile.avatarUrl != null && profile.avatarUrl!.isNotEmpty
+              ? ClipOval(
+                  child: CachedNetworkImage(
+                    imageUrl: AppEnv.assetUrl(profile.avatarUrl),
+                    fit: BoxFit.cover,
+                    placeholder: (BuildContext context, String url) =>
+                        Container(color: AppColors.surfaceDimDark),
+                    errorBuilder: (BuildContext context, Object error,
+                            StackTrace? stackTrace) =>
+                        CircleAvatar(
+                      radius: 36,
+                      backgroundColor: AppColors.surfaceDimDark,
+                      child: Text(
+                        initial,
+                        style: AppTypography.headlineMd.copyWith(
+                          color: AppColors.textPrimaryDark,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                )
+              : CircleAvatar(
+                  radius: 36,
+                  backgroundColor: AppColors.surfaceDimDark,
+                  child: Text(
+                    initial,
+                    style: AppTypography.headlineMd.copyWith(
+                      color: AppColors.textPrimaryDark,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+        ),
+        const SizedBox(width: AppSpacing.md),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                profile.name,
+                style: AppTypography.headlineSm.copyWith(
+                  color: AppColors.textPrimaryDark,
+                  fontWeight: FontWeight.bold,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                '@$usernameText',
+                style: AppTypography.bodyMd.copyWith(
+                  color: AppColors.textSecondaryDark,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              OutlinedButton(
+                onPressed: () => context.push('/settings'),
+                style: OutlinedButton.styleFrom(
+                  side: const BorderSide(color: AppColors.outlineLight),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(AppRadius.md),
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.md,
+                    vertical: AppSpacing.xs,
+                  ),
+                ),
+                child: Text(
+                  text.editProfile,
+                  style: AppTypography.labelMd.copyWith(
+                    color: AppColors.textPrimaryDark,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       ],
     );
   }
 
-  Widget _buildDiaryTab(List<Map<String, dynamic>> diaryList) {
-    if (diaryList.isEmpty) {
-      return Center(child: Text(text.profileDiaryEmpty, style: const TextStyle(color: Colors.grey)));
-    }
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: diaryList.length,
-      itemBuilder: (context, index) {
-        final movie = diaryList[index];
-        return Container(
-          margin: const EdgeInsets.only(bottom: 16),
-          decoration: const BoxDecoration(border: Border(bottom: BorderSide(color: Color(0xFF2C3440), width: 1))),
-          padding: const EdgeInsets.only(bottom: 16),
-          child: Row(
-            children: [
-              Container(
-                width: 50, height: 75,
-                decoration: BoxDecoration(
-                  color: Colors.grey[800],
-                  borderRadius: BorderRadius.circular(4),
-                  image: DecorationImage(image: NetworkImage(movie['image']), fit: BoxFit.cover),
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(movie['title'], style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 4),
-                    Row(
-                      children: List.generate(5, (starIndex) {
-                        return Icon(
-                          starIndex < movie['user_rating'] ? Icons.star : Icons.star_border, 
-                          color: const Color(0xFF00E054), size: 14
-                        );
-                      }),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      '"${movie['user_review']}"',
-                      style: const TextStyle(color: Colors.grey, fontSize: 13, fontStyle: FontStyle.italic),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildWatchlistTab(List<Map<String, dynamic>> watchlist) {
-    if (watchlist.isEmpty) {
-      return Center(child: Text(text.watchlistEmpty, style: const TextStyle(color: Colors.grey)));
-    }
-    return GridView.builder(
-      padding: const EdgeInsets.all(16),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3, crossAxisSpacing: 8, mainAxisSpacing: 8, childAspectRatio: 2 / 3,
+  /// Statistik 3 kolom: X Films, Y This Year, Z Lists.
+  Widget _buildStatsRow(UserStats stats) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        vertical: AppSpacing.md,
+        horizontal: AppSpacing.sm,
       ),
-      itemCount: watchlist.length,
-      itemBuilder: (context, index) {
-        final movie = watchlist[index];
-        return GestureDetector(
-          onTap: () {
-            Navigator.push(context, MaterialPageRoute(builder: (context) => MovieDetailPage(movieData: movie)));
-          },
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.grey[800],
-              borderRadius: BorderRadius.circular(4),
-              image: DecorationImage(image: NetworkImage(movie['image']), fit: BoxFit.cover),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceDark,
+        borderRadius: BorderRadius.circular(AppRadius.md),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: _buildStatItem(
+              '${stats.totalWatched}',
+              text.statFilms,
             ),
           ),
+          Container(
+            width: 1,
+            height: AppSpacing.xl,
+            color: AppColors.surfaceDimDark,
+          ),
+          Expanded(
+            child: _buildStatItem(
+              '${stats.thisYearCount}',
+              text.statThisYear,
+            ),
+          ),
+          Container(
+            width: 1,
+            height: AppSpacing.xl,
+            color: AppColors.surfaceDimDark,
+          ),
+          Expanded(
+            child: _buildStatItem(
+              '${stats.totalLists}',
+              text.statLists,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatItem(String count, String label) {
+    return Column(
+      children: [
+        Text(
+          count,
+          style: AppTypography.headlineSm.copyWith(
+            fontWeight: FontWeight.bold,
+            color: AppColors.textPrimaryDark,
+          ),
+        ),
+        const SizedBox(height: AppSpacing.xs),
+        Text(
+          label,
+          style: AppTypography.labelSm.copyWith(
+            color: AppColors.textSecondaryDark,
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Four Favourites (4 slot poster menempel rapat gap 6px).
+  Widget _buildFourFavourites(
+    BuildContext context,
+    AsyncValue<List<FavoriteFilm>> favoritesAsync,
+  ) {
+    final List<FavoriteFilm> favorites =
+        favoritesAsync.value ?? const <FavoriteFilm>[];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              text.favoriteFilms,
+              style: AppTypography.labelLg.copyWith(
+                color: AppColors.textSecondaryDark,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 1.2,
+              ),
+            ),
+            IconButton(
+              icon: const Icon(
+                Icons.edit_outlined,
+                size: AppSpacing.md + AppSpacing.xs,
+                color: AppColors.textSecondaryDark,
+              ),
+              onPressed: () => context.push('/favorites/edit'),
+            ),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        Row(
+          children: [
+            for (int pos = 1; pos <= 4; pos++) ...[
+              if (pos > 1) const SizedBox(width: AppSpacing.posterGap),
+              Expanded(
+                child: _buildFavouriteSlot(context, favorites, pos),
+              ),
+            ],
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFavouriteSlot(
+    BuildContext context,
+    List<FavoriteFilm> favorites,
+    int position,
+  ) {
+    FavoriteFilm? film;
+    for (final FavoriteFilm item in favorites) {
+      if (item.position == position) {
+        film = item;
+        break;
+      }
+    }
+
+    return AspectRatio(
+      aspectRatio: 2 / 3,
+      child: Material(
+        color: AppColors.surfaceDimDark,
+        borderRadius: BorderRadius.circular(AppRadius.sm),
+        child: InkWell(
+          onTap: () => context.push('/favorites/edit'),
+          borderRadius: BorderRadius.circular(AppRadius.sm),
+          child: film != null && film.movie.posterUrl != null
+              ? ClipRRect(
+                  borderRadius: BorderRadius.circular(AppRadius.sm),
+                  child: CachedNetworkImage(
+                    imageUrl: AppEnv.assetUrl(film.movie.posterUrl),
+                    fit: BoxFit.cover,
+                    placeholder: (BuildContext context, String url) =>
+                        Container(color: AppColors.surfaceDimDark),
+                    errorBuilder: (BuildContext context, Object error,
+                            StackTrace? stackTrace) =>
+                        const Center(
+                      child: Icon(
+                        Icons.movie_outlined,
+                        color: AppColors.textSecondaryDark,
+                      ),
+                    ),
+                  ),
+                )
+              : const Center(
+                  child: Icon(
+                    Icons.add,
+                    color: AppColors.textSecondaryDark,
+                    size: AppSpacing.lg,
+                  ),
+                ),
+        ),
+      ),
+    );
+  }
+
+  /// Tab FILMS: GridView 4 kolom poster film watched.
+  Widget _buildFilmsTab(
+    BuildContext context,
+    WidgetRef ref,
+    AsyncValue<List<Movie>> filmsAsync,
+  ) {
+    return filmsAsync.when(
+      loading: () => const Center(
+        child: LoadingIndicator(message: 'Memuat film'),
+      ),
+      error: (Object error, StackTrace stackTrace) => Center(
+        child: AppErrorState(
+          message: error.toString(),
+          onRetry: () => ref.refresh(userFilmsProvider),
+        ),
+      ),
+      data: (List<Movie> films) {
+        if (films.isEmpty) {
+          return Center(
+            child: EmptyState(
+              icon: Icons.movie_outlined,
+              message: text.watchedEmpty,
+            ),
+          );
+        }
+
+        return GridView.builder(
+          padding: const EdgeInsets.all(AppSpacing.md),
+          itemCount: films.length,
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 4,
+            childAspectRatio: 2 / 3,
+            crossAxisSpacing: AppSpacing.sm,
+            mainAxisSpacing: AppSpacing.sm,
+          ),
+          itemBuilder: (BuildContext context, int index) {
+            final Movie movie = films[index];
+            return ClipRRect(
+              borderRadius: BorderRadius.circular(AppRadius.sm),
+              child: CachedNetworkImage(
+                imageUrl: AppEnv.assetUrl(movie.posterUrl),
+                fit: BoxFit.cover,
+                placeholder: (BuildContext context, String url) =>
+                    Container(color: AppColors.surfaceDimDark),
+                errorBuilder: (BuildContext context, Object error,
+                        StackTrace? stackTrace) =>
+                    Container(
+                  color: AppColors.surfaceDimDark,
+                  padding: const EdgeInsets.all(AppSpacing.xs),
+                  alignment: Alignment.center,
+                  child: Text(
+                    movie.title,
+                    style: AppTypography.labelSm.copyWith(
+                      color: AppColors.textSecondaryDark,
+                    ),
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ),
+            );
+          },
         );
       },
     );
   }
 
-  // WIDGET UNTUK TAB LISTS
-  Widget _buildListsTab(List<Map<String, dynamic>> userLists) {
-    if (userLists.isEmpty) {
-      return Center(child: Text(text.profileListsEmpty, style: const TextStyle(color: Colors.grey)));
-    }
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: userLists.length,
-      itemBuilder: (context, index) {
-        final list = userLists[index];
-        return Container(
-          margin: const EdgeInsets.only(bottom: 16),
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(color: const Color(0xFF2C3440), borderRadius: BorderRadius.circular(8)),
-          child: Row(
-            children: [
-              const Icon(Icons.format_list_bulleted, color: Color(0xFF00E054), size: 40),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(list['name'], style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 4),
-                    Text(text.filmCount(list['movies'].length), style: const TextStyle(color: Colors.grey, fontSize: 14)),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        );
-      },
+  /// Tampilan kosong untuk tab-tab lainnya.
+  Widget _buildEmptyTab(BuildContext context, String message, IconData icon) {
+    return Center(
+      child: EmptyState(
+        icon: icon,
+        message: message,
+      ),
     );
   }
 }
 
-class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
-  final TabBar _tabBar;
-  _SliverAppBarDelegate(this._tabBar);
+/// Persistent header delegate untuk TabBar profil.
+class _ProfileTabBarDelegate extends SliverPersistentHeaderDelegate {
+  const _ProfileTabBarDelegate({required this.tabBar});
+
+  final TabBar tabBar;
+
   @override
-  double get minExtent => _tabBar.preferredSize.height;
+  double get minExtent => tabBar.preferredSize.height;
+
   @override
-  double get maxExtent => _tabBar.preferredSize.height;
+  double get maxExtent => tabBar.preferredSize.height;
+
   @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return Container(color: const Color(0xFF14181C), child: _tabBar);
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
+    return Container(
+      color: AppColors.letterboxdBg,
+      child: tabBar,
+    );
   }
+
   @override
-  bool shouldRebuild(_SliverAppBarDelegate oldDelegate) => false;
+  bool shouldRebuild(covariant _ProfileTabBarDelegate oldDelegate) {
+    return oldDelegate.tabBar != tabBar;
+  }
 }
