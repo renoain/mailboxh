@@ -3,6 +3,14 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../features/admin/presentation/pages/admin_dashboard_page.dart';
+import '../../features/admin/presentation/admin_layout.dart';
+import '../../features/admin/presentation/pages/admin_batch_import_page.dart';
+import '../../features/admin/presentation/pages/admin_genres_page.dart';
+import '../../features/admin/presentation/pages/admin_movie_form_page.dart';
+import '../../features/admin/presentation/pages/admin_movies_page.dart';
+import '../../features/admin/presentation/pages/admin_reviews_page.dart';
+import '../../features/admin/presentation/pages/admin_users_page.dart';
 import '../../features/auth/presentation/login_page.dart';
 import '../../features/auth/presentation/register_page.dart';
 import '../../features/catalog/presentation/home_page.dart';
@@ -66,6 +74,16 @@ abstract final class AppRoutes {
   static const String settings = '/settings';
 
   static const String watchlist = '/watchlist';
+
+  // Rute admin
+  static const String admin = '/admin';
+  static const String adminDashboard = '/admin/dashboard';
+  static const String adminMovies = '/admin/movies';
+  static const String adminMovieForm = '/admin/movies/form';
+  static const String adminGenres = '/admin/genres';
+  static const String adminUsers = '/admin/users';
+  static const String adminReviews = '/admin/reviews';
+  static const String adminBatchImport = '/admin/batch-import';
 
   static const List<String> publicPages = [
     splash,
@@ -227,6 +245,43 @@ GoRouter buildRouter() {
         path: AppRoutes.log,
         builder: (BuildContext context, GoRouterState state) =>
             const LogFormPage(),
+      ),
+
+      // Rute admin dilindungi oleh AdminLayout dengan pengecekan role admin.
+      GoRoute(
+        path: AppRoutes.adminDashboard,
+        builder: (BuildContext context, GoRouterState state) =>
+            AdminLayout(child: const AdminDashboardPage()),
+      ),
+      GoRoute(
+        path: AppRoutes.adminMovies,
+        builder: (BuildContext context, GoRouterState state) =>
+            AdminLayout(child: const AdminMoviesPage()),
+      ),
+      GoRoute(
+        path: AppRoutes.adminMovieForm,
+        builder: (BuildContext context, GoRouterState state) =>
+            AdminLayout(child: const AdminMovieFormPage()),
+      ),
+      GoRoute(
+        path: AppRoutes.adminGenres,
+        builder: (BuildContext context, GoRouterState state) =>
+            AdminLayout(child: const AdminGenresPage()),
+      ),
+      GoRoute(
+        path: AppRoutes.adminUsers,
+        builder: (BuildContext context, GoRouterState state) =>
+            AdminLayout(child: const AdminUsersPage()),
+      ),
+      GoRoute(
+        path: AppRoutes.adminReviews,
+        builder: (BuildContext context, GoRouterState state) =>
+            AdminLayout(child: const AdminReviewsPage()),
+      ),
+      GoRoute(
+        path: AppRoutes.adminBatchImport,
+        builder: (BuildContext context, GoRouterState state) =>
+            AdminLayout(child: const AdminBatchImportPage()),
       ),
     ],
     errorBuilder: (BuildContext context, GoRouterState state) => Scaffold(

@@ -231,6 +231,11 @@ class AppText {
   final String adminLists;
   final String adminTags;
   final String adminAuditLogs;
+  final String adminAddMovie;
+  final String adminUploadPoster;
+  final String adminBatchImport;
+  final String adminRoleAdmin;
+  final String adminRoleUser;
   final String languageIndonesian;
   final String languageEnglish;
 
@@ -419,6 +424,11 @@ class AppText {
     adminLists: 'List',
     adminTags: 'Tag',
     adminAuditLogs: 'Log Aktivitas',
+    adminAddMovie: 'Tambah Film',
+    adminUploadPoster: 'Pilih Poster',
+    adminBatchImport: 'Impor Batch',
+    adminRoleAdmin: 'Admin',
+    adminRoleUser: 'User',
     languageIndonesian: 'Indonesia',
     languageEnglish: 'Inggris',
     darkMode: 'Mode gelap',
@@ -604,6 +614,11 @@ class AppText {
     adminLists: 'Lists',
     adminTags: 'Tags',
     adminAuditLogs: 'Activity Logs',
+    adminAddMovie: 'Add Film',
+    adminUploadPoster: 'Choose Poster',
+    adminBatchImport: 'Batch Import',
+    adminRoleAdmin: 'Admin',
+    adminRoleUser: 'User',
     languageIndonesian: 'Indonesian',
     languageEnglish: 'English',
     darkMode: 'Dark mode',
@@ -789,6 +804,11 @@ class AppText {
     required this.adminLists,
     required this.adminTags,
     required this.adminAuditLogs,
+    required this.adminAddMovie,
+    required this.adminUploadPoster,
+    required this.adminBatchImport,
+    required this.adminRoleAdmin,
+    required this.adminRoleUser,
     required this.languageIndonesian,
     required this.languageEnglish,
     required this.darkMode,

@@ -1,5 +1,42 @@
 ﻿# CHANGELOG - Mailboxh
 
+## [2026-10-19 11:00] - Implementasi Fitur Admin di Flutter
+
+Status: Selesai
+
+File yang dibuat:
+- frontend/lib/features/admin/domain/admin_models.dart (dibuat, model DashboardSummary, AdminMovie, AdminGenre, AdminUser, AdminReview, BatchImportResult)
+- frontend/lib/features/admin/domain/admin_repository.dart (dibuat, interface AdminRepository)
+- frontend/lib/features/admin/data/admin_repository.dart (dibuat, implementasi AdminRepositoryImpl dengan endpoint admin backend)
+- frontend/lib/features/admin/presentation/admin_provider.dart (dibuat, AdminNotifier dengan NotifierProvider)
+- frontend/lib/features/admin/presentation/admin_layout.dart (dibuat, layout dengan drawer dan guard role admin)
+- frontend/lib/features/admin/presentation/pages/admin_dashboard_page.dart (dibuat, halaman dashboard statistik)
+- frontend/lib/features/admin/presentation/pages/admin_movies_page.dart (dibuat, halaman kelola film)
+- frontend/lib/features/admin/presentation/pages/admin_movie_form_page.dart (dibuat, halaman form film dengan upload poster)
+- frontend/lib/features/admin/presentation/pages/admin_users_page.dart (dibuat, halaman kelola user dan role)
+- frontend/lib/features/admin/presentation/pages/admin_reviews_page.dart (dibuat, halaman moderasi review)
+- frontend/lib/features/admin/presentation/pages/admin_genres_page.dart (dibuat, halaman kelola genre)
+- frontend/lib/features/admin/presentation/pages/admin_batch_import_page.dart (dibuat, halaman impor batch ZIP)
+
+File yang diubah:
+- frontend/lib/pubspec.yaml (diedit, tambah dependensi image_picker dan file_picker)
+- frontend/lib/core/constants/app_strings.dart (diedit, tambah string admin: adminAddMovie, adminUploadPoster, adminBatchImport, adminRoleAdmin, adminRoleUser)
+- frontend/lib/core/router/app_router.dart (diedit, tambah 7 route admin dengan AdminLayout wrapper)
+- CHANGELOG.md (diedit, entri task ini ditambahkan di paling atas)
+
+Catatan:
+- Backend tidak diubah; semua endpoint admin sudah ada di backend/routes/api.php.
+- Admin route dilindungi oleh AdminLayout yang memeriksa role == 'admin' lewat authProvider.
+- Route admin: /admin/dashboard, /admin/movies, /admin/movies/form, /admin/genres, /admin/users, /admin/reviews, /admin/batch-import.
+- AdminMovieFormPage menggunakan image_picker untuk upload poster dan MultipartFile (Dio) untuk multipart/form-data.
+- AdminBatchImportPage menggunakan file_picker untuk memilih file ZIP.
+- State management menggunakan NotifierProvider (Riverpod 3.x) bukan StateNotifier.
+
+Verifikasi:
+- hasil linter/analyze: OK (No issues found)
+- hasil test frontend: OK (18 test pass)
+- hasil test backend: belum ditest (task tidak menyentuh backend)
+
 ## [2026-10-19 10:00] - Pasang GoRouter dan Daftarkan Semua Route Frontend
 
 Status: Selesai
