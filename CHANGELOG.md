@@ -1,5 +1,107 @@
 ﻿# CHANGELOG - Mailboxh
 
+## [2026-10-19 11:20] - Fitur Log, Review, Diary, dan Tag
+
+Status: Selesai
+
+File yang diubah:
+- frontend/lib/features/log/domain/log_models.dart (dibuat, LogDraft)
+- frontend/lib/features/log/domain/log_repository.dart (dibuat, interface submit)
+- frontend/lib/features/log/data/log_repository.dart (dibuat, POST /log atomik)
+- frontend/lib/features/log/presentation/log_provider.dart (dibuat, LogFormController)
+- frontend/lib/features/log/presentation/log_form_page.dart (dibuat, form log dengan tanggal, rating, catatan, review, tag)
+- frontend/lib/features/review/domain/review_models.dart (dibuat, Review)
+- frontend/lib/features/review/domain/review_repository.dart (dibuat, interface createReview)
+- frontend/lib/features/review/data/review_model.dart (dibuat, parser JSON review)
+- frontend/lib/features/review/data/review_repository.dart (dibuat, POST /reviews)
+- frontend/lib/features/review/presentation/review_provider.dart (dibuat, ReviewFormController)
+- frontend/lib/features/review/presentation/review_form_page.dart (dibuat, form review dengan rating wajib)
+- frontend/lib/features/tags/domain/tag_models.dart (dibuat, Tag)
+- frontend/lib/features/tags/domain/tag_repository.dart (dibuat, interface fetchTags dan createTag)
+- frontend/lib/features/tags/data/tag_model.dart (dibuat, parser JSON tag)
+- frontend/lib/features/tags/data/tag_repository.dart (dibuat, GET dan POST /tags)
+- frontend/lib/features/tags/presentation/tag_provider.dart (dibuat, tagsProvider dan TagCreateController)
+- frontend/lib/features/tags/presentation/widgets/tag_selector.dart (dibuat, pemilih tag)
+- frontend/lib/features/diary/domain/diary_models.dart (dibuat, DiaryTag, DiaryEntry, DiaryDay)
+- frontend/lib/features/diary/domain/diary_repository.dart (dibuat, interface fetchDiary)
+- frontend/lib/features/diary/data/diary_model.dart (dibuat, parser JSON diary)
+- frontend/lib/features/diary/data/diary_repository.dart (dibuat, GET /diary)
+- frontend/lib/features/diary/presentation/diary_provider.dart (dibuat, diaryProvider)
+- frontend/lib/features/diary/presentation/diary_page.dart (diedit, timeline entri per tanggal menggantikan placeholder)
+- frontend/lib/features/detail/presentation/movie_detail_page.dart (diedit, detail asli berbasis Riverpod dengan aksi Log dan Review)
+- frontend/lib/features/detail/presentation/legacy_movie_detail_page.dart (dibuat, menyimpan detail mock lama)
+- frontend/lib/features/catalog/presentation/home_page.dart (diedit, kartu film membuka Detail)
+- frontend/lib/features/catalog/presentation/search_page.dart (diedit, hasil pencarian membuka Detail)
+- frontend/lib/features/watchlist/presentation/watchlist_page.dart (diedit, memakai LegacyMovieDetailPage)
+- frontend/lib/features/profile/presentation/profile_page.dart (diedit, memakai LegacyMovieDetailPage)
+- frontend/lib/core/constants/app_strings.dart (diedit, tambah string logTitle, logNoteLabel, logRatingLabel, logReviewLabel, logTagsLabel, logDateLabel, logSuccess, logTagLimitReached, reviewRatingRequired)
+- frontend/lib/main.dart (diedit, inisialisasi locale intl id_ID dan en_US)
+- frontend/test/helpers/fakes.dart (diedit, tambah fake repository log, diary, review, tag)
+- frontend/test/helpers/test_locale.dart (dibuat, inisialisasi locale untuk test)
+- frontend/test/features/log/log_form_page_test.dart (dibuat)
+- frontend/test/features/review/review_form_page_test.dart (dibuat)
+- frontend/test/features/diary/diary_page_test.dart (dibuat)
+- frontend/test/features/tags/tag_selector_test.dart (dibuat)
+- frontend/test/features/catalog/movie_detail_page_test.dart (dibuat)
+- docs/UI_PAGES.md (diedit, tambah komponen TagSelector)
+- CHANGELOG.md (diedit)
+
+Catatan:
+- Form Log memakai POST /api/log agar watched, diary, rating, review, dan tag tersimpan atomik dalam satu permintaan.
+- Tag dikaitkan ke entri diary lewat POST /api/log, bukan ke review, sesuai kontrak backend.
+- Halaman Detail lama dengan data mock dipindah ke LegacyMovieDetailPage dan masih dipakai Watchlist dan Profile sampai keduanya memakai data asli.
+- Halaman Log, Review, dan Diary memakai AppFormatters.dateLong sehingga main.dart kini memuat data locale intl id_ID dan en_US.
+- Tidak ada dependency baru; intl sudah dipakai sebelumnya.
+
+Verifikasi:
+- hasil linter/analyze: OK (No issues found)
+- hasil test frontend: OK (29 test pass)
+- hasil test backend: belum ditest (task tidak menyentuh backend)
+
+## [2026-10-18 21:43] - Sesuaikan Halaman Login ke Referensi
+
+Status: Selesai
+
+File yang diubah:
+- frontend/lib/features/auth/presentation/login_page.dart (diedit, susunan baru meniru referensi: ilustrasi gradien memenuhi header, tombol tutup di pojok kanan atas, tiga lingkaran aksen di bawah gambar, judul di latar gelap, dua field putih, footer gelap dengan tombol Gabung, Atur ulang kata sandi, dan Masuk hijau terang; responsif dan kontrak auth tidak berubah)
+- frontend/lib/core/constants/app_strings.dart (diedit, tambah string username dalam ID dan EN)
+- frontend/test/features/auth/login_page_test.dart (diedit, tambah assert label field dan tes render layar HP kecil)
+- docs/UI_PAGES.md (diedit, perbarui elemen, navigasi, dan catatan halaman Login)
+
+Catatan:
+- Field tetap mengirim email ke backend walau label tampil sebagai Nama pengguna, sehingga kontrak autentikasi tidak berubah.
+- Ilustrasi memakai placeholder gradien gelap dari token, tanpa aset atau dependency baru.
+- Tombol Atur ulang kata sandi menampilkan SnackBar belum tersedia karena endpoint reset belum ada.
+- Footer memakai susunan dua tombol sekunder sebaris dan tombol Masuk hijau terang di bawahnya agar tidak overflow di layar sempit.
+
+Verifikasi:
+- hasil linter/analyze: OK (No issues found)
+- hasil test frontend: OK (19 test pass)
+- hasil test backend: belum ditest (task tidak menyentuh backend)
+
+## [2026-10-18 21:14] - Redesain Halaman Login
+
+Status: Selesai
+
+File yang diubah:
+- frontend/lib/features/auth/presentation/login_page.dart (diedit, tata letak baru bergaya referensi: area poster gelap dengan tiga lingkaran aksen dan judul masuk, panel form putih, tombol Gabung, Atur ulang kata sandi, dan Masuk, responsif untuk HP dan desktop; kontrak auth, validasi, loading, error, dan navigasi dipertahankan)
+- frontend/lib/core/theme/app_colors.dart (diedit, tambah token accentOrange #FF8000, accentGreen #00E030, accentBlue #40BCF4)
+- frontend/lib/core/constants/app_strings.dart (diedit, tambah string loginHeadline, loginJoinButton, loginResetButton, loginGoButton, loginResetUnavailable dalam ID dan EN)
+- frontend/test/features/auth/login_page_test.dart (diedit, assert diselaraskan ke judul dan tombol baru)
+- docs/DESIGN_SYSTEM.md (diedit, tambah bagian 2.3 Aksen)
+- docs/UI_PAGES.md (diedit, perbarui elemen dan navigasi halaman Login)
+- CHANGELOG.md (diedit, entri ini)
+
+Catatan:
+- Area poster memakai placeholder gradien gelap dari token tanpa dependency atau gambar eksternal.
+- Tombol Atur ulang kata sandi menampilkan SnackBar belum tersedia karena endpoint reset belum ada.
+- Field tetap memakai email; kontrak backend, register_page.dart, auth_provider.dart, repository, dan route tidak diubah.
+
+Verifikasi:
+- hasil linter/analyze: OK (No issues found)
+- hasil test frontend: OK (18 test pass)
+- hasil test backend: belum ditest (task tidak menyentuh backend)
+
 ## [2026-10-19 08:19] - Perbaiki Log Interceptor dan Komentar Logger
 
 Status: Selesai

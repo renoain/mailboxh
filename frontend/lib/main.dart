@@ -1,16 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
 
 import 'core/constants/app_strings.dart';
+import 'core/utils/formatters.dart';
 import 'core/providers/app_state.dart';
 import 'features/splash/presentation/splash_page.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await initializeDateFormatting(AppFormatters.localeId);
+  await initializeDateFormatting(AppFormatters.localeEn);
   runApp(
     ProviderScope(
       child: ChangeNotifierProvider(
-        create: (context) => AppState(),
+        create: (BuildContext context) => AppState(),
         child: const MyApp(),
       ),
     ),

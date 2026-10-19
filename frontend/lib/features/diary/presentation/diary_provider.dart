@@ -2,5 +2,11 @@
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// Provider fitur diary. Diisi pada task implementasi endpoint.
-final Provider<int> diaryProvider = Provider<int>((Ref ref) => 0);
+import '../data/diary_repository.dart';
+import '../domain/diary_models.dart';
+
+/// Riwayat tontonan user yang dikelompokkan per tanggal.
+final FutureProvider<List<DiaryDay>> diaryProvider =
+    FutureProvider<List<DiaryDay>>(
+      (Ref ref) => ref.watch(diaryRepositoryProvider).fetchDiary(),
+    );

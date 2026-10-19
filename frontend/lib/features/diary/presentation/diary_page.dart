@@ -1,69 +1,121 @@
-import 'package:flutter/material.dart';
+// Halaman riwayat tontonan yang dikelompokkan per tanggal.
 
-class DiaryPage extends StatelessWidget {
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../core/constants/app_strings.dart';
+import '../../../core/theme/app_spacing.dart';
+import '../../../core/utils/formatters.dart';
+import '../../../core/widgets/app_error_state.dart';
+import '../../../core/widgets/empty_state.dart';
+import '../../../core/widgets/loading_indicator.dart';
+import '../../../core/widgets/movie_list_item.dart';
+import '../../../core/widgets/rating_stars.dart';
+import '../../../core/widgets/tag_chip.dart';
+import '../domain/diary_models.dart';
+import 'diary_provider.dart';
+
+/// Menampilkan entri diary yang dikelompokkan per tanggal.
+class DiaryPage extends ConsumerWidget {
   const DiaryPage({super.key});
 
+  static const AppText text = AppStrings.id;
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final AsyncValue<List<DiaryDay>> diary = ref.watch(diaryProvider);
     return Scaffold(
-      backgroundColor: const Color(0xFF14181C),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF14181C),
-        elevation: 0,
-        title: const Text('Your Diary', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-        centerTitle: true,
-      ),
-      body: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: 6,
-        itemBuilder: (context, index) {
-          return Container(
-            margin: const EdgeInsets.only(bottom: 16),
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: const Color(0xFF2C3440),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Row(
-              children: [
-                Column(
-                  children: [
-                    Text('Oct', style: TextStyle(color: Colors.grey[400], fontSize: 12)),
-                    Text('${15 - index}', style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
-                  ],
-                ),
-                const SizedBox(width: 16),
-                Container(
-                  width: 60, height: 90,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[800],
-                    borderRadius: BorderRadius.circular(4),
-                    image: const DecorationImage(
-                      image: NetworkImage('https://image.tmdb.org/t/p/w500/1E5baAaEse26fej7uHcjOgEE2t2.jpg'),
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text('Digger', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 4),
-                      Row(
-                        children: List.generate(4, (i) => const Icon(Icons.star, color: Color(0xFF00E054), size: 16)),
-                      ),
-                      const SizedBox(height: 8),
-                      const Text('"A brilliant movie, very trippy!"', style: TextStyle(color: Colors.grey, fontSize: 13, fontStyle: FontStyle.italic)),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+      appBar: AppBar(title: Text(text.diaryTitle)),
+      body: diary.when(
+        loading: () => const LoadingIndicator(isFullScreen: true),
+        error: (Object error, StackTrace stackTrace) =>
+            AppErrorState(onRetry: () => ref.invalidate(diaryProvider)),
+        data: (List<DiaryDay> days) {
+          if (days.isEmpty) {
+            return EmptyState(
+              icon: Icons.movie_outlined,
+              title: text.diaryEmpty,
+              message: text.emptyMessage,
+            );
+          }
+          return ListView.builder(
+            padding: const EdgeInsets.all(AppSpacing.md),
+            itemCount: days.length,
+            itemBuilder: (BuildContext context, int index) =>
+                _DiaryDaySection(day: days[index]),
           );
         },
       ),
+    );
+  }
+}
+
+/// Judul tanggal beserta entri tontonan pada hari itu.
+class _DiaryDaySection extends StatelessWidget {
+  const _DiaryDaySection({required this.day});
+
+  static const AppText text = AppStrings.id;
+
+  final DiaryDay day;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+          child: Text(
+            AppFormatters.dateLong(day.date, isIndonesian: text.isIndonesian),
+            style: Theme.of(context).textTheme.labelLarge,
+          ),
+        ),
+        for (final DiaryEntry entry in day.entries)
+          _DiaryEntryTile(entry: entry),
+      ],
+    );
+  }
+}
+
+/// Satu entri diary dengan poster, rating, catatan, dan tag.
+class _DiaryEntryTile extends StatelessWidget {
+  const _DiaryEntryTile({required this.entry});
+
+  final DiaryEntry entry;
+
+  @override
+  Widget build(BuildContext context) {
+    final String? subtitle =
+        entry.note ??
+        (entry.content == null ? null : AppFormatters.excerpt(entry.content!));
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        MovieListItem(
+          title: entry.movie.title,
+          posterPath: entry.movie.posterUrl,
+          releaseDate: entry.movie.releaseDate,
+          subtitle: subtitle,
+          trailing: (entry.rating ?? 0) > 0
+              ? RatingStars(value: entry.rating!, size: AppSpacing.md)
+              : null,
+        ),
+        if (entry.tags.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(
+              left: AppSpacing.sm,
+              bottom: AppSpacing.sm,
+            ),
+            child: Wrap(
+              spacing: AppSpacing.sm,
+              runSpacing: AppSpacing.xs,
+              children: <Widget>[
+                for (final DiaryTag tag in entry.tags) TagChip(label: tag.name),
+              ],
+            ),
+          ),
+      ],
     );
   }
 }

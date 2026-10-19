@@ -13,6 +13,7 @@ import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/loading_indicator.dart';
 import '../../../core/widgets/movie_card.dart';
 import '../../../core/widgets/section_header.dart';
+import '../../detail/presentation/movie_detail_page.dart';
 import '../../members/presentation/members_page.dart';
 import '../../settings/presentation/settings_page.dart';
 import '../domain/movie_models.dart';
@@ -149,11 +150,17 @@ class _MovieTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MovieCard(
-      title: movie.title,
-      posterPath: movie.posterUrl,
-      releaseDate: movie.releaseDate,
-    );
+            return MovieCard(
+              title: movie.title,
+              posterPath: movie.posterUrl,
+              releaseDate: movie.releaseDate,
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => MovieDetailPage(movie: movie),
+                ),
+              ),
+            );
   }
 }
 
@@ -176,43 +183,52 @@ class _FeaturedList extends StatelessWidget {
             const SizedBox(width: AppSpacing.sm),
         itemBuilder: (BuildContext context, int index) {
           final Movie movie = movies[index];
-          return ClipRRect(
+          return InkWell(
             borderRadius: BorderRadius.circular(AppRadius.lg),
-            child: SizedBox(
-              width: AppSpacing.twoXl * 6,
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  if (movie.backdropUrl != null)
-                    CachedNetworkImage(
-                      imageUrl: movie.backdropUrl!,
-                      fit: BoxFit.cover,
-                      placeholder: (BuildContext context, String url) =>
-                          Container(color: scheme.surfaceContainerHighest),
-                      errorBuilder:
-                          (BuildContext context, Object error,
-                                  StackTrace? stackTrace) =>
-                              Container(color: scheme.surfaceContainerHighest),
-                    )
-                  else
-                    Container(color: scheme.surfaceContainerHighest),
-                  Align(
-                    alignment: Alignment.bottomLeft,
-                    child: Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(AppSpacing.md),
-                      color: scheme.surface.withValues(alpha: 0.75),
-                      child: Text(
-                        movie.title,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: AppTypography.headlineSm.copyWith(
-                          color: scheme.onSurface,
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => MovieDetailPage(movie: movie),
+              ),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(AppRadius.lg),
+              child: SizedBox(
+                width: AppSpacing.twoXl * 6,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    if (movie.backdropUrl != null)
+                      CachedNetworkImage(
+                        imageUrl: movie.backdropUrl!,
+                        fit: BoxFit.cover,
+                        placeholder: (BuildContext context, String url) =>
+                            Container(color: scheme.surfaceContainerHighest),
+                        errorBuilder:
+                            (BuildContext context, Object error,
+                                    StackTrace? stackTrace) =>
+                                Container(color: scheme.surfaceContainerHighest),
+                      )
+                    else
+                      Container(color: scheme.surfaceContainerHighest),
+                    Align(
+                      alignment: Alignment.bottomLeft,
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(AppSpacing.md),
+                        color: scheme.surface.withValues(alpha: 0.75),
+                        child: Text(
+                          movie.title,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTypography.headlineSm.copyWith(
+                            color: scheme.onSurface,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           );

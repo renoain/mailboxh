@@ -11,6 +11,7 @@ import '../../../core/widgets/app_error_state.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/loading_indicator.dart';
 import '../../../core/widgets/movie_card.dart';
+import '../../detail/presentation/movie_detail_page.dart';
 import '../domain/movie_models.dart';
 import 'catalog_provider.dart';
 
@@ -191,6 +192,12 @@ class _SearchPageState extends ConsumerState<SearchPage> {
               title: movie.title,
               posterPath: movie.posterUrl,
               releaseDate: movie.releaseDate,
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => MovieDetailPage(movie: movie),
+                ),
+              ),
             );
           },
         );

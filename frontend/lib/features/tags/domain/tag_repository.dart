@@ -1,8 +1,14 @@
-// Kontrak repository fitur tags.
+// Kontrak repository fitur tag.
 
-/// Kontrak akses data untuk fitur tags.
+import 'tag_models.dart';
+
+/// Kontrak akses data untuk tag pribadi user.
 abstract class TagRepository {
   const TagRepository();
 
-  // Method repository diisi pada task implementasi endpoint.
+  /// Mengambil seluruh tag milik user.
+  Future<List<Tag>> fetchTags();
+
+  /// Membuat tag baru. Nama yang sudah ada ditolak backend.
+  Future<Tag> createTag(String name);
 }

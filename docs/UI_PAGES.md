@@ -25,8 +25,20 @@ struktur, alur, dan komponen.
 ## 3. Login
 
 - Tujuan: masuk akun.
-- Elemen: field email, field password, tombol Masuk, link ke Register.
+- Elemen: area ilustrasi gelap di bagian atas dengan tombol tutup di pojok
+  kanan atas dan tiga lingkaran aksen (oranye, hijau, biru) di dekat
+  bawah gambar, judul masuk di atas latar gelap, dua field putih dengan
+  label Nama pengguna dan Kata sandi, footer gelap berisi tombol Gabung,
+  tombol Atur ulang kata sandi, dan tombol Masuk berwarna hijau terang.
+- Navigasi: tombol Gabung menuju Register, tombol Masuk mengirim form
+  login, tombol tutup keluar dari halaman.
 - State: kosong, validasi, loading, error, sukses.
+- Responsif: konten dibatasi lebar maksimum 480 dan dipusatkan pada layar
+  lebar.
+- Catatan: field Nama pengguna tetap mengirim email ke backend sehingga
+  kontrak autentikasi tidak berubah. Tombol Atur ulang kata sandi
+  menampilkan pesan bahwa fitur belum tersedia karena endpoint reset
+  belum ada.
 
 ## 4. Register
 
@@ -484,6 +496,7 @@ struktur, alur, dan komponen.
 | LikeButton | Ikon hati, jumlah like, mode aktif dan mode nonaktif |
 | FollowButton | Tombol Ikuti dan Diikuti |
 | TagChip | Nama tag, bisa dipilih dan bisa dilepas |
+| TagSelector | Pilih tag yang ada atau buat tag baru di Form Log |
 | ListCard | Judul list, deskripsi ringkas, jumlah film, penanda privasi |
 | ActivityItem | Pelaku, kalimat aktivitas, film terkait, jam relatif |
 | UserCard | Avatar inisial, nama, jumlah follower, tombol follow |

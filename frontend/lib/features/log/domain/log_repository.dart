@@ -1,8 +1,11 @@
 // Kontrak repository fitur log.
 
-/// Kontrak akses data untuk fitur log.
+import 'log_models.dart';
+
+/// Kontrak akses data untuk pencatatan tontonan.
 abstract class LogRepository {
   const LogRepository();
 
-  // Method repository diisi pada task implementasi endpoint.
+  /// Mencatat satu tontonan beserta rating, review, dan tag sekaligus.
+  Future<void> submit(LogDraft draft);
 }

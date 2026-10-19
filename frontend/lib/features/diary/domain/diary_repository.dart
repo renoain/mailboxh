@@ -1,8 +1,11 @@
 // Kontrak repository fitur diary.
 
-/// Kontrak akses data untuk fitur diary.
+import 'diary_models.dart';
+
+/// Kontrak akses data untuk riwayat tontonan.
 abstract class DiaryRepository {
   const DiaryRepository();
 
-  // Method repository diisi pada task implementasi endpoint.
+  /// Mengambil entri diary yang dikelompokkan per tanggal tonton.
+  Future<List<DiaryDay>> fetchDiary({DateTime? from, DateTime? to, int? tagId});
 }
