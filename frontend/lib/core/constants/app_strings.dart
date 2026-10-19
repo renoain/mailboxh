@@ -5,7 +5,10 @@
 class AppStrings {
   const AppStrings._();
 
-  static const String appName = 'Mailboxh';
+  static const String appName = 'Letterboks';
+  static const String artworkCreditFilm = 'Spider-Man';
+  static const String artworkSignInFilm = 'Coraline';
+  static const String artworkJoinFilm = 'Onward';
 
   // Formatted fragments untuk plural dan interpolasi.
   static String greeting(String name) => 'Halo, $name';
@@ -68,6 +71,33 @@ class AppText {
   final String passwordConfirmation;
   final String artworkCredit;
   final String nextButton;
+  final String signInHeading;
+  final String joinHeading;
+  final String username;
+  final String resetPassword;
+  final String tourOpen;
+  final String consentTerms;
+  final String consentPrivacy;
+  final String consentRequired;
+  final String artworkFromPrefix;
+  final String tabFilms;
+  final String tabReviews;
+  final String tabLists;
+  final String tabJournal;
+  final String navFilms;
+  final String navAdd;
+  final String navActivity;
+  final String tourLogged;
+  final String tourLiked;
+  final String tourWatchlist;
+  final String tourRated;
+  final String tourReviewAgain;
+  final String tourAddToList;
+  final String tourGoToFilm;
+  final String tourShare;
+  final String tourCrew;
+  final String tourPatron;
+  final List<String> tourCaptions;
   final String sectionFeatured;
   final String sectionLatest;
   final String sectionTopRated;
@@ -104,10 +134,12 @@ class AppText {
   final String signInToReview;
   final String loginRequired;
   final String invalidCredentials;
+  final String rememberMe;
   final String guestProfileMessage;
   final String createAccount;
   final String signIn;
   final String continueAsGuest;
+  final String backToUserPage;
   final String tabCast;
   final String tabCrew;
   final String tabDetails;
@@ -197,10 +229,7 @@ class AppText {
 
   // Profile dan stats
   final String profileTitle;
-  final String tabFilms;
   final String tabDiary;
-  final String tabReviews;
-  final String tabLists;
   final String tabTags;
   final String tabStats;
   final String statWatched;
@@ -266,7 +295,7 @@ class AppText {
 
   static const AppText _id = AppText._(
     isIndonesian: true,
-    appName: 'Mailboxh',
+    appName: 'Letterboks',
     retry: 'Coba lagi',
     cancel: 'Batal',
     save: 'Simpan',
@@ -299,8 +328,41 @@ class AppText {
     invalidEmail: 'Email tidak valid',
     passwordTooShort: 'Kata sandi minimal 8 karakter',
     passwordConfirmation: 'Konfirmasi kata sandi',
-    artworkCredit: 'Artwork dari Kelompok 6',
+    artworkCredit: 'Spider-Man',
     nextButton: 'Lanjut',
+    signInHeading: 'Masuk ke Letterboks',
+    joinHeading: 'Gabung ke Letterboks',
+    username: 'Nama pengguna',
+    resetPassword: 'Atur ulang sandi',
+    tourOpen: 'Lihat tur',
+    consentTerms: 'Saya berusia minimal 16 tahun dan menerima Ketentuan Penggunaan',
+    consentPrivacy: 'Saya menerima Kebijakan Privasi dan menyetujui pemrosesan informasi pribadi saya sesuai kebijakan tersebut',
+    consentRequired: 'Setujui ketentuan dan kebijakan privasi untuk melanjutkan',
+    artworkFromPrefix: 'Artwork dari',
+    tabFilms: 'Film',
+    tabReviews: 'Ulasan',
+    tabLists: 'Daftar',
+    tabJournal: 'Jurnal',
+    navFilms: 'Film',
+    navAdd: 'Catat film',
+    navActivity: 'Aktivitas',
+    tourLogged: 'Ditonton',
+    tourLiked: 'Disukai',
+    tourWatchlist: 'Watchlist',
+    tourRated: 'Rating',
+    tourReviewAgain: 'Ulas atau catat lagi',
+    tourAddToList: 'Tambah ke daftar',
+    tourGoToFilm: 'Buka film',
+    tourShare: 'Bagikan ke Instagram Stories',
+    tourCrew: 'CREW',
+    tourPatron: 'PATRON',
+    tourCaptions: [
+      'Pakai Letterboks untuk mencatat film yang sudah kamu tonton dan yang ingin kamu tonton',
+      'Catat dan beri rating setiap film yang kamu tonton untuk membangun diary riwayat tontonan',
+      'Tulis ulasan dan tag di setiap catatan, lalu bagikan dan diskusikan dengan orang lain',
+      'Ikuti teman-temanmu untuk melihat apa yang mereka tonton dan sukai di feed aktivitas',
+      'Buat daftar, cari info pemeran dan kru, lihat yang populer di jaringanmu dan banyak lagi!',
+    ],
     sectionFeatured: 'Unggulan',
     sectionLatest: 'Terbaru',
     sectionTopRated: 'Rating tertinggi',
@@ -335,10 +397,12 @@ class AppText {
     signInToReview: 'Kamu harus masuk untuk memberi review!',
     loginRequired: 'Silakan login untuk melanjutkan',
     invalidCredentials: 'Email atau password salah',
+    rememberMe: 'Ingat Saya',
     guestProfileMessage: 'Buat catatan filmmu, beri rating, dan bagikan ke teman.',
     createAccount: 'Create Account',
     signIn: 'Sign In',
     continueAsGuest: 'Lanjutkan sebagai Tamu',
+    backToUserPage: 'Tekan kembali sekali lagi untuk ke User Page',
     tabCast: 'Cast',
     tabCrew: 'Crew',
     tabDetails: 'Detail',
@@ -378,7 +442,7 @@ class AppText {
     listFormTitle: 'Form List',
     followingTitle: 'Following',
     onboardingTitle: 'Selamat datang',
-    splashTitle: 'Mailboxh',
+    splashTitle: 'Letterboks',
     feedTitle: 'Aktivitas',
     feedEmpty: 'Belum ada aktivitas',
     filterAll: 'Semua',
@@ -413,10 +477,7 @@ class AppText {
     logTagsLabel: 'Tag',
     logAlreadyWatched: 'Film ini sudah tercatat',
     profileTitle: 'Profil',
-    tabFilms: 'Films',
     tabDiary: 'Diary',
-    tabReviews: 'Reviews',
-    tabLists: 'Lists',
     tabTags: 'Tags',
     tabStats: 'Stats',
     statWatched: 'Ditonton',
@@ -472,7 +533,7 @@ class AppText {
 
   static const AppText _en = AppText._(
     isIndonesian: false,
-    appName: 'Mailboxh',
+    appName: 'Letterboks',
     retry: 'Try again',
     cancel: 'Cancel',
     save: 'Save',
@@ -505,8 +566,41 @@ class AppText {
     invalidEmail: 'Invalid email',
     passwordTooShort: 'Password must be at least 8 characters',
     passwordConfirmation: 'Confirm password',
-    artworkCredit: 'Artwork from Kelompok 6',
+    artworkCredit: 'Spider-Man',
     nextButton: 'Continue',
+    signInHeading: 'Sign in to Letterboks',
+    joinHeading: 'Join Letterboks',
+    username: 'Username',
+    resetPassword: 'Reset password',
+    tourOpen: 'Open the tour',
+    consentTerms: 'I am at least 16 years old and accept the Terms of Use',
+    consentPrivacy: 'I accept the Privacy Policy and consent to the processing of my personal information in accordance with it',
+    consentRequired: 'Accept the terms and privacy policy to continue',
+    artworkFromPrefix: 'Artwork from',
+    tabFilms: 'Films',
+    tabReviews: 'Reviews',
+    tabLists: 'Lists',
+    tabJournal: 'Journal',
+    navFilms: 'Films',
+    navAdd: 'Log a film',
+    navActivity: 'Activity',
+    tourLogged: 'Logged',
+    tourLiked: 'Liked',
+    tourWatchlist: 'Watchlist',
+    tourRated: 'Rated',
+    tourReviewAgain: 'Review or log again',
+    tourAddToList: 'Add to a list',
+    tourGoToFilm: 'Go to film',
+    tourShare: 'Share to Instagram Stories',
+    tourCrew: 'CREW',
+    tourPatron: 'PATRON',
+    tourCaptions: [
+      'Use Letterboks to track the films you\u2019ve watched, and those you want to watch',
+      'Log and rate each film as you watch it, to build up a diary of your viewing history',
+      'Add a review and tags to each entry, then share and discuss with others',
+      'Follow your friends to see what they\u2019re watching and liking in your activity feed',
+      'Make lists, find cast and crew info, see what\u2019s popular in your network and more!',
+    ],
     sectionFeatured: 'Featured',
     sectionLatest: 'Latest',
     sectionTopRated: 'Top rated',
@@ -541,10 +635,12 @@ class AppText {
     signInToReview: 'You must sign in to write a review!',
     loginRequired: 'Please log in to continue',
     invalidCredentials: 'Email or password is incorrect',
+    rememberMe: 'Remember Me',
     guestProfileMessage: 'Create your film notes, rate them, and share with friends.',
     createAccount: 'Create Account',
     signIn: 'Sign In',
     continueAsGuest: 'Continue as Guest',
+    backToUserPage: 'Press back again to go to User Page',
     tabCast: 'Cast',
     tabCrew: 'Crew',
     tabDetails: 'Details',
@@ -584,7 +680,7 @@ class AppText {
     listFormTitle: 'List',
     followingTitle: 'Following',
     onboardingTitle: 'Welcome',
-    splashTitle: 'Mailboxh',
+    splashTitle: 'Letterboks',
     feedTitle: 'Activity',
     feedEmpty: 'No activity yet',
     filterAll: 'All',
@@ -619,10 +715,7 @@ class AppText {
     logTagsLabel: 'Tags',
     logAlreadyWatched: 'This film is already logged',
     profileTitle: 'Profile',
-    tabFilms: 'Films',
     tabDiary: 'Diary',
-    tabReviews: 'Reviews',
-    tabLists: 'Lists',
     tabTags: 'Tags',
     tabStats: 'Stats',
     statWatched: 'Watched',
@@ -714,6 +807,33 @@ class AppText {
     required this.passwordConfirmation,
     required this.artworkCredit,
     required this.nextButton,
+    required this.signInHeading,
+    required this.joinHeading,
+    required this.username,
+    required this.resetPassword,
+    required this.tourOpen,
+    required this.consentTerms,
+    required this.consentPrivacy,
+    required this.consentRequired,
+    required this.artworkFromPrefix,
+    required this.tabFilms,
+    required this.tabReviews,
+    required this.tabLists,
+    required this.tabJournal,
+    required this.navFilms,
+    required this.navAdd,
+    required this.navActivity,
+    required this.tourLogged,
+    required this.tourLiked,
+    required this.tourWatchlist,
+    required this.tourRated,
+    required this.tourReviewAgain,
+    required this.tourAddToList,
+    required this.tourGoToFilm,
+    required this.tourShare,
+    required this.tourCrew,
+    required this.tourPatron,
+    required this.tourCaptions,
     required this.sectionFeatured,
     required this.sectionLatest,
     required this.sectionTopRated,
@@ -748,10 +868,12 @@ class AppText {
     required this.signInToReview,
     required this.loginRequired,
     required this.invalidCredentials,
+    required this.rememberMe,
     required this.guestProfileMessage,
     required this.createAccount,
     required this.signIn,
     required this.continueAsGuest,
+    required this.backToUserPage,
     required this.tabCast,
     required this.tabCrew,
     required this.tabDetails,
@@ -825,10 +947,7 @@ class AppText {
     required this.logTagsLabel,
     required this.logAlreadyWatched,
     required this.profileTitle,
-    required this.tabFilms,
     required this.tabDiary,
-    required this.tabReviews,
-    required this.tabLists,
     required this.tabTags,
     required this.tabStats,
     required this.statWatched,

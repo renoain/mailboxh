@@ -12,6 +12,11 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasColumn('likes', 'likeable_id')) {
+            // Skema polymorphic sudah diterapkan, lewati migrasi.
+            return;
+        }
+
         // SQLite tidak bisa menjatuhkan kolom yang dirujuk foreign key,
         // jadi tabel dibuat ulang. Tabel test selalu kosong saat migrasi berjalan.
         if (Schema::getConnection()->getDriverName() === 'sqlite') {

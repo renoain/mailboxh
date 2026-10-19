@@ -1598,6 +1598,32 @@ Catatan:
   `storage/app/public/backdrops/`. `php artisan storage:link` wajib
   dijalankan lebih dulu.
 
+#### POST /api/admin/movies/batch-import
+
+Content type `multipart/form-data`.
+
+Request:
+
+| Field | Tipe | Aturan |
+|---|---|---|
+| file | file | Wajib, berupa file .zip |
+
+Struktur file .zip harus berisi:
+
+- `movies.json` di root ZIP.
+- Folder `posters/` berisi file gambar poster.
+
+Nilai `poster_filename` di dalam `movies.json` harus sama persis dengan
+nama file gambar di folder `posters/`.
+
+Respons API mengembalikan laporan:
+
+- jumlah film yang berhasil diimpor.
+- jumlah film yang gagal.
+- daftar film yang posternya tidak cocok (unmatched).
+
+Kemungkinan gagal: 401, 403, 422.
+
 #### PUT /api/admin/movies/{id}
 
 Sama seperti `POST /api/admin/movies`, dengan Content type

@@ -57,6 +57,7 @@ Aturan detail ada di folder .opencode/rules/. Wajib dibaca sesuai konteks:
   menjelaskan hal yang sudah jelas dari nama variabel atau fungsi.
 - Dilarang hardcode warna/spacing/radius, wajib token di frontend/lib/core/theme/.
 - Dilarang menulis secret, wajib lewat .env.
+- Semua file gambar/gambar poster yang di-upload admin disimpan di storage/app/public/. Jangan pernah menyimpan file gambar langsung ke dalam folder public/ tanpa melalui storage symlink.
 - Setiap task selesai wajib update CHANGELOG.md di paling atas.
 - Task yang mengubah struktur/token/arsitektur wajib update docs terkait
   pada task yang sama.

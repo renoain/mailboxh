@@ -3,18 +3,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' hide Provider;
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../core/constants/app_assets.dart';
 import '../../../core/constants/app_strings.dart';
+import '../../../core/widgets/auth_field.dart';
 import '../../../core/error/app_exception.dart';
 import '../../../core/providers/app_state.dart';
 import '../../../core/services/app_providers.dart';
-import '../../../core/theme/app_spacing.dart';
-import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/validators.dart';
 import '../../admin/presentation/admin_layout.dart';
 import '../../admin/presentation/pages/admin_dashboard_page.dart';
 import '../../catalog/presentation/main_navigation.dart';
 import '../domain/auth_models.dart';
+import 'auth_layout.dart';
 import 'auth_provider.dart';
 import 'register_page.dart';
 
@@ -34,6 +36,22 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
   String? _error;
   bool _isLoading = false;
+  bool _rememberMe = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSavedEmail();
+  }
+
+  Future<void> _loadSavedEmail() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? savedEmail = prefs.getString('saved_email');
+    if (savedEmail != null && savedEmail.isNotEmpty) {
+      _emailController.text = savedEmail;
+      setState(() => _rememberMe = true);
+    }
+  }
 
   @override
   void dispose() {
@@ -61,6 +79,13 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       setState(() => _error = validationError);
       return;
     }
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    if (_rememberMe) {
+      await prefs.setString('saved_email', _emailController.text.trim());
+    } else {
+      await prefs.remove('saved_email');
+    }
+
     setState(() {
       _error = null;
       _isLoading = true;
@@ -113,71 +138,44 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    final ColorScheme colors = Theme.of(context).colorScheme;
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.close),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Text(text.loginTitle),
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(text.loginTitle, style: AppTypography.headlineLg),
-              const SizedBox(height: AppSpacing.lg),
-              TextField(
-                controller: _emailController,
-                keyboardType: TextInputType.emailAddress,
-                textInputAction: TextInputAction.next,
-                decoration: InputDecoration(labelText: text.email),
-              ),
-              const SizedBox(height: AppSpacing.md),
-              TextField(
-                controller: _passwordController,
-                obscureText: true,
-                textInputAction: TextInputAction.done,
-                onSubmitted: (_) => _submit(),
-                decoration: InputDecoration(labelText: text.password),
-              ),
-              if (_error != null) ...[
-                const SizedBox(height: AppSpacing.md),
-                Text(
-                  _error!,
-                  style: AppTypography.bodyMd.copyWith(color: colors.error),
-                ),
-              ],
-              const SizedBox(height: AppSpacing.lg),
-              SizedBox(
-                width: double.infinity,
-                child: FilledButton(
-                  onPressed: _isLoading ? null : _submit,
-                  child: _isLoading
-                      ? const SizedBox(
-                          height: AppSpacing.md,
-                          width: AppSpacing.md,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : Text(text.loginButton),
-                ),
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              Center(
-                child: TextButton(
-                  onPressed: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const RegisterPage()),
-                  ),
-                  child: Text(text.noAccount),
-                ),
-              ),
-            ],
+    return AuthLayout(
+      artwork: AppAssets.artworkSignIn,
+      film: AppStrings.artworkSignInFilm,
+      heading: text.signInHeading,
+      error: _error,
+      form: Column(
+        children: [
+          AuthField(
+            controller: _emailController,
+            hint: text.email,
+            keyboardType: TextInputType.emailAddress,
           ),
-        ),
+          AuthField(
+            controller: _passwordController,
+            hint: text.password,
+            obscureText: true,
+            textInputAction: TextInputAction.done,
+            onSubmitted: (_) => _submit(),
+          ),
+        ],
+      ),
+      actions: AuthActions(
+        children: [
+          AuthSmallButton(
+            label: text.registerButton,
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const RegisterPage()),
+            ),
+          ),
+          AuthSmallButton(label: text.resetPassword, onPressed: null),
+          AuthSmallButton(
+            label: text.loginButton,
+            filled: true,
+            loading: _isLoading,
+            onPressed: _isLoading ? null : _submit,
+          ),
+        ],
       ),
     );
   }

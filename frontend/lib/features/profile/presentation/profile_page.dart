@@ -44,6 +44,11 @@ class ProfilePage extends ConsumerWidget {
         backgroundColor: AppColors.letterboxdBg,
         elevation: 0,
         actions: [
+          if (authAsync.value?.isAdmin ?? false)
+            TextButton(
+              onPressed: () => context.go('/admin/dashboard'),
+              child: const Text('Kembali ke Mode Admin'),
+            ),
           IconButton(
             icon: const Icon(Icons.settings_outlined),
             color: AppColors.textPrimaryDark,

@@ -8,6 +8,9 @@ abstract final class AppAssets {
   static const String fontGeist = '$fontsFolder/Geist-Regular.ttf';
 
   static const String imagesFolder = 'assets/images';
+  static const String artworkWelcome = '$imagesFolder/artwork_welcome.jpg';
+  static const String artworkSignIn = '$imagesFolder/artwork_signin.jpg';
+  static const String artworkJoin = '$imagesFolder/artwork_join.jpg';
   static const String tmdbBadge = '$imagesFolder/tmdb_badge.svg';
   static const String emptyFilm = '$imagesFolder/empty_film.svg';
 
