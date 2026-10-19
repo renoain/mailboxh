@@ -1,8 +1,11 @@
 // Kontrak repository fitur feed.
 
-/// Kontrak akses data untuk fitur feed.
+/// Kontrak akses data untuk fitur feed dan notifikasi.
 abstract class FeedRepository {
   const FeedRepository();
 
-  // Method repository diisi pada task implementasi endpoint.
+  Future<List<Map<String, dynamic>>> getFeed();
+  Future<List<Map<String, dynamic>>> getNotifications();
+  Future<void> markNotificationRead(int id);
+  Future<void> markAllNotificationsRead();
 }
