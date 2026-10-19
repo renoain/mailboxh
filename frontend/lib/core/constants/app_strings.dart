@@ -1,4 +1,4 @@
-﻿// Seluruh string UI dwibahasa Indonesia dan Inggris.
+// Seluruh string UI dwibahasa Indonesia dan Inggris.
 
 /// Sumber tunggal teks yang tampil ke user. Widget tidak boleh punya
 /// string const berisi teks, dan tidak boleh menulis teks langsung.
@@ -210,6 +210,16 @@ class AppText {
   final String artworkAttribution;
   final String profileDiaryEmpty;
   final String profileListsEmpty;
+  final String statThisYear;
+  final String statFilms;
+  final String tabWatchlist;
+  final String favoriteFilms;
+  final String favoritesEditTitle;
+  final String favoritesUpdated;
+  final String selectFromWatched;
+  final String searchWatchedHint;
+  final String emptyWatchedFilms;
+  final String slotEmptyLabel;
 
   // Settings
   final String settingsTitle;
@@ -410,6 +420,16 @@ class AppText {
     artworkAttribution: 'Karya dari Kelompok 6',
     profileDiaryEmpty: 'Belum ada film yang di-review.',
     profileListsEmpty: 'Kamu belum membuat list apa pun.',
+    statThisYear: 'Tahun ini',
+    statFilms: 'Film',
+    tabWatchlist: 'Watchlist',
+    favoriteFilms: 'FAVORITE FILMS',
+    favoritesEditTitle: 'Pilih Empat Favorit',
+    favoritesUpdated: 'Film favorit berhasil disimpan',
+    selectFromWatched: 'Pilih dari film ditonton',
+    searchWatchedHint: 'Cari judul film...',
+    emptyWatchedFilms: 'Belum ada film yang ditonton untuk dipilih',
+    slotEmptyLabel: 'Pilih Film',
     settingsTitle: 'Pengaturan',
     settingsLanguage: 'Bahasa',
     settingsAbout: 'Tentang aplikasi',
@@ -600,6 +620,16 @@ class AppText {
     artworkAttribution: 'Artwork from Kelompok 6',
     profileDiaryEmpty: 'No films reviewed yet',
     profileListsEmpty: 'You have not created any lists yet',
+    statThisYear: 'This Year',
+    statFilms: 'Films',
+    tabWatchlist: 'Watchlist',
+    favoriteFilms: 'FAVORITE FILMS',
+    favoritesEditTitle: 'Pick Four Favourites',
+    favoritesUpdated: 'Favorite films saved successfully',
+    selectFromWatched: 'Select from watched films',
+    searchWatchedHint: 'Search film title...',
+    emptyWatchedFilms: 'No watched films available to select',
+    slotEmptyLabel: 'Pick Film',
     settingsTitle: 'Settings',
     settingsLanguage: 'Language',
     settingsAbout: 'About',
@@ -790,6 +820,16 @@ class AppText {
     required this.artworkAttribution,
     required this.profileDiaryEmpty,
     required this.profileListsEmpty,
+    required this.statThisYear,
+    required this.statFilms,
+    required this.tabWatchlist,
+    required this.favoriteFilms,
+    required this.favoritesEditTitle,
+    required this.favoritesUpdated,
+    required this.selectFromWatched,
+    required this.searchWatchedHint,
+    required this.emptyWatchedFilms,
+    required this.slotEmptyLabel,
     required this.settingsTitle,
     required this.settingsLanguage,
     required this.settingsAbout,

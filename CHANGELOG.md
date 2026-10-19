@@ -1,4 +1,42 @@
-﻿# CHANGELOG - Mailboxh
+# CHANGELOG - Mailboxh
+
+## [2026-10-19 14:30] - Implementasi Halaman Profile dan Four Favourites di Flutter
+
+Status: Selesai
+
+File yang dibuat:
+- frontend/lib/features/profile/domain/profile_models.dart (dibuat/diperbarui, model UserProfile dengan username, bio, UserStats, Movie, FavoriteFilm)
+- frontend/test/features/favorites/favorites_edit_page_test.dart (dibuat, widget test untuk FavoritesEditPage)
+
+File yang diubah:
+- frontend/lib/features/profile/domain/profile_repository.dart (diedit, tambah getUserStats, getUserFilms, getFavorites)
+- frontend/lib/features/profile/data/profile_repository.dart (diedit, implementasi pemanggilan /profile/stats, /watched, dan /favorites)
+- frontend/lib/features/profile/presentation/profile_provider.dart (diedit, ProfileNotifier dengan AsyncNotifier, userFilmsProvider, userStatsProvider)
+- frontend/lib/features/profile/presentation/profile_page.dart (ditulis ulang, UI Letterboxd dark theme, header avatar 72px, statistik 3 kolom, Four Favourites rapat gap 6px, TabBar 5 tab dengan GridView film ditonton)
+- frontend/lib/features/favorites/domain/favorite_repository.dart (diedit, kontrak getFavorites dan updateFavorites)
+- frontend/lib/features/favorites/data/favorite_repository.dart (diimplementasikan, request GET /api/favorites dan PUT /api/favorites)
+- frontend/lib/features/favorites/presentation/favorite_provider.dart (diimplementasikan, FavoritesNotifier dengan AsyncNotifier)
+- frontend/lib/features/favorites/presentation/favorites_edit_page.dart (diimplementasikan, grid 2x2, bottom sheet pencarian film watched, simpan via PUT /api/favorites)
+- frontend/lib/core/constants/app_strings.dart (diedit, tambah token teks profil, statistik, dan favourites)
+- frontend/lib/core/theme/app_colors.dart (diedit, tambah token letterboxdBg)
+- frontend/lib/core/theme/app_spacing.dart (diedit, tambah token posterGap 6px)
+- docs/DESIGN_SYSTEM.md (diedit, catat token color-letterboxd-bg dan space-poster-gap)
+- frontend/test/features/profile/profile_page_test.dart (diedit, diselaraskan dengan model dan FakeProfileRepository terbaru)
+- CHANGELOG.md (diedit, entri task ini ditambahkan di paling atas)
+
+Catatan:
+- Desain tema gelap Letterboxd dengan latar #14181C (AppColors.letterboxdBg).
+- Header profil memuat avatar 72px, nama tebal, username abu-abu, dan tombol Edit Profile yang terhubung ke /settings lewat go_router.
+- Statistik profil menampilkan 3 kolom: Films, This Year, Lists.
+- Four Favourites menampilkan 4 poster rapat dengan gap 6px (AppSpacing.posterGap), tanda tambah untuk slot kosong, dan tombol edit menuju /favorites/edit.
+- TabBar memiliki 5 tab: FILMS, REVIEWS, DIARY, WATCHLIST, LISTS. Tab FILMS menampilkan GridView 4 kolom film dari /api/watched.
+- Halaman FavoritesEditPage menampilkan grid 2x2 dengan bottom sheet picker untuk mencari film dari daftar watched, disimpan via PUT /api/favorites.
+- app_router.dart tidak diubah sesuai instruksi.
+
+Verifikasi:
+- hasil linter/analyze: OK (No issues found)
+- hasil test frontend: OK (20 test pass)
+- hasil test backend: belum ditest (task tidak menyentuh backend)
 
 ## [2026-10-19 11:00] - Implementasi Fitur Admin di Flutter
 
