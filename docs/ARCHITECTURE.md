@@ -685,11 +685,22 @@ Sequence saat user membuka detail film:
 | intl | Format tanggal dan angka |
 | logger | Logging |
 
-Entri `flutter_lucide`, `shared_preferences`, dan `image_picker`
-tercantum di atas sebagai rencana, tetapi belum dipasang di
-`frontend/pubspec.yaml` karena belum diimpor kode mana pun. Ketiganya
-ditambahkan bersama fitur yang memakainya, dengan evaluasi tercatat
-pada saat itu.
+Entri `flutter_lucide` dan `image_picker` tercantum di atas sebagai
+rencana, tetapi belum dipasang di `frontend/pubspec.yaml` karena belum
+diimpor kode mana pun. Keduanya ditambahkan bersama fitur yang
+memakainya, dengan evaluasi tercatat pada saat itu.
+
+Evaluasi `shared_preferences`:
+
+| Aspek | Nilai |
+|---|---|
+| Tujuan | Menyimpan flag nonrahasia onboarding `has_seen_onboarding` |
+| Alternatif | `flutter_secure_storage` untuk seluruh penyimpanan lokal, terlalu berat untuk data nonrahasia |
+| Pemeliharaan | Plugin resmi Flutter, rilis 2.5.x dalam 12 bulan terakhir |
+| Lisensi | BSD 3-Clause |
+| Kompatibilitas | Mendukung Android, iOS, dan platform desktop yang didukung Flutter |
+| Ukuran | Kecil, hanya lapisan tipis di atas platform channel |
+| Dokumentasi | Ada di pub.dev dengan contoh lengkap |
 
 Evaluasi `image_picker`:
 

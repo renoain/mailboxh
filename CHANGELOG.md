@@ -1,5 +1,32 @@
 ﻿# CHANGELOG - Mailboxh
 
+## [2026-10-19 01:33] - Tambah Session Restore dan Onboarding Flag di Splash
+
+Status: Selesai
+
+File yang diubah:
+- frontend/lib/features/splash/presentation/splash_page.dart (diedit, ditulis ulang ke Riverpod dengan pemulihan sesi, redirect onboarding, dan token styling)
+- frontend/lib/features/onboarding/presentation/onboarding_page.dart (diedit, ConsumerWidget dengan tombol Lanjut yang menyimpan flag onboarding)
+- frontend/lib/core/services/onboarding_storage.dart (dibuat, penyimpanan flag has_seen_onboarding)
+- frontend/lib/core/services/app_providers.dart (diedit, onboardingStorageProvider)
+- frontend/lib/core/constants/app_strings.dart (diedit, string artworkCredit dan nextButton ID dan EN)
+- frontend/pubspec.yaml (diedit, tambah dependency shared_preferences)
+- frontend/test/helpers/fakes.dart (dibuat, FakeTokenStorage, FakeOnboardingStorage, dan FakeHttpClientAdapter bersama)
+- frontend/test/features/auth/auth_repository_test.dart (diedit, memakai fake bersama)
+- frontend/test/features/splash/splash_page_test.dart (dibuat, widget test menu dan redirect onboarding)
+- docs/ARCHITECTURE.md (diedit, evaluasi dependency shared_preferences)
+
+Catatan:
+- Splash membaca authProvider: token ada dan /api/me sukses langsung ke MainNavigation; tanpa token lalu cek flag has_seen_onboarding, pemakaian pertama ke Onboarding, selain itu menampilkan menu Masuk dan Daftar.
+- Bottom navigation bar palsu di splash dihapus saat penulisan ulang; kredit artwork dipertahankan lewat string AppStrings.
+- shared_preferences dievaluasi sesuai Bagian C: plugin resmi Flutter, lisensi BSD 3-Clause, rilis dalam 12 bulan, dipakai untuk data nonrahasia sesuai rule 05-security.
+- Onboarding masih satu slide; deskripsi UI_PAGES tiga slide menjadi task lanjutan.
+
+Verifikasi:
+- hasil linter/analyze: OK (No issues found)
+- hasil test frontend: OK (13 test pass)
+- hasil test backend: OK (130 test pass, 276 assertions)
+
 ## [2026-10-19 01:13] - Implementasi API Auth Frontend
 
 Status: Selesai
