@@ -5,13 +5,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/constants/app_strings.dart';
 import '../../../core/services/app_providers.dart';
+import '../../../core/theme/app_sizes.dart';
 import '../../../core/theme/app_spacing.dart';
-import '../../../core/theme/app_typography.dart';
+import '../../../core/widgets/brand_logo.dart';
 import '../../auth/presentation/auth_provider.dart';
 import '../../auth/presentation/login_page.dart';
 import '../../auth/presentation/register_page.dart';
 import '../../catalog/presentation/main_navigation.dart';
 import '../../onboarding/presentation/onboarding_page.dart';
+import 'welcome_view.dart';
 
 /// Menampilkan logo sambil memeriksa sesi, lalu mengarahkan rute.
 class SplashPage extends ConsumerStatefulWidget {
@@ -60,68 +62,57 @@ class _SplashPageState extends ConsumerState<SplashPage> {
     setState(() => _sessionChecked = true);
   }
 
+  void _open(Widget page) {
+    Navigator.push(context, MaterialPageRoute(builder: (_) => page));
+  }
+
   @override
   Widget build(BuildContext context) {
-    final ColorScheme colors = Theme.of(context).colorScheme;
-    return Scaffold(
-      body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: AppSpacing.fourXl * 6),
-            child: Padding(
-              padding: const EdgeInsets.all(AppSpacing.lg),
-              child: Column(
-                children: [
-                  const Spacer(flex: 2),
-                  Icon(Icons.mail_outline, size: AppSpacing.fourXl * 2,
-                      color: colors.primary),
-                  const SizedBox(height: AppSpacing.md),
-                  Text(
-                    text.appName,
-                    style: AppTypography.headlineXl.copyWith(
-                      color: colors.onSurface,
-                    ),
-                  ),
-                  const Spacer(flex: 3),
-                  if (!_sessionChecked) ...[
-                    CircularProgressIndicator(color: colors.primary),
-                  ] else ...[
-                    SizedBox(
-                      width: double.infinity,
-                      child: FilledButton(
-                        onPressed: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => const LoginPage()),
-                        ),
-                        child: Text(text.loginTitle),
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.sm),
-                    SizedBox(
-                      width: double.infinity,
-                      child: TextButton(
-                        onPressed: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const RegisterPage(),
-                          ),
-                        ),
-                        child: Text(text.registerTitle),
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-                    Text(
-                      text.artworkCredit,
-                      style: AppTypography.bodySm.copyWith(
-                        color: colors.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ],
+    if (!_sessionChecked) {
+      return const Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              BrandLogo(),
+              SizedBox(height: AppSpacing.lg),
+              SizedBox(
+                width: AppSizes.avatar,
+                height: AppSizes.avatar,
+                child: CircularProgressIndicator(strokeWidth: 2),
               ),
-            ),
+            ],
           ),
         ),
+      );
+    }
+    return Scaffold(
+      body: WelcomeView(
+        onSignIn: () => _open(const LoginPage()),
+        onCreateAccount: () => _open(const RegisterPage()),
+        onOpenTour: () => _open(const OnboardingPage()),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: 0,
+        showSelectedLabels: false,
+        showUnselectedLabels: false,
+        onTap: (int index) {
+          if (index != 0) _open(const LoginPage());
+        },
+        items: [
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.manage_accounts),
+            label: text.navProfile,
+          ),
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.video_library_outlined),
+            label: text.navFilms,
+          ),
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.search),
+            label: text.navSearch,
+          ),
+        ],
       ),
     );
   }

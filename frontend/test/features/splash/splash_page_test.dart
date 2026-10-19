@@ -47,7 +47,7 @@ void main() {
     expect(find.text(text.appName), findsOneWidget);
     expect(find.text(text.loginTitle), findsOneWidget);
     expect(find.text(text.registerTitle), findsOneWidget);
-    expect(find.text(text.artworkCredit), findsOneWidget);
+    expect(find.textContaining(text.artworkFromPrefix), findsOneWidget);
   });
 
   testWidgets('SplashPage mengarahkan ke Onboarding pada pemakaian pertama', (
@@ -60,6 +60,6 @@ void main() {
     );
 
     expect(find.byType(OnboardingPage), findsOneWidget);
-    expect(find.text(text.nextButton), findsOneWidget);
+    expect(find.byType(PageView), findsOneWidget);
   });
 }

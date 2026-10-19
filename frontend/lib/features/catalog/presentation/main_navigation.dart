@@ -1,66 +1,92 @@
 import 'package:flutter/material.dart';
-import 'home_page.dart'; 
-import 'search_page.dart'; 
-import '../../profile/presentation/profile_page.dart'; 
 
+import '../../../core/constants/app_strings.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_sizes.dart';
+import '../../feed/presentation/feed_page.dart';
+import '../../log/presentation/log_form_page.dart';
+import '../../profile/presentation/profile_page.dart';
+import 'home_page.dart';
+import 'search_page.dart';
+
+/// Kerangka utama dengan bottom nav lima item; item tengah membuka form catat.
 class MainNavigation extends StatefulWidget {
-  final int initialIndex; 
+  const MainNavigation({super.key, this.initialIndex = 0});
 
-  const MainNavigation({super.key, this.initialIndex = 1});
+  final int initialIndex;
 
   @override
   State<MainNavigation> createState() => _MainNavigationState();
 }
 
 class _MainNavigationState extends State<MainNavigation> {
+  static const AppText text = AppStrings.id;
+  static const int _addIndex = 2;
+
   late int _selectedIndex;
 
   @override
   void initState() {
     super.initState();
-    _selectedIndex = widget.initialIndex; 
+    _selectedIndex = widget.initialIndex;
   }
 
-  final List<Widget> _pages = [
-    const ProfilePage(),  
-    const HomePage(),     
-    const SearchPage(),   
+  static const List<Widget> _pages = [
+    HomePage(),
+    SearchPage(),
+    SizedBox.shrink(),
+    FeedPage(),
+    ProfilePage(),
   ];
+
+  void _onTap(int index) {
+    if (index == _addIndex) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const LogFormPage()),
+      );
+      return;
+    }
+    setState(() => _selectedIndex = index);
+  }
 
   @override
   Widget build(BuildContext context) {
-    // PopScope mencegah user menekan tombol back dan kembali ke Login
     return PopScope(
-      canPop: false, // Tidak bisa di-pop (back) secara default
+      canPop: false,
       child: Scaffold(
-        backgroundColor: const Color(0xFF14181C),
         body: _pages[_selectedIndex],
         bottomNavigationBar: BottomNavigationBar(
-          backgroundColor: const Color(0xFF2C3440),
-          selectedItemColor: const Color(0xFF40BCF4), 
-          unselectedItemColor: const Color(0xFF8A9BAE), 
           showSelectedLabels: false,
           showUnselectedLabels: false,
           currentIndex: _selectedIndex,
-          onTap: (index) {
-            setState(() {
-              _selectedIndex = index;
-            });
-          },
-          items: const [
+          onTap: _onTap,
+          items: [
             BottomNavigationBarItem(
-              icon: Icon(Icons.person_outline, size: 28),
-              activeIcon: Icon(Icons.person, size: 28),
-              label: 'Profile',
+              icon: const Icon(Icons.video_library_outlined),
+              activeIcon: const Icon(Icons.video_library),
+              label: text.navFilms,
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.video_library_outlined, size: 28),
-              activeIcon: Icon(Icons.video_library, size: 28),
-              label: 'Films',
+              icon: const Icon(Icons.search),
+              label: text.navSearch,
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.search, size: 28),
-              label: 'Search',
+              icon: const Icon(
+                Icons.add_circle_outline,
+                size: AppSizes.navAddIcon,
+                color: AppColors.brandGreen,
+              ),
+              label: text.navAdd,
+            ),
+            BottomNavigationBarItem(
+              icon: const Icon(Icons.bolt),
+              label: text.navActivity,
+            ),
+            BottomNavigationBarItem(
+              icon: const Icon(Icons.person_outline),
+              activeIcon: const Icon(Icons.person),
+              label: text.navProfile,
             ),
           ],
         ),

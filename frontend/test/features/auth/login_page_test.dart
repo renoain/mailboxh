@@ -23,7 +23,7 @@ void main() {
       ),
     );
 
-    expect(find.text(text.loginTitle), findsWidgets);
+    expect(find.text(text.signInHeading), findsOneWidget);
     expect(find.byType(TextField), findsNWidgets(2));
     expect(find.byType(FilledButton), findsOneWidget);
   });
