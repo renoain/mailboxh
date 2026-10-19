@@ -7,7 +7,7 @@ import '../../../core/constants/app_strings.dart';
 import '../../../core/services/app_providers.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
-import '../../auth/presentation/login_page.dart';
+import '../../catalog/presentation/main_navigation.dart';
 
 /// Halaman pengantar yang menandai onboarding selesai lalu ke Login.
 class OnboardingPage extends ConsumerWidget {
@@ -20,7 +20,7 @@ class OnboardingPage extends ConsumerWidget {
     if (!context.mounted) return;
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (_) => const LoginPage()),
+      MaterialPageRoute(builder: (_) => const MainNavigation()),
     );
   }
 

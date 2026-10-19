@@ -102,6 +102,12 @@ class AppText {
   final String popularReviews;
   final String signInFirst;
   final String signInToReview;
+  final String loginRequired;
+  final String invalidCredentials;
+  final String guestProfileMessage;
+  final String createAccount;
+  final String signIn;
+  final String continueAsGuest;
   final String tabCast;
   final String tabCrew;
   final String tabDetails;
@@ -327,6 +333,12 @@ class AppText {
     popularReviews: 'ULASAN POPULER',
     signInFirst: 'Silakan masuk dulu!',
     signInToReview: 'Kamu harus masuk untuk memberi review!',
+    loginRequired: 'Silakan login untuk melanjutkan',
+    invalidCredentials: 'Email atau password salah',
+    guestProfileMessage: 'Buat catatan filmmu, beri rating, dan bagikan ke teman.',
+    createAccount: 'Create Account',
+    signIn: 'Sign In',
+    continueAsGuest: 'Lanjutkan sebagai Tamu',
     tabCast: 'Cast',
     tabCrew: 'Crew',
     tabDetails: 'Detail',
@@ -527,6 +539,12 @@ class AppText {
     popularReviews: 'POPULAR REVIEWS',
     signInFirst: 'Please sign in first!',
     signInToReview: 'You must sign in to write a review!',
+    loginRequired: 'Please log in to continue',
+    invalidCredentials: 'Email or password is incorrect',
+    guestProfileMessage: 'Create your film notes, rate them, and share with friends.',
+    createAccount: 'Create Account',
+    signIn: 'Sign In',
+    continueAsGuest: 'Continue as Guest',
     tabCast: 'Cast',
     tabCrew: 'Crew',
     tabDetails: 'Details',
@@ -728,6 +746,12 @@ class AppText {
     required this.popularReviews,
     required this.signInFirst,
     required this.signInToReview,
+    required this.loginRequired,
+    required this.invalidCredentials,
+    required this.guestProfileMessage,
+    required this.createAccount,
+    required this.signIn,
+    required this.continueAsGuest,
     required this.tabCast,
     required this.tabCrew,
     required this.tabDetails,

@@ -1,5 +1,119 @@
 # CHANGELOG - Mailboxh
 
+## [2026-10-19 16:00] - Bersihkan UI Splash dari Menu Login
+
+Status: Selesai
+
+File yang diubah:
+- frontend/lib/features/splash/presentation/splash_page.dart (diedit, hapus menu login/register, hanya loading lalu home)
+
+Catatan:
+- Hot restart kini langsung ke home guest.
+
+Verifikasi:
+- hasil linter/analyze: OK (0 error, info saja)
+- hasil test: OK (20 passed)
+
+## [2026-10-19 15:50] - Splash Langsung ke Home Guest
+
+Status: Selesai
+
+File yang diubah:
+- frontend/lib/features/splash/presentation/splash_page.dart (diedit, onboarding selesai mengarah ke MainNavigation)
+- frontend/test/features/splash/splash_page_test.dart (diedit, ekspektasi Home)
+
+Catatan:
+- Tombol lanjutkan sebagai tamu di AuthGateway dihapus.
+
+Verifikasi:
+- hasil linter/analyze: OK (0 error, info saja)
+- hasil test: OK (20 passed)
+
+## [2026-10-19 15:40] - AuthGateway dan Navbar Guest
+
+Status: Selesai
+
+File yang dibuat:
+- frontend/lib/features/auth/presentation/auth_gateway_page.dart (dibuat, halaman pilihan Sign In / Create Account)
+
+File yang diubah:
+- frontend/lib/features/catalog/presentation/main_navigation.dart (diedit, mode guest menampilkan AuthGateway di tab profil)
+- frontend/lib/core/constants/app_strings.dart (diedit, tambah continueAsGuest)
+
+Catatan:
+- Onboarding tetap mengarah ke home guest.
+
+Verifikasi:
+- hasil linter/analyze: OK (0 error, info saja)
+- hasil test: OK (20 passed)
+
+## [2026-10-19 15:30] - Profil Guest dan Akses Home Tanpa Login
+
+Status: Selesai
+
+File yang diubah:
+- frontend/lib/features/profile/presentation/profile_page.dart (diedit, tampilan guest dengan tombol Create Account dan Sign In)
+- frontend/lib/core/constants/app_strings.dart (diedit, tambah teks guest profil)
+- frontend/lib/core/router/app_router.dart (sudah mendukung /home tanpa token)
+- frontend/test/features/profile/profile_page_test.dart (diedit, override authProvider)
+
+Catatan:
+- Guest dapat melihat katalog dan tab profil menampilkan pilihan akun.
+
+Verifikasi:
+- hasil linter/analyze: OK (0 error, info saja)
+- hasil test: OK (20 passed)
+
+## [2026-10-19 15:20] - Urutan Navbar Bawah Home-Search-Profile
+
+Status: Selesai
+
+File yang diubah:
+- frontend/lib/features/catalog/presentation/main_navigation.dart (diedit, urutan kiri home, tengah search, kanan profile, guard guest)
+
+Catatan:
+- Guest menekan profil menampilkan SnackBar loginRequired lalu ke login.
+
+Verifikasi:
+- hasil linter/analyze: OK (0 error, info saja)
+- hasil test: OK (20 passed)
+
+## [2026-10-19 15:10] - Alur Onboarding Langsung ke Home
+
+Status: Selesai
+
+File yang diubah:
+- frontend/lib/features/onboarding/presentation/onboarding_page.dart (diedit, setelah onboarding langsung ke MainNavigation/Home)
+
+Catatan:
+- Onboarding tidak lagi mengarah ke halaman login.
+
+Verifikasi:
+- hasil linter/analyze: OK (0 error, info saja)
+- hasil test: OK (20 passed)
+
+## [2026-10-19 15:00] - Perbaikan Fitur Autentikasi dan Redirect Role
+
+Status: Selesai
+
+File yang diubah:
+- frontend/lib/core/router/app_router.dart (diedit, redirect berbasis role guest/user/admin dan auto-refresh dari authProvider)
+- frontend/lib/core/constants/app_strings.dart (diedit, tambah loginRequired dan invalidCredentials)
+- frontend/lib/features/auth/presentation/auth_provider.dart (dipakai untuk auto-login dari token)
+- frontend/lib/features/auth/presentation/login_page.dart (diedit, SnackBar kredensial salah dan navigasi role)
+- frontend/lib/features/auth/presentation/register_page.dart (diedit, navigasi role)
+- frontend/lib/features/splash/presentation/splash_page.dart (diedit, navigasi role setelah restore sesi)
+- frontend/lib/features/detail/presentation/movie_detail_page.dart (diedit, SnackBar loginRequired)
+- frontend/lib/main.dart (diedit, buildRouter dengan ref)
+
+Catatan:
+- Token tetap disimpan di flutter_secure_storage.
+- Role admin diarahkan ke dashboard, user ke home, guest ke login untuk rute non-katalog.
+
+Verifikasi:
+- hasil linter/analyze: OK (0 error, info saja)
+- hasil test: OK (20 passed)
+
 ## [2026-10-19 14:30] - Implementasi Halaman Profile dan Four Favourites di Flutter
 
 Status: Selesai
