@@ -1,48 +1,58 @@
-import 'package:flutter/material.dart';
-import 'home_page.dart'; 
-import 'search_page.dart'; 
-import '../../profile/presentation/profile_page.dart'; 
+// Navigasi utama dengan bottom bar untuk mode tamu dan user login.
 
-class MainNavigation extends StatefulWidget {
-  final int initialIndex; 
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:provider/provider.dart';
+
+import '../../../core/constants/app_strings.dart';
+import '../../../core/providers/app_state.dart';
+import '../../auth/presentation/auth_gateway_page.dart';
+import '../../auth/presentation/auth_provider.dart';
+import 'home_page.dart';
+import 'search_page.dart';
+import '../../profile/presentation/profile_page.dart';
+import '../../auth/presentation/login_page.dart';
+
+class MainNavigation extends ConsumerStatefulWidget {
+  final int initialIndex;
 
   const MainNavigation({super.key, this.initialIndex = 1});
 
   @override
-  State<MainNavigation> createState() => _MainNavigationState();
+  ConsumerState<MainNavigation> createState() => _MainNavigationState();
 }
 
-class _MainNavigationState extends State<MainNavigation> {
+class _MainNavigationState extends ConsumerState<MainNavigation> {
   late int _selectedIndex;
 
   @override
   void initState() {
     super.initState();
-    _selectedIndex = widget.initialIndex; 
+    _selectedIndex = widget.initialIndex;
   }
-
-  final List<Widget> _pages = [
-    const ProfilePage(),  
-    const HomePage(),     
-    const SearchPage(),   
-  ];
 
   @override
   Widget build(BuildContext context) {
-    // PopScope mencegah user menekan tombol back dan kembali ke Login
+    final bool isGuest = ref.watch(authProvider).value == null;
+    final List<Widget> pages = [
+      isGuest ? const AuthGatewayPage() : const ProfilePage(),
+      const HomePage(),
+      const SearchPage(),
+    ];
+
     return PopScope(
-      canPop: false, // Tidak bisa di-pop (back) secara default
+      canPop: false,
       child: Scaffold(
         backgroundColor: const Color(0xFF14181C),
-        body: _pages[_selectedIndex],
+        body: pages[_selectedIndex],
         bottomNavigationBar: BottomNavigationBar(
           backgroundColor: const Color(0xFF2C3440),
-          selectedItemColor: const Color(0xFF40BCF4), 
-          unselectedItemColor: const Color(0xFF8A9BAE), 
+          selectedItemColor: const Color(0xFF40BCF4),
+          unselectedItemColor: const Color(0xFF8A9BAE),
           showSelectedLabels: false,
           showUnselectedLabels: false,
           currentIndex: _selectedIndex,
-          onTap: (index) {
+          onTap: (int index) {
             setState(() {
               _selectedIndex = index;
             });

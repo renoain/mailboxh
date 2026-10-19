@@ -15,6 +15,8 @@ import '../../../core/widgets/app_error_state.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/loading_indicator.dart';
 import '../../favorites/presentation/favorite_provider.dart';
+import '../../auth/domain/auth_models.dart';
+import '../../auth/presentation/auth_provider.dart';
 import '../domain/profile_models.dart';
 import 'profile_provider.dart';
 
@@ -26,10 +28,15 @@ class ProfilePage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final AsyncValue<AuthUser?> authAsync = ref.watch(authProvider);
     final AsyncValue<UserProfile> profileAsync = ref.watch(profileProvider);
     final AsyncValue<List<FavoriteFilm>> favoritesAsync =
         ref.watch(favoritesProvider);
     final AsyncValue<List<Movie>> filmsAsync = ref.watch(userFilmsProvider);
+
+    if (authAsync.value == null) {
+      return _buildGuestProfile(context);
+    }
 
     return Scaffold(
       backgroundColor: AppColors.letterboxdBg,
@@ -120,6 +127,56 @@ class ProfilePage extends ConsumerWidget {
             ),
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildGuestProfile(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.letterboxdBg,
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.movie_filter_outlined,
+                size: AppSpacing.fourXl,
+                color: AppColors.textSecondaryDark,
+              ),
+              const SizedBox(height: AppSpacing.md),
+              Text(
+                text.guestProfileMessage,
+                textAlign: TextAlign.center,
+                style: AppTypography.bodyMd.copyWith(
+                  color: AppColors.textSecondaryDark,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              Row(
+                children: [
+                  Expanded(
+                    child: FilledButton(
+                      onPressed: () => context.go('/register'),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: AppColors.primaryDark,
+                      ),
+                      child: Text(text.createAccount),
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => context.go('/login'),
+                      child: Text(text.signIn),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

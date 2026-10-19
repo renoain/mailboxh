@@ -203,7 +203,7 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
                           icon: Icons.visibility, label: text.watchAction, color: const Color(0xFF00E054),
                           onTap: () {
                             if (!appState.isLoggedIn) {
-                              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text.signInFirst), backgroundColor: Colors.redAccent));
+                              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text.loginRequired), backgroundColor: Colors.redAccent));
                               Navigator.push(context, MaterialPageRoute(builder: (context) => const LoginPage()));
                               return;
                             }
@@ -222,7 +222,7 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
                           color: isWatchlisted ? Colors.redAccent : const Color(0xFF40BCF4), // Warna berubah jadi merah jika sudah ada
                           onTap: () {
                             if (!appState.isLoggedIn) {
-                              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text.signInFirst), backgroundColor: Colors.redAccent));
+                              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text.loginRequired), backgroundColor: Colors.redAccent));
                               Navigator.push(context, MaterialPageRoute(builder: (context) => const LoginPage()));
                               return;
                             }

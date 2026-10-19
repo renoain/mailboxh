@@ -6,6 +6,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:mailboxh/core/constants/app_strings.dart';
 import 'package:mailboxh/core/theme/app_theme.dart';
+import 'package:mailboxh/features/auth/domain/auth_models.dart';
+import 'package:mailboxh/features/auth/presentation/auth_provider.dart';
 import 'package:mailboxh/features/profile/data/profile_repository.dart';
 import 'package:mailboxh/features/profile/domain/profile_models.dart';
 import 'package:mailboxh/features/profile/domain/profile_repository.dart';
@@ -71,6 +73,16 @@ class FakeProfileRepository implements ProfileRepository {
   Future<List<Tag>> getTags() async => const <Tag>[];
 }
 
+class _FakeAuthNotifier extends AuthNotifier {
+  @override
+  Future<AuthUser?> build() async => const AuthUser(
+        id: 1,
+        name: 'Budi Santoso',
+        email: 'budi@mailboxh.id',
+        role: 'user',
+      );
+}
+
 void main() {
   const AppText text = AppStrings.id;
 
@@ -84,6 +96,7 @@ void main() {
           profileRepositoryProvider.overrideWithValue(
             const FakeProfileRepository(),
           ),
+          authProvider.overrideWith(() => _FakeAuthNotifier()),
         ],
         child: MaterialApp(
           theme: AppTheme.dark,

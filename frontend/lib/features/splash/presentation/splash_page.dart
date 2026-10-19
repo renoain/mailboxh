@@ -7,9 +7,9 @@ import '../../../core/constants/app_strings.dart';
 import '../../../core/services/app_providers.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../admin/presentation/admin_layout.dart';
+import '../../admin/presentation/pages/admin_dashboard_page.dart';
 import '../../auth/presentation/auth_provider.dart';
-import '../../auth/presentation/login_page.dart';
-import '../../auth/presentation/register_page.dart';
 import '../../catalog/presentation/main_navigation.dart';
 import '../../onboarding/presentation/onboarding_page.dart';
 
@@ -41,10 +41,21 @@ class _SplashPageState extends ConsumerState<SplashPage> {
     }
     if (!mounted) return;
     if (signedIn) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const MainNavigation()),
-      );
+      final user = await ref.read(authProvider.future);
+      if (!mounted) return;
+      if (user != null && user.isAdmin) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => AdminLayout(child: const AdminDashboardPage()),
+          ),
+        );
+      } else {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const MainNavigation()),
+        );
+      }
       return;
     }
     final bool seenOnboarding =
@@ -57,7 +68,10 @@ class _SplashPageState extends ConsumerState<SplashPage> {
       );
       return;
     }
-    setState(() => _sessionChecked = true);
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => const MainNavigation()),
+    );
   }
 
   @override
@@ -83,40 +97,7 @@ class _SplashPageState extends ConsumerState<SplashPage> {
                     ),
                   ),
                   const Spacer(flex: 3),
-                  if (!_sessionChecked) ...[
-                    CircularProgressIndicator(color: colors.primary),
-                  ] else ...[
-                    SizedBox(
-                      width: double.infinity,
-                      child: FilledButton(
-                        onPressed: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => const LoginPage()),
-                        ),
-                        child: Text(text.loginTitle),
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.sm),
-                    SizedBox(
-                      width: double.infinity,
-                      child: TextButton(
-                        onPressed: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const RegisterPage(),
-                          ),
-                        ),
-                        child: Text(text.registerTitle),
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-                    Text(
-                      text.artworkCredit,
-                      style: AppTypography.bodySm.copyWith(
-                        color: colors.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
+                  CircularProgressIndicator(color: colors.primary),
                 ],
               ),
             ),
