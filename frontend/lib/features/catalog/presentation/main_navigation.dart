@@ -79,8 +79,11 @@ class MainNavigation extends ConsumerStatefulWidget {
   ConsumerState<MainNavigation> createState() => _MainNavigationState();
 }
 
-class _MainNavigationState extends ConsumerState<MainNavigation> {
-  late int _index;
+class _MainNavigationState extends State<MainNavigation> {
+  static const AppText text = AppStrings.id;
+  static const int _addIndex = 2;
+
+  late int _selectedIndex;
 
   @override
   void initState() {
@@ -88,38 +91,65 @@ class _MainNavigationState extends ConsumerState<MainNavigation> {
     _index = widget.initialIndex;
   }
 
+  static const List<Widget> _pages = [
+    HomePage(),
+    SearchPage(),
+    SizedBox.shrink(),
+    FeedPage(),
+    ProfilePage(),
+  ];
+
+  void _onTap(int index) {
+    if (index == _addIndex) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const LogFormPage()),
+      );
+      return;
+    }
+    setState(() => _selectedIndex = index);
+  }
+
   @override
   Widget build(BuildContext context) {
-    final bool isGuest = ref.watch(authProvider).value == null;
-    final List<Widget> pages = <Widget>[
-      const HomePage(),
-      const SearchPage(),
-      const LogFormPage(),
-      const FeedPage(),
-      isGuest ? const AuthGatewayPage() : const ProfilePage(),
-    ];
-
-    return Scaffold(
-      body: IndexedStack(index: _index, children: pages),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _index,
-        onTap: (int value) => setState(() => _index = value),
-        backgroundColor: const Color(0xFF14181C),
-        selectedItemColor: const Color(0xFF00E054),
-        unselectedItemColor: Colors.grey,
-        type: BottomNavigationBarType.fixed,
-        showSelectedLabels: false,
-        showUnselectedLabels: false,
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(icon: Icon(Icons.book_outlined), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.add_circle, color: Color(0xFF00E054), size: 32),
-            label: 'Add',
-          ),
-          BottomNavigationBarItem(icon: Icon(Icons.bolt_outlined), label: 'Activity'),
-          BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: 'Profile'),
-        ],
+    return PopScope(
+      canPop: false,
+      child: Scaffold(
+        body: _pages[_selectedIndex],
+        bottomNavigationBar: BottomNavigationBar(
+          showSelectedLabels: false,
+          showUnselectedLabels: false,
+          currentIndex: _selectedIndex,
+          onTap: _onTap,
+          items: [
+            BottomNavigationBarItem(
+              icon: const Icon(Icons.video_library_outlined),
+              activeIcon: const Icon(Icons.video_library),
+              label: text.navFilms,
+            ),
+            BottomNavigationBarItem(
+              icon: const Icon(Icons.search),
+              label: text.navSearch,
+            ),
+            BottomNavigationBarItem(
+              icon: const Icon(
+                Icons.add_circle_outline,
+                size: AppSizes.navAddIcon,
+                color: AppColors.brandGreen,
+              ),
+              label: text.navAdd,
+            ),
+            BottomNavigationBarItem(
+              icon: const Icon(Icons.bolt),
+              label: text.navActivity,
+            ),
+            BottomNavigationBarItem(
+              icon: const Icon(Icons.person_outline),
+              activeIcon: const Icon(Icons.person),
+              label: text.navProfile,
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -41,9 +41,7 @@ class RatingStars extends StatelessWidget {
                 isFilled ? Icons.star : Icons.star_border,
                 size: size,
                 color: isFilled
-                    ? (Theme.of(context).brightness == Brightness.dark
-                        ? AppColors.secondaryDark
-                        : AppColors.secondaryLight)
+                    ? AppColors.brandGreen
                     : Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),

@@ -5,14 +5,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart' hide Provider;
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/constants/app_assets.dart';
 import '../../../core/constants/app_strings.dart';
+import '../../../core/widgets/auth_field.dart';
 import '../../../core/error/app_exception.dart';
 import '../../../core/providers/app_state.dart';
 import '../../../core/services/app_providers.dart';
-import '../../../core/theme/app_spacing.dart';
-import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/validators.dart';
 import '../domain/auth_models.dart';
+import 'auth_layout.dart';
 import 'auth_provider.dart';
 
 /// Form pendaftaran user baru; sukses berarti langsung masuk.
@@ -33,6 +34,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
 
   String? _error;
   bool _isLoading = false;
+  bool _acceptTerms = false;
+  bool _acceptPrivacy = false;
 
   @override
   void dispose() {
@@ -55,6 +58,9 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     }
     if (_passwordController.text != _confirmController.text) {
       return text.passwordConfirmation;
+    }
+    if (!_acceptTerms || !_acceptPrivacy) {
+      return text.consentRequired;
     }
     return null;
   }
@@ -103,82 +109,56 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
 
   @override
   Widget build(BuildContext context) {
-    final ColorScheme colors = Theme.of(context).colorScheme;
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.close),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Text(text.registerTitle),
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(text.registerTitle, style: AppTypography.headlineLg),
-              const SizedBox(height: AppSpacing.lg),
-              TextField(
-                controller: _nameController,
-                textInputAction: TextInputAction.next,
-                decoration: InputDecoration(labelText: text.name),
-              ),
-              const SizedBox(height: AppSpacing.md),
-              TextField(
-                controller: _emailController,
-                keyboardType: TextInputType.emailAddress,
-                textInputAction: TextInputAction.next,
-                decoration: InputDecoration(labelText: text.email),
-              ),
-              const SizedBox(height: AppSpacing.md),
-              TextField(
-                controller: _passwordController,
-                obscureText: true,
-                textInputAction: TextInputAction.next,
-                decoration: InputDecoration(labelText: text.password),
-              ),
-              const SizedBox(height: AppSpacing.md),
-              TextField(
-                controller: _confirmController,
-                obscureText: true,
-                textInputAction: TextInputAction.done,
-                onSubmitted: (_) => _submit(),
-                decoration:
-                    InputDecoration(labelText: text.passwordConfirmation),
-              ),
-              if (_error != null) ...[
-                const SizedBox(height: AppSpacing.md),
-                Text(
-                  _error!,
-                  style: AppTypography.bodyMd.copyWith(color: colors.error),
-                ),
-              ],
-              const SizedBox(height: AppSpacing.lg),
-              SizedBox(
-                width: double.infinity,
-                child: FilledButton(
-                  onPressed: _isLoading ? null : _submit,
-                  child: _isLoading
-                      ? const SizedBox(
-                          height: AppSpacing.md,
-                          width: AppSpacing.md,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : Text(text.registerButton),
-                ),
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              Center(
-                child: TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: Text(text.haveAccount),
-                ),
-              ),
-            ],
+    return AuthLayout(
+      artwork: AppAssets.artworkJoin,
+      film: AppStrings.artworkJoinFilm,
+      heading: text.joinHeading,
+      error: _error,
+      form: Column(
+        children: [
+          AuthField(
+            controller: _emailController,
+            hint: text.email,
+            keyboardType: TextInputType.emailAddress,
           ),
-        ),
+          AuthField(controller: _nameController, hint: text.username),
+          AuthField(
+            controller: _passwordController,
+            hint: text.password,
+            obscureText: true,
+          ),
+          AuthField(
+            controller: _confirmController,
+            hint: text.passwordConfirmation,
+            obscureText: true,
+            textInputAction: TextInputAction.done,
+          ),
+          AuthConsentRow(
+            label: text.consentTerms,
+            value: _acceptTerms,
+            onChanged: (bool value) => setState(() => _acceptTerms = value),
+          ),
+          AuthConsentRow(
+            label: text.consentPrivacy,
+            value: _acceptPrivacy,
+            onChanged: (bool value) => setState(() => _acceptPrivacy = value),
+          ),
+        ],
+      ),
+      actions: AuthActions(
+        children: [
+          AuthSmallButton(
+            label: text.loginTitle,
+            onPressed: () => Navigator.pop(context),
+          ),
+          AuthSmallButton(label: text.resetPassword, onPressed: null),
+          AuthSmallButton(
+            label: text.registerButton,
+            filled: true,
+            loading: _isLoading,
+            onPressed: _isLoading ? null : _submit,
+          ),
+        ],
       ),
     );
   }

@@ -30,27 +30,47 @@ abstract final class AppColors {
   static const Color borderLightSoft = Color(0xFFE6EBE3);
   static const Color outlineLight = Color(0xFF717973);
 
-  static const Color primaryDark = Color(0xFF4FBFA3);
-  static const Color primaryDarkHover = Color(0xFF6FD4B8);
-  static const Color primaryDarkPressed = Color(0xFF2C7D68);
+  static const Color primaryDark = Color(0xFF00C032);
+  static const Color primaryDarkHover = Color(0xFF00E054);
+  static const Color primaryDarkPressed = Color(0xFF008F26);
 
-  static const Color secondaryDark = Color(0xFFF0C05E);
-  static const Color secondaryDarkHover = Color(0xFFF7D58C);
+  static const Color secondaryDark = Color(0xFFFF8000);
+  static const Color secondaryDarkHover = Color(0xFFFFA04D);
 
-  static const Color bgDark = Color(0xFF101412);
-  static const Color bgAltDark = Color(0xFF171C1A);
-  static const Color surfaceDark = Color(0xFF1A211E);
-  static const Color surfaceDimDark = Color(0xFF232B27);
-  static const Color letterboxdBg = Color(0xFF14181C);
+  static const Color bgDark = Color(0xFF181B20);
+  static const Color bgAltDark = Color(0xFF1F262E);
+  static const Color surfaceDark = Color(0xFF20272F);
+  static const Color surfaceDimDark = Color(0xFF2C3440);
 
-  static const Color textPrimaryDark = Color(0xFFE8EDEA);
-  static const Color textSecondaryDark = Color(0xFFA0ABA5);
-  static const Color textDisabledDark = Color(0xFF6E7873);
-  static const Color textOnPrimaryDark = Color(0xFF06201A);
+  static const Color textPrimaryDark = Color(0xFFFFFFFF);
+  static const Color textSecondaryDark = Color(0xFF99AABB);
+  static const Color textDisabledDark = Color(0xFF667788);
+  static const Color textOnPrimaryDark = Color(0xFFFFFFFF);
 
   static const Color successDark = Color(0xFF5FBF9E);
   static const Color warningDark = Color(0xFFF0C05E);
   static const Color errorDark = Color(0xFFF2726B);
+
+  static const Color brandOrange = Color(0xFFFF8000);
+  static const Color brandGreen = Color(0xFF00E054);
+  static const Color brandBlue = Color(0xFF40BCF4);
+  static const Color headerBlack = Color(0xFF000000);
+  static const Color navBar = Color(0xFF445566);
+  static const Color tabTrack = Color(0xFF1F262E);
+  static const Color tabSelected = Color(0xFF445566);
+  static const Color panelDark = Color(0xFF2C3440);
+  static const Color fieldWhite = Color(0xFFFFFFFF);
+  static const Color fieldHint = Color(0xFFB0BAC4);
+  static const Color fieldText = Color(0xFF14181C);
+  static const List<Color> posterTints = [
+    Color(0xFF3B5B7A),
+    Color(0xFF7A3B4B),
+    Color(0xFF4B6A3B),
+    Color(0xFF7A6A3B),
+    Color(0xFF5A3B7A),
+    Color(0xFF3B7A74),
+  ];
+  static const Color slideGradientTop = Color(0xFF445565);
 
   /// Menerjemahkan set token ke [ColorScheme] Flutter.
   static ColorScheme toColorScheme(Brightness brightness) {
@@ -66,10 +86,11 @@ abstract final class AppColors {
       error: isDark ? errorDark : errorLight,
       onError: isDark ? textOnPrimaryDark : textOnPrimaryLight,
       surface: isDark ? surfaceDark : surfaceLight,
+      onSurfaceVariant: isDark ? textSecondaryDark : textSecondaryLight,
       onSurface: isDark ? textPrimaryDark : textPrimaryLight,
       surfaceContainerHighest: isDark ? surfaceDimDark : surfaceDimLight,
-      outline: isDark ? const Color(0xFF6E7873) : outlineLight,
-      outlineVariant: isDark ? const Color(0xFF2C3531) : borderLightSoft,
+      outline: isDark ? textDisabledDark : outlineLight,
+      outlineVariant: isDark ? panelDark : borderLightSoft,
     );
   }
 }

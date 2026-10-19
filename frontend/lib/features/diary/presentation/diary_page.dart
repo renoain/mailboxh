@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 
 class DiaryPage extends StatelessWidget {
-  const DiaryPage({super.key});
+  const DiaryPage({this.embedded = false, super.key});
+
+  final bool embedded;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF14181C),
-      appBar: AppBar(
+      appBar: embedded ? null : AppBar(
         backgroundColor: const Color(0xFF14181C),
         elevation: 0,
         title: const Text('Your Diary', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),

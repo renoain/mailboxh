@@ -279,3 +279,16 @@ Sebelum halaman dianggap selesai:
 11. Target sentuh minimal 48x48.
 12. String UI dari AppStrings, tersedia dalam ID dan EN.
 13. Screenshot terlampir sebagai bukti.
+## 12. Tema Gelap Letterboks
+
+Mode gelap mengikuti desain Figma Go_green. Token dark di
+`frontend/lib/core/theme/app_colors.dart` diganti: latar `#181B20`,
+permukaan `#20272F`, panel `#2C3440`, teks sekunder `#99AABB`, primary
+hijau `#00C032`, secondary oranye `#FF8000`.
+
+Token merek baru: `brandOrange`, `brandGreen`, `brandBlue`, `headerBlack`,
+`navBar`, `tabTrack`, `tabSelected`, `panelDark`, `fieldWhite`, `fieldHint`,
+`fieldText`, `slideGradientTop`, `posterTints`.
+
+Ukuran komponen tetap ada di `frontend/lib/core/theme/app_sizes.dart`.
+Aplikasi selalu memakai `AppTheme.dark`.

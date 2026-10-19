@@ -6,14 +6,15 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../core/constants/app_assets.dart';
 import '../../../core/constants/app_strings.dart';
+import '../../../core/widgets/auth_field.dart';
 import '../../../core/error/app_exception.dart';
 import '../../../core/providers/app_state.dart';
 import '../../../core/services/app_providers.dart';
-import '../../../core/theme/app_spacing.dart';
-import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/validators.dart';
 import '../domain/auth_models.dart';
+import 'auth_layout.dart';
 import 'auth_provider.dart';
 import 'register_page.dart';
 
@@ -127,82 +128,44 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    final ColorScheme colors = Theme.of(context).colorScheme;
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.close),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Text(text.loginTitle),
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(text.loginTitle, style: AppTypography.headlineLg),
-              const SizedBox(height: AppSpacing.lg),
-              TextField(
-                controller: _emailController,
-                keyboardType: TextInputType.emailAddress,
-                textInputAction: TextInputAction.next,
-                decoration: InputDecoration(labelText: text.email),
-              ),
-              const SizedBox(height: AppSpacing.md),
-              TextField(
-                controller: _passwordController,
-                obscureText: true,
-                textInputAction: TextInputAction.done,
-                onSubmitted: (_) => _submit(),
-                decoration: InputDecoration(labelText: text.password),
-              ),
-              Row(
-                children: [
-                  Checkbox(
-                    value: _rememberMe,
-                    onChanged: (bool? value) {
-                      setState(() => _rememberMe = value ?? false);
-                    },
-                  ),
-                  Text(text.rememberMe),
-                ],
-              ),
-              if (_error != null) ...[
-                const SizedBox(height: AppSpacing.md),
-                Text(
-                  _error!,
-                  style: AppTypography.bodyMd.copyWith(color: colors.error),
-                ),
-              ],
-              const SizedBox(height: AppSpacing.lg),
-              SizedBox(
-                width: double.infinity,
-                child: FilledButton(
-                  onPressed: _isLoading ? null : _submit,
-                  child: _isLoading
-                      ? const SizedBox(
-                          height: AppSpacing.md,
-                          width: AppSpacing.md,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : Text(text.loginButton),
-                ),
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              Center(
-                child: TextButton(
-                  onPressed: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const RegisterPage()),
-                  ),
-                  child: Text(text.noAccount),
-                ),
-              ),
-            ],
+    return AuthLayout(
+      artwork: AppAssets.artworkSignIn,
+      film: AppStrings.artworkSignInFilm,
+      heading: text.signInHeading,
+      error: _error,
+      form: Column(
+        children: [
+          AuthField(
+            controller: _emailController,
+            hint: text.email,
+            keyboardType: TextInputType.emailAddress,
           ),
-        ),
+          AuthField(
+            controller: _passwordController,
+            hint: text.password,
+            obscureText: true,
+            textInputAction: TextInputAction.done,
+            onSubmitted: (_) => _submit(),
+          ),
+        ],
+      ),
+      actions: AuthActions(
+        children: [
+          AuthSmallButton(
+            label: text.registerButton,
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const RegisterPage()),
+            ),
+          ),
+          AuthSmallButton(label: text.resetPassword, onPressed: null),
+          AuthSmallButton(
+            label: text.loginButton,
+            filled: true,
+            loading: _isLoading,
+            onPressed: _isLoading ? null : _submit,
+          ),
+        ],
       ),
     );
   }
