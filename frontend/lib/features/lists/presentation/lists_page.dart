@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 
 class ListsPage extends StatelessWidget {
-  const ListsPage({super.key});
+  const ListsPage({this.embedded = false, super.key});
+
+  final bool embedded;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF14181C),
-      appBar: AppBar(
+      appBar: embedded ? null : AppBar(
         backgroundColor: const Color(0xFF14181C),
         title: const Text('Your Lists', style: TextStyle(color: Colors.white)),
       ),

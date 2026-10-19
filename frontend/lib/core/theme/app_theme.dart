@@ -15,6 +15,7 @@ abstract final class AppTheme {
 
   static ThemeData _build(Brightness brightness) {
     final ColorScheme scheme = AppColors.toColorScheme(brightness);
+    final bool isDark = brightness == Brightness.dark;
     return ThemeData(
       useMaterial3: true,
       brightness: brightness,
@@ -34,7 +35,7 @@ abstract final class AppTheme {
         labelSmall: AppTypography.labelSm,
       ),
       appBarTheme: AppBarTheme(
-        backgroundColor: scheme.surface,
+        backgroundColor: isDark ? AppColors.bgDark : scheme.surface,
         foregroundColor: scheme.onSurface,
         elevation: 0,
         centerTitle: false,
@@ -99,8 +100,8 @@ abstract final class AppTheme {
         side: BorderSide(color: scheme.outlineVariant),
       ),
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
-        backgroundColor: scheme.surface,
-        selectedItemColor: scheme.primary,
+        backgroundColor: isDark ? AppColors.navBar : scheme.surface,
+        selectedItemColor: isDark ? AppColors.brandBlue : scheme.primary,
         unselectedItemColor: scheme.onSurfaceVariant,
         elevation: 0,
         type: BottomNavigationBarType.fixed,

@@ -1,28 +1,30 @@
 // Navigasi utama dengan bottom bar untuk mode tamu dan user login.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:provider/provider.dart';
 
 import '../../../core/constants/app_strings.dart';
-import '../../../core/providers/app_state.dart';
-import '../../auth/presentation/auth_gateway_page.dart';
-import '../../auth/presentation/auth_provider.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_sizes.dart';
+import '../../feed/presentation/feed_page.dart';
+import '../../log/presentation/log_form_page.dart';
+import '../../profile/presentation/profile_page.dart';
 import 'home_page.dart';
 import 'search_page.dart';
-import '../../profile/presentation/profile_page.dart';
-import '../../auth/presentation/login_page.dart';
 
-class MainNavigation extends ConsumerStatefulWidget {
+/// Kerangka utama dengan bottom nav lima item; item tengah membuka form catat.
+class MainNavigation extends StatefulWidget {
+  const MainNavigation({super.key, this.initialIndex = 0});
+
   final int initialIndex;
-
-  const MainNavigation({super.key, this.initialIndex = 1});
 
   @override
   ConsumerState<MainNavigation> createState() => _MainNavigationState();
 }
 
-class _MainNavigationState extends ConsumerState<MainNavigation> {
+class _MainNavigationState extends State<MainNavigation> {
+  static const AppText text = AppStrings.id;
+  static const int _addIndex = 2;
+
   late int _selectedIndex;
 
   @override
@@ -31,46 +33,62 @@ class _MainNavigationState extends ConsumerState<MainNavigation> {
     _selectedIndex = widget.initialIndex;
   }
 
+  static const List<Widget> _pages = [
+    HomePage(),
+    SearchPage(),
+    SizedBox.shrink(),
+    FeedPage(),
+    ProfilePage(),
+  ];
+
+  void _onTap(int index) {
+    if (index == _addIndex) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const LogFormPage()),
+      );
+      return;
+    }
+    setState(() => _selectedIndex = index);
+  }
+
   @override
   Widget build(BuildContext context) {
-    final bool isGuest = ref.watch(authProvider).value == null;
-    final List<Widget> pages = [
-      isGuest ? const AuthGatewayPage() : const ProfilePage(),
-      const HomePage(),
-      const SearchPage(),
-    ];
-
     return PopScope(
       canPop: false,
       child: Scaffold(
-        backgroundColor: const Color(0xFF14181C),
-        body: pages[_selectedIndex],
+        body: _pages[_selectedIndex],
         bottomNavigationBar: BottomNavigationBar(
-          backgroundColor: const Color(0xFF2C3440),
-          selectedItemColor: const Color(0xFF40BCF4),
-          unselectedItemColor: const Color(0xFF8A9BAE),
           showSelectedLabels: false,
           showUnselectedLabels: false,
           currentIndex: _selectedIndex,
-          onTap: (int index) {
-            setState(() {
-              _selectedIndex = index;
-            });
-          },
-          items: const [
+          onTap: _onTap,
+          items: [
             BottomNavigationBarItem(
-              icon: Icon(Icons.person_outline, size: 28),
-              activeIcon: Icon(Icons.person, size: 28),
-              label: 'Profile',
+              icon: const Icon(Icons.video_library_outlined),
+              activeIcon: const Icon(Icons.video_library),
+              label: text.navFilms,
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.video_library_outlined, size: 28),
-              activeIcon: Icon(Icons.video_library, size: 28),
-              label: 'Films',
+              icon: const Icon(Icons.search),
+              label: text.navSearch,
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.search, size: 28),
-              label: 'Search',
+              icon: const Icon(
+                Icons.add_circle_outline,
+                size: AppSizes.navAddIcon,
+                color: AppColors.brandGreen,
+              ),
+              label: text.navAdd,
+            ),
+            BottomNavigationBarItem(
+              icon: const Icon(Icons.bolt),
+              label: text.navActivity,
+            ),
+            BottomNavigationBarItem(
+              icon: const Icon(Icons.person_outline),
+              activeIcon: const Icon(Icons.person),
+              label: text.navProfile,
             ),
           ],
         ),
