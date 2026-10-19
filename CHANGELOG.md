@@ -1,5 +1,73 @@
 # CHANGELOG - Mailboxh
 
+## [2026-10-19 16:40] - Remember Me di Login
+
+Status: Selesai
+
+File yang diubah:
+- frontend/lib/features/auth/presentation/login_page.dart (diedit, checkbox Ingat Saya, simpan/hapus saved_email)
+- frontend/lib/core/constants/app_strings.dart (diedit, tambah rememberMe)
+
+Catatan:
+- Password tidak disimpan. Hanya email yang disimpan di SharedPreferences.
+
+Verifikasi:
+- hasil linter/analyze: OK (0 error, info saja)
+- hasil test: OK (20 passed)
+
+## [2026-10-19 16:30] - Admin Back 2x dan Mode Switch
+
+Status: Selesai
+
+File yang diubah:
+- frontend/lib/features/admin/presentation/admin_layout.dart (diedit, PopScope 2x back ke /home, tombol Lihat sebagai User)
+- frontend/lib/features/profile/presentation/profile_page.dart (diedit, tombol Kembali ke Mode Admin untuk admin)
+- frontend/lib/core/constants/app_strings.dart (diedit, tambah backToUserPage)
+
+Catatan:
+- Route guard tetap memblokir user biasa dari /admin/*.
+
+Verifikasi:
+- hasil linter/analyze: OK (0 error, info saja)
+- hasil test: OK (20 passed)
+
+## [2026-10-19 16:20] - Dokumentasi Batch Import di API.md
+
+Status: Selesai
+
+File yang diubah:
+- docs/API.md (diedit, tambah POST /api/admin/movies/batch-import)
+- docs/ARCHITECTURE.md (sudah berisi Manajemen File & Storage)
+- AGENTS.md (sudah berisi aturan penyimpanan gambar)
+- README.md (sudah memuat storage:link)
+- docs/BATCH_IMPORT.md (dihapus, sesuai permintaan tidak membuat file baru)
+
+Catatan:
+- Dokumentasi batch import digabung ke docs yang sudah ada.
+
+Verifikasi:
+- hasil linter/analyze: belum ditest
+- hasil test: belum ditest
+
+## [2026-10-19 16:10] - Dokumentasi Batch Import dan Storage
+
+Status: Selesai
+
+File yang dibuat:
+- docs/BATCH_IMPORT.md (dibuat, dokumentasi teknis batch import)
+
+File yang diubah:
+- docs/ARCHITECTURE.md (diedit, tambah Manajemen File & Storage)
+- README.md (sudah memuat storage:link)
+- AGENTS.md (diedit, aturan penyimpanan gambar)
+
+Catatan:
+- Menjelaskan format ZIP, penamaan poster, dan laporan unmatched.
+
+Verifikasi:
+- hasil linter/analyze: belum ditest
+- hasil test: belum ditest
+
 ## [2026-10-19 16:00] - Bersihkan UI Splash dari Menu Login
 
 Status: Selesai

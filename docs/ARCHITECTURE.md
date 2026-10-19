@@ -811,3 +811,9 @@ dicatat di CHANGELOG.md dan di dokumen ini.
   `AdminAuditService`.
 - Endpoint admin tanpa middleware `EnsureUserIsAdmin`.
 - Role user diubah lewat form register.
+
+## 12. Manajemen File & Storage
+
+- Gambar poster disimpan di `storage/app/public/posters/`.
+- URL gambar diakses melalui `public/storage/posters/`.
+- Setiap developer yang baru clone repo WAJIB menjalankan perintah `php artisan storage:link` di folder backend agar gambar poster bisa diakses oleh aplikasi Flutter.

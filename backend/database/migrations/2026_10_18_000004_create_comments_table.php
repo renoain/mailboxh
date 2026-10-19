@@ -10,6 +10,10 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasTable('comments')) {
+            return;
+        }
+
         Schema::create('comments', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('review_id')->constrained('reviews')->cascadeOnDelete();

@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' hide Provider;
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/constants/app_strings.dart';
 import '../../../core/error/app_exception.dart';
@@ -34,6 +35,22 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
   String? _error;
   bool _isLoading = false;
+  bool _rememberMe = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSavedEmail();
+  }
+
+  Future<void> _loadSavedEmail() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? savedEmail = prefs.getString('saved_email');
+    if (savedEmail != null && savedEmail.isNotEmpty) {
+      _emailController.text = savedEmail;
+      setState(() => _rememberMe = true);
+    }
+  }
 
   @override
   void dispose() {
@@ -61,6 +78,13 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       setState(() => _error = validationError);
       return;
     }
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    if (_rememberMe) {
+      await prefs.setString('saved_email', _emailController.text.trim());
+    } else {
+      await prefs.remove('saved_email');
+    }
+
     setState(() {
       _error = null;
       _isLoading = true;
@@ -143,6 +167,17 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 textInputAction: TextInputAction.done,
                 onSubmitted: (_) => _submit(),
                 decoration: InputDecoration(labelText: text.password),
+              ),
+              Row(
+                children: [
+                  Checkbox(
+                    value: _rememberMe,
+                    onChanged: (bool? value) {
+                      setState(() => _rememberMe = value ?? false);
+                    },
+                  ),
+                  Text(text.rememberMe),
+                ],
               ),
               if (_error != null) ...[
                 const SizedBox(height: AppSpacing.md),
